@@ -1440,23 +1440,26 @@
   <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px;">
 
     <!-- Dados Cadastrais -->
-    <div class="panel" style="flex: 1; min-width: 280px; margin-bottom: 0;">
+        <div class="panel" style="flex: 1; min-width: 280px; margin-bottom: 0;">
       <h3>📋 Dados Cadastrais</h3>
-      <div style="text-align: center; margin-bottom: 14px;">
-        {% if usuario['foto'] %}
-          <img src="{{ url_for('static', filename=usuario['foto']) }}"
-               style="width: 86px; height: 86px; border-radius: 50%; object-fit: cover;
-                      border: 3px solid var(--accent);">
-        {% else %}
-          <div style="font-size: 52px; line-height: 1;">👤</div>
-        {% endif %}
-      </div>
-
-      <form action="{{ url_for('editar_cadastro', id=usuario['id']) }}" method="POST" enctype="multipart/form-data">
-        <div style="margin-bottom: 9px;">
-          <label class="label-editor">Alterar Foto de Perfil</label>
-          <input type="file" name="foto" accept="image/*" style="font-size: 12px; padding: 5px;">
+      <form action="{{ url_for('editar_cadastro', id=usuario['id']) }}" method="POST" enctype="multipart/form-data" id="form-perfil-{{ usuario['id'] }}">
+        
+        <div style="text-align: center; margin-bottom: 14px;">
+          <label for="foto-upload-{{ usuario['id'] }}" style="cursor: pointer; display: inline-block; position: relative;" title="Clique para alterar a foto">
+            {% if usuario['foto'] %}
+              <img src="{{ url_for('static', filename=usuario['foto']) }}"
+                   style="width: 86px; height: 86px; border-radius: 50%; object-fit: cover;
+                          border: 3px solid var(--accent); transition: opacity 0.2s;"
+                   onmouseover="this.style.opacity=0.8" onmouseout="this.style.opacity=1">
+            {% else %}
+              <div style="font-size: 52px; line-height: 1; transition: opacity 0.2s;"
+                   onmouseover="this.style.opacity=0.8" onmouseout="this.style.opacity=1">👤</div>
+            {% endif %}
+            <div style="font-size: 10px; color: var(--text-muted); margin-top: 5px;">Alterar Foto</div>
+          </label>
+          <input type="file" id="foto-upload-{{ usuario['id'] }}" name="foto" accept="image/*" style="display: none;" onchange="document.getElementById('form-perfil-{{ usuario['id'] }}').submit()">
         </div>
+
         <div style="margin-bottom: 9px;">
           <label class="label-editor">Cargo / Ocupação</label>
           <input type="text" name="cargo" value="{{ usuario['cargo'] or '' }}" placeholder="Ex: Analista de Dados">
@@ -1466,6 +1469,7 @@
           <input type="email" name="email" value="{{ usuario['email'] or '' }}" placeholder="Ex: nome@projeto.com">
         </div>
         
+        <button type="submit" class="btn-principal" style="width: 100%; padding: 8px;">💾 Salvar Dados</button>
       </form>
     </div>
 
@@ -2378,7 +2382,7 @@
       data.append('descricao', desc);
       data.append('prazo', prazo);
       
-      await fetch(`${SCRIPT_ROOT}/api/passos/adicionar', { method: 'POST', body: data });
+      await fetch(`${SCRIPT_ROOT}/api/passos/adicionar`, { method: 'POST', body: data });
       document.getElementById('novoPassoDesc').value = '';
       document.getElementById('novoPassoPrazo').value = '';
       carregarPassos();
