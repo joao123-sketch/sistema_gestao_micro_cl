@@ -752,8 +752,8 @@
       </h1>
 
       <div class="botoes-topo" style="flex-direction: row;">
-        <a href="{{ url_for(\'alterar_fonte\', tamanho=font_size - 1) }}" title="Diminuir Fonte" style="font-size:13px; color:#000000; padding:6px 12px;">A−</a>
-        <a href="{{ url_for(\'alterar_fonte\', tamanho=font_size + 1) }}" title="Aumentar Fonte" style="font-size:15px; color:#000000; padding:6px 12px;">A+</a>
+        <a href="{{ url_for('alterar_fonte', tamanho=font_size - 1) }}" title="Diminuir Fonte" style="font-size:13px; color:#000000; padding:6px 12px;">A−</a>
+        <a href="{{ url_for('alterar_fonte', tamanho=font_size + 1) }}" title="Aumentar Fonte" style="font-size:15px; color:#000000; padding:6px 12px;">A+</a>
       </div>
     </div>
 
@@ -1022,17 +1022,17 @@
 
           <td style="vertical-align: middle;">
             {% if modo == 'ativos' or modo.startswith('usuario_detalhe') %}
-              <form action="{{ url_for(\'arquivar\', id=atv[\'id\']) }}" method="POST" onsubmit="return confirm('Mover para arquivados?')" style="margin:0; width: 100%; display: flex; align-items: center; justify-content: center;">
+              <form action="{{ url_for('arquivar', id=atv['id']) }}" method="POST" onsubmit="return confirm('Mover para arquivados?')" style="margin:0; width: 100%; display: flex; align-items: center; justify-content: center;">
                 <input type="hidden" name="next" value="{{ request.path }}">
                 <button type="submit" class="btn-arquivar">Arquivar</button>
               </form>
             {% else %}
               <div style="display: flex; flex-direction: column; gap: 6px; width: 100%; justify-content: center; align-items: center;">
-                <form action="{{ url_for(\'restaurar\', id=atv[\'id\']) }}" method="POST" style="margin:0; width: 100%;">
+                <form action="{{ url_for('restaurar', id=atv['id']) }}" method="POST" style="margin:0; width: 100%;">
                   <input type="hidden" name="next" value="{{ request.path }}">
                   <button type="submit" class="btn-restaurar" style="width: 100%; box-sizing: border-box; border-radius: var(--radius-sm); padding: 5px 8px; font-size: 11px; font-weight: 600;">Restaurar</button>
                 </form>
-                <form action="{{ url_for(\'deletar\', id=atv[\'id\']) }}" method="POST" onsubmit="return confirm('EXCLUIR PERMANENTEMENTE?')" style="margin:0; width: 100%;">
+                <form action="{{ url_for('deletar', id=atv['id']) }}" method="POST" onsubmit="return confirm('EXCLUIR PERMANENTEMENTE?')" style="margin:0; width: 100%;">
                   <input type="hidden" name="next" value="{{ request.path }}">
                   <button type="submit" class="btn-deletar" style="width: 100%; box-sizing: border-box; border-radius: var(--radius-sm); padding: 5px 8px; font-size: 11px; font-weight: 600;">Excluir</button>
                 </form>
@@ -1143,17 +1143,17 @@
 
           <td style="vertical-align: middle;">
             {% if modo == 'ativos' or modo.startswith('usuario_detalhe') %}
-              <form action="{{ url_for(\'arquivar\', id=atv[\'id\']) }}" method="POST" onsubmit="return confirm('Mover para arquivados?')" style="margin:0; width: 100%; display: flex; align-items: center; justify-content: center;">
+              <form action="{{ url_for('arquivar', id=atv['id']) }}" method="POST" onsubmit="return confirm('Mover para arquivados?')" style="margin:0; width: 100%; display: flex; align-items: center; justify-content: center;">
                 <input type="hidden" name="next" value="{{ request.path }}">
                 <button type="submit" class="btn-arquivar">Arquivar</button>
               </form>
             {% else %}
               <div style="display: flex; flex-direction: column; gap: 6px; width: 100%; justify-content: center; align-items: center;">
-                <form action="{{ url_for(\'restaurar\', id=atv[\'id\']) }}" method="POST" style="margin:0; width: 100%;">
+                <form action="{{ url_for('restaurar', id=atv['id']) }}" method="POST" style="margin:0; width: 100%;">
                   <input type="hidden" name="next" value="{{ request.path }}">
                   <button type="submit" class="btn-restaurar" style="width: 100%; box-sizing: border-box; border-radius: var(--radius-sm); padding: 5px 8px; font-size: 11px; font-weight: 600;">Restaurar</button>
                 </form>
-                <form action="{{ url_for(\'deletar\', id=atv[\'id\']) }}" method="POST" onsubmit="return confirm('EXCLUIR PERMANENTEMENTE?')" style="margin:0; width: 100%;">
+                <form action="{{ url_for('deletar', id=atv['id']) }}" method="POST" onsubmit="return confirm('EXCLUIR PERMANENTEMENTE?')" style="margin:0; width: 100%;">
                   <input type="hidden" name="next" value="{{ request.path }}">
                   <button type="submit" class="btn-deletar" style="width: 100%; box-sizing: border-box; border-radius: var(--radius-sm); padding: 5px 8px; font-size: 11px; font-weight: 600;">Excluir</button>
                 </form>
@@ -1195,7 +1195,7 @@
               <strong>{{ cat['nome'] }}</strong>
             </td>
             <td style="text-align:right;">
-              <form action="{{ url_for(\'deletar_categoria\', id=cat[\'id\']) }}" method="POST" onsubmit="return confirm('Excluir Área?')">
+              <form action="{{ url_for('deletar_categoria', id=cat['id']) }}" method="POST" onsubmit="return confirm('Excluir Área?')">
                 <button type="submit" class="btn-deletar" style="padding:4px 8px; font-size:11px;">Excluir</button>
               </form>
             </td>
@@ -1219,7 +1219,7 @@
           <tr style="border-bottom:1px solid var(--border-color);">
             <td style="padding:12px 8px; font-size:14px;"><strong>{{ resp['nome'] }}</strong></td>
             <td style="text-align:right;">
-              <form action="{{ url_for(\'deletar_responsavel\', id=resp[\'id\']) }}" method="POST" onsubmit="return confirm('Excluir Responsável?')">
+              <form action="{{ url_for('deletar_responsavel', id=resp['id']) }}" method="POST" onsubmit="return confirm('Excluir Responsável?')">
                 <button type="submit" class="btn-deletar" style="padding:4px 8px; font-size:11px;">Excluir</button>
               </form>
             </td>
@@ -1259,7 +1259,7 @@
 
       <div style="display:flex; gap:10px;">
         <button onclick="abrirModalProcedimento({{ proc['id'] }})" class="btn-restaurar" style="flex:1; padding:8px; border-radius:4px; font-weight:600; cursor:pointer;">Ler / Editar</button>
-        <form action="{{ url_for(\'procedimentos_deletar\', id=proc[\'id\']) }}" method="POST" onsubmit="return confirm('Excluir este procedimento permanentemente?')" style="margin:0;">
+        <form action="{{ url_for('procedimentos_deletar', id=proc['id']) }}" method="POST" onsubmit="return confirm('Excluir este procedimento permanentemente?')" style="margin:0;">
           <button type="submit" class="btn-deletar" style="padding:8px 12px; border-radius:4px; font-weight:600; cursor:pointer;" title="Excluir">🗑️</button>
         </form>
       </div>
@@ -1385,7 +1385,7 @@
           <td style="padding:10px;"><strong>{{ conta['servico'] }}</strong></td>
           <td style="padding:10px;">{{ conta['usuario'] }}</td>
           <td style="padding:10px;">
-            <form action="{{ url_for(\'credenciais_deletar\', id=conta[\'id\']) }}" method="POST" onsubmit="return confirm('Excluir do cofre?')" style="display:inline;">
+            <form action="{{ url_for('credenciais_deletar', id=conta['id']) }}" method="POST" onsubmit="return confirm('Excluir do cofre?')" style="display:inline;">
               <button type="submit" class="btn-deletar" style="padding:4px 8px; font-size:11px;">Excluir</button>
             </form>
           </td>
@@ -1418,7 +1418,7 @@
         <p style="color: var(--text-muted); font-size: 12.5px; min-height: 36px; margin: 0 0 14px;">
           {{ resp['cargo'] or 'Integrante do projeto' }}
         </p>
-        <a href="{{ url_for(\'usuario_detalhe\', id=resp[\'id\']) }}"
+        <a href="{{ url_for('usuario_detalhe', id=resp['id']) }}"
            style="text-decoration: none; display: inline-block;
                   background: var(--accent); color: #fff;
                   padding: 7px 14px; border-radius: var(--radius-sm);
@@ -1452,7 +1452,7 @@
         {% endif %}
       </div>
 
-      <form action="{{ url_for(\'editar_cadastro\', id=usuario[\'id\']) }}" method="POST" enctype="multipart/form-data">
+      <form action="{{ url_for('editar_cadastro', id=usuario['id']) }}" method="POST" enctype="multipart/form-data">
         <div style="margin-bottom: 9px;">
           <label class="label-editor">Alterar Foto de Perfil</label>
           <input type="file" name="foto" accept="image/*" style="font-size: 12px; padding: 5px;">
@@ -1642,7 +1642,7 @@
   <div class="panel">
     <div class="panel-header-with-export">
       <h3>📋 Atividades Sob Responsabilidade de {{ usuario['nome'] }}</h3>
-      <a href="{{ url_for(\'exportar_usuario\', id=usuario[\'id\']) }}" class="btn-exportar">📄 Exportar PDF</a>
+      <a href="{{ url_for('exportar_usuario', id=usuario['id']) }}" class="btn-exportar">📄 Exportar PDF</a>
     </div>
     <table id="tabelaAtividades">
       <thead>
@@ -1728,17 +1728,17 @@
 
           <td style="vertical-align: middle;">
             {% if modo == 'ativos' or modo.startswith('usuario_detalhe') %}
-              <form action="{{ url_for(\'arquivar\', id=atv[\'id\']) }}" method="POST" onsubmit="return confirm('Mover para arquivados?')" style="margin:0; width: 100%; display: flex; align-items: center; justify-content: center;">
+              <form action="{{ url_for('arquivar', id=atv['id']) }}" method="POST" onsubmit="return confirm('Mover para arquivados?')" style="margin:0; width: 100%; display: flex; align-items: center; justify-content: center;">
                 <input type="hidden" name="next" value="{{ request.path }}">
                 <button type="submit" class="btn-arquivar">Arquivar</button>
               </form>
             {% else %}
               <div style="display: flex; flex-direction: column; gap: 6px; width: 100%; justify-content: center; align-items: center;">
-                <form action="{{ url_for(\'restaurar\', id=atv[\'id\']) }}" method="POST" style="margin:0; width: 100%;">
+                <form action="{{ url_for('restaurar', id=atv['id']) }}" method="POST" style="margin:0; width: 100%;">
                   <input type="hidden" name="next" value="{{ request.path }}">
                   <button type="submit" class="btn-restaurar" style="width: 100%; box-sizing: border-box; border-radius: var(--radius-sm); padding: 5px 8px; font-size: 11px; font-weight: 600;">Restaurar</button>
                 </form>
-                <form action="{{ url_for(\'deletar\', id=atv[\'id\']) }}" method="POST" onsubmit="return confirm('EXCLUIR PERMANENTEMENTE?')" style="margin:0; width: 100%;">
+                <form action="{{ url_for('deletar', id=atv['id']) }}" method="POST" onsubmit="return confirm('EXCLUIR PERMANENTEMENTE?')" style="margin:0; width: 100%;">
                   <input type="hidden" name="next" value="{{ request.path }}">
                   <button type="submit" class="btn-deletar" style="width: 100%; box-sizing: border-box; border-radius: var(--radius-sm); padding: 5px 8px; font-size: 11px; font-weight: 600;">Excluir</button>
                 </form>
