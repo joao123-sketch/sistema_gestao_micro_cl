@@ -1,0 +1,2483 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestão de Atividades & Contas</title>
+  <style>
+    /* ── Importação Local da Fonte Poppins ── */
+    @font-face {
+      font-family: 'Poppins';
+      src: url('/static/poppins/Poppins-Light.ttf') format('truetype');
+      font-weight: 300;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'Poppins';
+      src: url('/static/poppins/Poppins-LightItalic.ttf') format('truetype');
+      font-weight: 300;
+      font-style: italic;
+    }
+    @font-face {
+      font-family: 'Poppins';
+      src: url('/static/poppins/Poppins-Regular.ttf') format('truetype');
+      font-weight: 400;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'Poppins';
+      src: url('/static/poppins/Poppins-Italic.ttf') format('truetype');
+      font-weight: 400;
+      font-style: italic;
+    }
+    @font-face {
+      font-family: 'Poppins';
+      src: url('/static/poppins/Poppins-Medium.ttf') format('truetype');
+      font-weight: 500;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'Poppins';
+      src: url('/static/poppins/Poppins-MediumItalic.ttf') format('truetype');
+      font-weight: 500;
+      font-style: italic;
+    }
+    @font-face {
+      font-family: 'Poppins';
+      src: url('/static/poppins/Poppins-SemiBold.ttf') format('truetype');
+      font-weight: 600;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'Poppins';
+      src: url('/static/poppins/Poppins-SemiBoldItalic.ttf') format('truetype');
+      font-weight: 600;
+      font-style: italic;
+    }
+    @font-face {
+      font-family: 'Poppins';
+      src: url('/static/poppins/Poppins-Bold.ttf') format('truetype');
+      font-weight: 700;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'Poppins';
+      src: url('/static/poppins/Poppins-BoldItalic.ttf') format('truetype');
+      font-weight: 700;
+      font-style: italic;
+    }
+    @font-face {
+      font-family: 'Poppins';
+      src: url('/static/poppins/Poppins-ExtraBold.ttf') format('truetype');
+      font-weight: 800;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'Poppins';
+      src: url('/static/poppins/Poppins-ExtraBoldItalic.ttf') format('truetype');
+      font-weight: 800;
+      font-style: italic;
+    }
+    @font-face {
+      font-family: 'Poppins';
+      src: url('/static/poppins/Poppins-Black.ttf') format('truetype');
+      font-weight: 900;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'Poppins';
+      src: url('/static/poppins/Poppins-BlackItalic.ttf') format('truetype');
+      font-weight: 900;
+      font-style: italic;
+    }
+    /* ── Variáveis de tema ── */
+    :root {
+      --bg-body:          #f8fafc;
+      --bg-panel:         #ffffff;
+      --text-main:        #1F1D1A;
+      --text-muted:       #64748b;
+      --border-color:     rgba(220, 95, 49, 0.5); /* Laranja com 50% de opacidade */
+      --border-focus:     #e16c42; /* Laranja secundária forte */
+      --input-bg:         #ffffff;
+      --table-even:       #f8fafc;
+      --header-bg:        #e16c42;
+      --header-text:      #ffffff;
+      --btn-toolbar:      #f1f5f9;
+      --link-color:       #4C6870;
+      --accent:           #F1C24C;
+      --accent-hover:     #E4863A;
+      --accent-soft:      rgba(241, 194, 76, 0.15);
+      --btn-primary:      #e16c42;
+      --btn-primary-hover: #e16c42;
+      --btn-success:       #e16c42;
+      --btn-success-hover: #CD302D;
+      --shadow-sm:        0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+      --shadow-md:        0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+      --radius:           12px;
+      --radius-sm:        8px;
+    }
+
+    /* ── Estilos para Blocos de Código ── */
+    pre code {
+      display: block;
+      background: #1e293b;
+      color: #f1f5f9;
+      padding: 12px;
+      border-radius: 6px;
+      font-family: 'Fira Code', 'Courier New', monospace;
+      font-size: 13px;
+      overflow-x: auto;
+      margin: 10px 0;
+      line-height: 1.4;
+      border: 1px solid #334155;
+    }
+
+    /* ── Acordeão de Procedimentos ── */
+    .proc-item {
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      margin-bottom: 12px;
+      overflow: hidden;
+      background: var(--bg-panel);
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .proc-item:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    .proc-header {
+      padding: 14px 20px;
+      background: var(--table-even);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.2s;
+      user-select: none;
+    }
+    .proc-header:hover { background: var(--accent-soft); }
+    .proc-title {
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .proc-tag {
+      font-size: 10px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      color: #fff;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .proc-content {
+      padding: 24px;
+      display: none;
+      border-top: 1px solid var(--border-color);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+    .proc-item.active .proc-content { display: block; }
+    .proc-item.active .proc-header { border-bottom: 1px solid var(--border-color); }
+
+    /* ── Reset & base ── */
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: var(--bg-body);
+      color: var(--text-main);
+      /* BUG CORRIGIDO: font-size herdado corretamente pelo Jinja */
+      font-size: {{ font_size }}px;
+      line-height: 1.6;
+      transition: background-color .25s, color .25s;
+    }
+
+    /* ── Header ── */
+    .header-banner {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 0 32px;
+      height: 64px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,.15);
+    }
+    .header-banner h1 {
+      margin: 0;
+      font-size: 1.2em;
+      font-weight: 700;
+      letter-spacing: -.5px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      white-space: nowrap;
+    }
+
+    /* ── App Layout & Sidebar ── */
+    .app-layout {
+      display: flex;
+      min-height: 100vh;
+    }
+    
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 250px;
+      height: 100vh;
+      background: var(--btn-success);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      padding: 15px 0;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.15);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 200;
+      overflow-y: auto;
+    }
+    .sidebar.fechada {
+      transform: translateX(-100%);
+    }
+    .sidebar-header {
+      padding: 0 20px 15px;
+      border-bottom: 1px solid rgba(255,255,255,0.15);
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      min-height: 100vh;
+      margin-left: 250px;
+      transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .main-content.expandido {
+      margin-left: 0;
+    }
+
+    /* ── Toolbar de botões ── */
+    .botoes-topo {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .sidebar .botoes-topo {
+      flex-direction: column;
+      align-items: stretch;
+      padding: 0 15px;
+    }
+    .botoes-topo a,
+    .botoes-topo button {
+      text-decoration: none;
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
+      color: inherit;
+      font-size: 16px;
+      font-weight: 600;
+      transition: all .2s;
+      cursor: pointer;
+      border: 1px solid rgba(255,255,255,.15);
+      background: rgba(255,255,255,0.05);
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .botoes-topo button:hover,
+    .botoes-topo a:hover  { 
+      background: rgba(255,255,255,.15); 
+      border-color: rgba(255,255,255,0.3); 
+    }
+
+    .botoes-topo a.active-tab {
+      background: rgba(0, 0, 0, 0.2) !important;
+      color: #fff !important;
+      border-color: transparent !important;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .botoes-topo a.active-tab:hover {
+      background: rgba(0, 0, 0, 0.3) !important;
+      transform: translateY(-1px);
+    }
+
+    /* ── Container principal ── */
+    .container {
+      max-width: 1400px;
+      margin: 22px auto;
+      padding: 0 20px 40px;
+    }
+
+    /* ── Painéis ── */
+    .panel {
+      background: var(--bg-panel);
+      padding: 20px 22px;
+      border-radius: var(--radius);
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-sm);
+      border: 2px solid transparent;
+      background-image: linear-gradient(var(--bg-panel), var(--bg-panel)), linear-gradient(135deg, #DC5F31, #F1C24C);
+      background-origin: border-box;
+      background-clip: padding-box, border-box;
+    }
+    .panel h3 {
+      margin: 0 0 16px;
+      font-size: 1em;
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    /* ── Header com botão de exportação ── */
+    .panel-header-with-export {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .panel-header-with-export h3 {
+      margin: 0;
+      flex: 1;
+      min-width: 200px;
+    }
+
+    /* ── Config grid ── */
+    .config-grid { display: flex; gap: 20px; flex-wrap: wrap; }
+    .config-col {
+      flex: 1;
+      min-width: 260px;
+      background: var(--table-even);
+      padding: 18px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+    }
+    .config-col h4 {
+      margin: 0 0 14px;
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 8px;
+      font-weight: 600;
+      font-size: .95em;
+    }
+    .config-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
+    .config-item {
+      background: var(--bg-panel);
+      padding: 10px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    /* ── Formulários ── */
+    .form-row  { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+    .form-row > * { flex: 1; min-width: 130px; }
+    .form-coluna { flex: 1; display: flex; flex-direction: column; }
+
+    .label-editor {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      margin-bottom: 5px;
+    }
+
+    /* BUG CORRIGIDO: inputs/selects herdam font-size do body */
+    input, select, textarea {
+      padding: 8px 11px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      font-size: inherit;  /* ← herdava errado antes */
+      width: 100%;
+      background: var(--input-bg);
+      color: var(--text-main);
+      transition: border-color .15s, box-shadow .15s;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--btn-success);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+    }
+
+    /* ── Editor rich text ── */
+    .editor-container {
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      background: var(--input-bg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+    .editor-container:focus-within {
+      border-color: var(--btn-success);
+      box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+    }
+    .editor-toolbar, .editor-toolbar-table {
+      background: var(--btn-toolbar);
+      border-bottom: 1px solid var(--border-color);
+      padding: 5px 6px;
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+    .editor-toolbar-table { border: none; border-radius: 4px; margin-bottom: 4px; }
+
+    .editor-toolbar button,
+    .editor-toolbar-table button {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 3px 9px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-main);
+      transition: background .1s, color .1s;
+      font-family: inherit;
+    }
+    .editor-toolbar button:hover,
+    .editor-toolbar-table button:hover {
+      background: var(--text-main);
+      color: var(--bg-panel);
+    }
+    .editor-box       { padding: 10px; min-height: 88px; outline: none; overflow-y: auto; }
+    .editor-box-table { min-height: 44px; padding: 5px; border-radius: 4px; border: 1px solid transparent; outline: none; }
+    .editor-box-table:focus { border-color: var(--btn-success); }
+
+    .editor-box ol, .editor-box-table ol { padding-left: 24px; margin: 6px 0; }
+    .editor-box ol ol, .editor-box-table ol ol { list-style-type: lower-alpha; }
+
+    /* ── Botões de ação ── */
+    button.btn-principal {
+      background: var(--btn-primary);
+      color: #fff;
+      border: none;
+      padding: 12px 24px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-weight: 600;
+      width: 100%;
+      font-family: inherit;
+      font-size: 15px;
+      transition: all .2s;
+      box-shadow: 0 4px 12px rgba(99,102,241,0.25);
+    }
+    button.btn-principal:hover  {
+      background: var(--btn-primary-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(99,102,241,0.35);
+    }
+    button.btn-principal:active { transform: scale(.98); }
+
+    /* ── Botão de exportação ── */
+    button.btn-exportar,
+    a.btn-exportar {
+      background: var(--btn-success);
+      color: #fff;
+      border: none;
+      padding: 10px 18px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-weight: 600;
+      font-family: inherit;
+      font-size: 14px;
+      transition: all .2s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 10px rgba(16,185,129,0.2);
+    }
+    button.btn-exportar:hover,
+    a.btn-exportar:hover {
+      background: var(--btn-success-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px rgba(16,185,129,0.3);
+    }
+
+    /* ── Tabela ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 14px;
+      /* table-layout removed for responsiveness */
+      background: var(--bg-panel);
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+    }
+    th, td {
+      padding: 9px 11px;
+      border: 1px solid var(--border-color);
+      vertical-align: middle;
+      word-wrap: break-word;
+    }
+    th {
+      background: var(--header-bg);
+      color: var(--header-text);
+      text-align: left;
+      font-weight: 500;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+    tr:nth-child(even) td { background: var(--table-even); }
+    tr.linha-dado:hover td { background: var(--accent-soft); transition: background .15s; }
+
+    th.sortable { cursor: pointer; user-select: none; }
+    th.sortable:hover { background: rgba(255,255,255,.12); }
+
+    
+    /* Ajuste de fonte da tabela */
+    #tabelaAtividades td, 
+    #tabelaAtividades input, 
+    #tabelaAtividades select, 
+    #tabelaAtividades textarea {
+      font-size: 12.5px;
+    }
+    #tabelaAtividades td {
+      padding: 6px 8px; /* Reduz padding para caber mais */
+    }
+    #tabelaAtividades input:not([type="hidden"]), 
+    #tabelaAtividades textarea {
+      width: 100%;
+      box-sizing: border-box;
+      background: transparent;
+      border: 1px solid transparent;
+      outline: none;
+      font-family: inherit;
+    }
+    #tabelaAtividades input:not([type="hidden"]):focus, 
+    #tabelaAtividades textarea:focus {
+      border-bottom: 1px solid var(--accent);
+    }
+
+    /* ── Selects coloridos (tag / prio) ── */
+    select.tag-select, select.prio-select {
+      color: #fff;
+      font-weight: 600;
+      border-radius: 20px;
+      padding: 5px 10px;
+      border: none;
+      cursor: pointer;
+      text-align: center;
+      -webkit-appearance: none;
+      appearance: none;
+      text-shadow: 0 1px 2px rgba(0,0,0,.2);
+      font-size: inherit;
+    }
+    select.tag-select option,
+    select.prio-select option {
+      background: var(--bg-panel);
+      color: var(--text-main);
+      font-weight: normal;
+      text-shadow: none;
+    }
+
+    /* ── Larguras das colunas ── */
+    .w-data  { min-width: 120px; width: auto; }
+    .w-ativ  { min-width: 155px; width: auto; }
+    .w-resp  { min-width: 155px; width: auto; }
+    .w-status{ min-width: 130px; width: auto; }
+    .w-prio  { min-width: 105px; width: auto; }
+    .w-acoes { min-width: 95px; width: auto;  }
+
+    /* ── Botões da coluna Ações ── */
+    .acoes { display: flex; flex-direction: column; gap: 4px; }
+    .acoes form { margin: 0; }
+    .acoes button, .acoes a button {
+      padding: 5px 8px;
+      font-size: 11.5px;
+      font-weight: 500;
+      border-radius: 4px;
+      font-family: inherit;
+      width: 100%;
+      cursor: pointer;
+      transition: all .12s;
+    }
+    .btn-salvar   { background: #4C6870; color: #fff; border: 1px solid #4C6870; }
+    .btn-salvar:hover   { background: #2f4349; }
+    .btn-arquivar { background: var(--btn-primary); color: white; border: none; padding: 5px 8px; font-size: 11px; cursor: pointer; border-radius: var(--radius-sm); width: 100%; font-weight: 600; box-sizing: border-box; }
+    .btn-arquivar:hover { opacity: 0.9; }
+    .btn-restaurar{ background: transparent; color: var(--text-main); border: 1px solid var(--border-color); }
+    .btn-restaurar:hover{ background: var(--btn-toolbar); }
+    .btn-deletar  { background: #CD302D; color: #fff; border: 1px solid #CD302D; }
+    .btn-deletar:hover  { background: #9B1C1A; }
+
+    /* ── Login do cofre ── */
+    .login-box {
+      max-width: 380px;
+      margin: 70px auto;
+      padding: 28px;
+      border-radius: var(--radius);
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-md);
+      text-align: center;
+    }
+    .login-box h3 { margin-top: 0; }
+    .badge-senha {
+      background: var(--btn-toolbar);
+      font-family: monospace;
+      padding: 4px 8px;
+      border-radius: 4px;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+    }
+    .btn-ver-senha {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 14px;
+      padding: 0 3px;
+    }
+
+    /* ── Filtros (linha de busca) ── */
+    .tr-filtros input {
+      font-size: inherit; /* herdava errado antes — BUG CORRIGIDO */
+      padding: 5px 8px;
+    }
+
+    /* ── Toast de feedback ── */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #22c55e;
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: var(--shadow-md);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity .3s, transform .3s;
+      pointer-events: none;
+      z-index: 9999;
+    }
+    #toast.show { opacity: 1; transform: translateY(0); }
+
+
+
+    #aba-ativos, #aba-arquivados, #aba-geral {
+      transition: all 0.3s ease;
+    }
+
+    #aba-ativos:hover, #aba-arquivados:hover, #aba-geral:hover {
+      color: #3b82f6;
+    }
+
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Quill.js for Rich Text Editing -->
+  <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+  <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+
+</head>
+<body>
+
+<!-- Toast de confirmação -->
+<div id="toast">✓ Salvo com sucesso</div>
+
+<div class="app-layout">
+  
+  <!-- BARRA LATERAL (SIDEBAR) -->
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-header">
+      <h2 style="margin:0; font-size: 30px; display:flex; align-items:center; gap:18px;">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" style="height: 80px; border-radius: 4px;" onerror="this.style.display='none'">
+      </h2>
+    </div>
+    
+    <div class="botoes-topo">
+      <a href="/"            class="{% if modo == 'ativos'      %}active-tab{% endif %}">📁 Ativos</a>
+      <a href="/arquivados"  class="{% if modo == 'arquivados'  %}active-tab{% endif %}">🗄️ Arquivados</a>
+      <a href="/procedimentos" class="{% if modo == 'procedimentos' %}active-tab{% endif %}">📝 Procedimentos</a>
+      <a href="/usuarios"    class="{% if modo in ['usuarios','usuario_detalhe'] %}active-tab{% endif %}">👤 Usuários</a>
+      <a href="/configuracoes" class="{% if modo == 'configuracoes' %}active-tab{% endif %}">⚙️ Ajustes</a>
+      <a href="/credenciais" class="{% if modo in ['credenciais','credenciais_login'] %}active-tab{% endif %}">🔑 Contas</a>
+    </div>
+  </aside>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <div id="main-content" class="main-content">
+    
+    <div class="header-banner">
+      <h1>
+        <button onclick="toggleSidebar()" style="background:transparent; border:none; color:inherit; font-size:px; cursor:pointer; margin-right:12px; line-height:1; padding:0;">☰</button>
+        {% if modo == 'ativos'            %} Painel de Controle
+        {% elif modo == 'arquivados'      %} Atividades Arquivadas
+        {% elif modo == 'configuracoes'   %} Configurações
+        {% elif modo in ['usuarios','usuario_detalhe'] %} Painel de Integrantes
+        {% elif modo in ['credenciais','credenciais_login'] %} Cofre de Segurança
+        {% elif modo == 'procedimentos' %} Procedimentos & Plataformas
+        {% endif %}
+      </h1>
+
+      <div class="botoes-topo" style="flex-direction: row;">
+        <a href="/alterar-fonte/{{ font_size - 1 }}" title="Diminuir Fonte" style="font-size:13px; color:#fff; padding:6px 12px;">A−</a>
+        <a href="/alterar-fonte/{{ font_size + 1 }}" title="Aumentar Fonte" style="font-size:15px; color:#fff; padding:6px 12px;">A+</a>
+      </div>
+    </div>
+
+    <div class="container">
+
+  
+  {# ══════════════ ATIVOS ══════════════ #}
+  {% if modo == 'ativos' %}
+  <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px;">
+    <!-- Dashboard -->
+    <div class="panel" style="flex: 2; min-width: 320px; margin-bottom: 0;">
+      <h3>📊 Dashboard de Atividades Ativas</h3>
+      
+      <!-- Abas de visualização -->
+      <div style="display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 2px solid var(--border-color); flex-wrap: wrap;">
+        <button onclick="mudarAbaDashboard('ativos')" id="aba-ativos"
+                style="background: none; border: none; padding: 8px 14px; cursor: pointer; font-weight: 600;
+                       border-bottom: 3px solid var(--accent); color: var(--text-main);">
+          📁 Ativas
+        </button>
+        <button onclick="mudarAbaDashboard('arquivados')" id="aba-arquivados"
+                style="background: none; border: none; padding: 8px 14px; cursor: pointer; font-weight: 600;
+                       border-bottom: 3px solid transparent; color: var(--text-main);">
+          🗃️ Arquivadas
+        </button>
+      </div>
+
+      <!-- Filtros do Dashboard -->
+      <div style="display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;">
+        <select id="filtro-area" onchange="filtrarTabelaAvancado()" style="flex:1;">
+          <option value="">Todas as Áreas</option>
+          {% for cat in categorias %}
+          <option value="{{ cat['nome'] }}">{{ cat['nome'] }}</option>
+          {% endfor %}
+        </select>
+        <select id="filtro-responsavel" onchange="filtrarTabelaAvancado()" style="flex:1;">
+          <option value="">Todos os Responsáveis</option>
+          {% for resp in responsaveis %}
+          <option value="{{ resp['nome'] }}">{{ resp['nome'] }}</option>
+          {% endfor %}
+        </select>
+        <select id="filtro-status" onchange="filtrarTabelaAvancado()" style="flex:1;">
+          <option value="">Todos os Status</option>
+          <option value="Pendente">Pendente</option>
+          <option value="Em andamento">Em andamento</option>
+          <option value="Feito">Feito</option>
+        </select>
+        <select id="filtro-prioridade" onchange="filtrarTabelaAvancado()" style="flex:1;">
+          <option value="">Todas as Prioridades</option>
+          <option value="Baixa">Baixa</option>
+          <option value="Média">Média</option>
+          <option value="Alta">Alta</option>
+        </select>
+      </div>
+
+      
+      <!-- Aba Arquivadas -->
+      <div id="dash-arquivados" style="display: none;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px;">
+          <div style="background: rgba(245,158,11,.1); border: 1px solid #f59e0b; padding: 14px; border-radius: 8px; text-align: center; color: #b45309;">
+            <div id="metric-pendente-arq" style="font-size: 22px; font-weight: 700;">{{ metricas.Pendente_Arq }}</div>
+            <div style="font-size: 11px; font-weight: 600; margin-top: 3px;">⚠️ Pendentes</div>
+          </div>
+          <div style="background: rgba(59,130,246,.1); border: 1px solid #3b82f6; padding: 14px; border-radius: 8px; text-align: center; color: #1d4ed8;">
+            <div id="metric-emandamento-arq" style="font-size: 22px; font-weight: 700;">{{ metricas['Em andamento_Arq'] }}</div>
+            <div style="font-size: 11px; font-weight: 600; margin-top: 3px;">🔄 Em andamento</div>
+          </div>
+          <div style="background: rgba(34,197,94,.1); border: 1px solid #22c55e; padding: 14px; border-radius: 8px; text-align: center; color: #15803d;">
+            <div id="metric-feito-arq" style="font-size: 22px; font-weight: 700;">{{ metricas.Feito_Arq }}</div>
+            <div style="font-size: 11px; font-weight: 600; margin-top: 3px;">✅ Concluídas</div>
+          </div>
+          <div style="background: var(--btn-toolbar); border: 1px solid var(--border-color); padding: 14px; border-radius: 8px; text-align: center;">
+            <div id="metric-total-arq" style="font-size: 22px; font-weight: 700; color: var(--text-main);">{{ metricas.Total_Arq }}</div>
+            <div style="font-size: 11px; font-weight: 600; margin-top: 3px; color: var(--text-muted);">Total Arquivadas</div>
+          </div>
+        </div>
+        <div style="margin-top: 20px; max-width: 500px; padding-left: 10px; padding-right: 10px; margin-left: auto; margin-right: auto; height: 250px;">
+            <canvas id="chartArquivadosDashboard" data-pendentearq="{{ metricas.Pendente_Arq }}" data-emandamentoarq="{{ metricas['Em andamento_Arq'] }}" data-feitoarq="{{ metricas.Feito_Arq }}"></canvas>
+        </div>
+      </div>
+      
+      <!-- Hidden table for Arquivadas so JS can filter it -->
+      <table id="tabelaArquivadasOculta" style="display: none;">
+        {% for atv in atividades_arq %}
+        <tr class="linha-dado arquivado">
+          <td class="w-status">{{ atv['status'] }}</td>
+          <td class="w-resp">{{ atv['responsavel'] }}</td>
+          <td class="w-area">{{ atv['area'] }}</td>
+          <td class="w-prio">{{ atv['prioridade'] }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+<!-- Aba Ativas -->
+      <div id="dash-ativos" style="display: block;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px;">
+          <div style="background: rgba(245,158,11,.1); border: 1px solid #f59e0b; padding: 14px; border-radius: 8px; text-align: center; color: #b45309;">
+            <div id="metric-pendente" style="font-size: 22px; font-weight: 700;">{{ metricas.Pendente }}</div>
+            <div style="font-size: 11px; font-weight: 600; margin-top: 3px;">⚠️ Pendentes</div>
+          </div>
+          <div style="background: rgba(59,130,246,.1); border: 1px solid #3b82f6; padding: 14px; border-radius: 8px; text-align: center; color: #1d4ed8;">
+            <div id="metric-emandamento" style="font-size: 22px; font-weight: 700;">{{ metricas['Em andamento'] }}</div>
+            <div style="font-size: 11px; font-weight: 600; margin-top: 3px;">🔄 Em andamento</div>
+          </div>
+          <div style="background: rgba(34,197,94,.1); border: 1px solid #22c55e; padding: 14px; border-radius: 8px; text-align: center; color: #15803d;">
+            <div id="metric-feito" style="font-size: 22px; font-weight: 700;">{{ metricas.Feito }}</div>
+            <div style="font-size: 11px; font-weight: 600; margin-top: 3px;">✅ Concluídas</div>
+          </div>
+          <div style="background: var(--btn-toolbar); border: 1px solid var(--border-color); padding: 14px; border-radius: 8px; text-align: center;">
+            <div id="metric-total" style="font-size: 22px; font-weight: 700; color: var(--text-main);">{{ metricas.Total }}</div>
+            <div style="font-size: 11px; font-weight: 600; margin-top: 3px; color: var(--text-muted);">Total Ativas</div>
+          </div>
+        </div>
+        <div style="margin-top: 20px; max-width: 500px; padding-left: 10px; padding-right: 10px; margin-left: auto; margin-right: auto; height: 250px;">
+            <canvas id="chartGeralDashboard" data-pendente="{{ metricas.Pendente }}" data-emandamento="{{ metricas['Em andamento'] }}" data-feito="{{ metricas.Feito }}"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Formulário de nova atividade -->
+  <div class="panel">
+    <h3>➕ Inserir Nova Atividade</h3>
+    <form action="/adicionar" method="POST">
+      <input type="hidden" name="modo_origem" value="ativos">
+      <div class="form-row">
+        <select name="area" id="select-nova-area" onchange="ajustarCorSelect(this)" class="tag-select">
+          {% for cat in categorias %}
+          <option value="{{ cat['nome'] }}" data-color="{{ cat['cor'] }}">{{ cat['nome'] }}</option>
+          {% endfor %}
+        </select>
+
+        <div style="display:flex; align-items:center; gap:6px; flex:1; min-width:130px;">
+          <div id="img-novo-resp-container"></div>
+          <select name="responsavel" id="select-novo-resp"
+                  onchange="ajustarFotoResp(this,'img-novo-resp-container')"
+                  required style="flex:1; min-width:0;">
+            {% for resp in responsaveis %}
+            <option value="{{ resp['nome'] }}"
+                    data-foto="{% if resp['foto'] %}{{ url_for('static', filename=resp['foto']) }}{% endif %}">
+              {{ resp['nome'] }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <select name="status">
+          <option value="Pendente">⚠️ Pendente</option>
+          <option value="Em andamento">🔄 Em andamento</option>
+          <option value="Feito">✅ Feito</option>
+        </select>
+        <select name="prioridade" class="prio-select" onchange="ajustarCorPrio(this)">
+          <option value="Baixa"  data-color="#22c55e">Baixa Prioridade</option>
+          <option value="Média"  data-color="#eab308">Média Prioridade</option>
+          <option value="Alta"   data-color="#ef4444">Alta Prioridade</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <div class="form-coluna">
+          <label class="label-editor">Atividade (Título)</label>
+          <input type="text" name="atividade" required placeholder="Digite o título da atividade..." style="margin-bottom: 10px;">
+          <label class="label-editor">Prazo Geral</label>
+          <input type="date" name="prazo" style="margin-bottom: 10px;">
+        </div>
+        <div class="form-coluna" id="container-passos-form">
+          <label class="label-editor">Passos (Detalhamento)</label>
+          <div id="lista-passos-form">
+             <div style="display:flex; gap:5px; margin-bottom:5px;">
+                <input type="text" name="passos_desc[]" placeholder="Descrição do passo..." style="flex:2">
+                <input type="date" name="passos_prazo[]" style="flex:1">
+             </div>
+          </div>
+          <button type="button" onclick="adicionarCampoPasso()" style="align-self:flex-start; margin-top:5px; background:var(--btn-toolbar); border:1px solid var(--border-color); padding:5px 10px; border-radius:4px; font-size:12px; cursor:pointer;">+ Adicionar Passo</button>
+        </div>
+      </div>
+      <button type="submit" class="btn-principal">Adicionar à Base Geral</button>
+    </form>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header-with-export">
+      <h3>📋 Painel de Controle de Atividades</h3>
+      <a href="/exportar/ativos" class="btn-exportar">📄 Exportar PDF</a>
+    </div>
+<table id="tabelaAtividades">
+      <thead>
+        <tr>
+          <th class="w-data sortable" onclick="ordenarTabela(0)">Prazo ↕</th>
+          <th class="w-ativ">Área</th>
+          <th>Atividade</th>
+          <th class="w-resp">Responsável</th>
+          <th class="w-status">Status</th>
+          <th class="w-prio">Prioridade</th>
+          <th style="width: 120px;">Detalhamento</th>
+          <th class="w-acoes" style="text-align:center;">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for atv in atividades %}
+                <tr class="linha-dado">
+          <td><input type="date" class="auto-save" data-id="{{ atv['id'] }}" data-campo="prazo" value="{{ atv['prazo'] }}"></td>
+
+          <td>
+            <select class="tag-select auto-save" data-id="{{ atv['id'] }}" data-campo="area" onchange="ajustarCorSelect(this)">
+              {% set ns = namespace(found=false) %}
+              {% for cat in categorias %}
+              <option value="{{ cat['nome'] }}" data-color="{{ cat['cor'] }}"
+                      {% if (atv['area']|string|lower|trim) == (cat['nome']|string|lower|trim) %}selected{% set ns.found = true %}{% endif %}>
+                {{ cat['nome'] }}
+              </option>
+              {% endfor %}
+              {% if not ns.found %}
+              <option value="{{ atv['area'] }}" data-color="#475569" selected>{{ atv['area'] }}</option>
+              {% endif %}
+            </select>
+          </td>
+
+          <td>
+            <textarea class="auto-save" data-id="{{ atv['id'] }}" data-campo="atividade" rows="2" style="resize:vertical;">{{ atv['atividade'] }}</textarea>
+          </td>
+
+          <td>
+            <div style="display:flex; align-items:center; gap:5px;">
+              <div id="img-resp-{{ atv['id'] }}">
+                {% set resp_foto = "" %}
+                {% for r in responsaveis %}{% if atv['responsavel'] == r['nome'] and r['foto'] %}{% set resp_foto = url_for('static', filename=r['foto']) %}{% endif %}{% endfor %}
+                {% if resp_foto %}
+                  <img src="{{ resp_foto }}" style="width:26px;height:26px;border-radius:50%;object-fit:cover;border:1px solid var(--border-color);">
+                {% else %}
+                  <div style="width:26px;height:26px;border-radius:50%;background:var(--table-even);display:flex;align-items:center;justify-content:center;font-size:13px;border:1px solid var(--border-color);">👤</div>
+                {% endif %}
+              </div>
+              <select class="auto-save" data-id="{{ atv['id'] }}" data-campo="responsavel"
+                      onchange="ajustarFotoResp(this,'img-resp-{{ atv['id'] }}')"
+                      style="flex:1; min-width:0;">
+                {% for resp in responsaveis %}
+                <option value="{{ resp['nome'] }}"
+                        data-foto="{% if resp['foto'] %}{{ url_for('static', filename=resp['foto']) }}{% endif %}"
+                        {% if atv['responsavel'] == resp['nome'] %}selected{% endif %}>
+                  {{ resp['nome'] }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+          </td>
+
+          <td>
+            <select class="auto-save" data-id="{{ atv['id'] }}" data-campo="status">
+              <option value="Pendente"     {% if atv['status'] == 'Pendente'     %}selected{% endif %}>⚠️ Pendente</option>
+              <option value="Em andamento" {% if atv['status'] == 'Em andamento' %}selected{% endif %}>🔄 Em andamento</option>
+              <option value="Feito"        {% if atv['status'] == 'Feito'        %}selected{% endif %}>✅ Feito</option>
+            </select>
+          </td>
+
+          <td>
+            <select class="prio-select auto-save" data-id="{{ atv['id'] }}" data-campo="prioridade" onchange="ajustarCorPrio(this)">
+              <option value="Baixa" data-color="#22c55e" {% if atv['prioridade'] == 'Baixa' %}selected{% endif %}>Baixa</option>
+              <option value="Média" data-color="#eab308" {% if atv['prioridade'] == 'Média' %}selected{% endif %}>Média</option>
+              <option value="Alta"  data-color="#ef4444" {% if atv['prioridade'] == 'Alta'  %}selected{% endif %}>Alta</option>
+            </select>
+          </td>
+
+          <td>
+            <button type="button" onclick="abrirModalPassos({{ atv['id'] }})" style="background:var(--btn-primary); color:white; border:none; padding:5px 8px; font-size: 11px; cursor:pointer; border-radius:var(--radius-sm); width:100%; min-width: 100%; font-weight:600;">Ver Passos</button>
+          </td>
+
+          <td style="vertical-align: middle;">
+            {% if modo == 'ativos' or modo.startswith('usuario_detalhe') %}
+              <form action="/arquivar/{{ atv['id'] }}" method="POST" onsubmit="return confirm('Mover para arquivados?')" style="margin:0; width: 100%; display: flex; align-items: center; justify-content: center;">
+                <input type="hidden" name="next" value="{{ request.path }}">
+                <button type="submit" class="btn-arquivar">Arquivar</button>
+              </form>
+            {% else %}
+              <div style="display: flex; flex-direction: column; gap: 6px; width: 100%; justify-content: center; align-items: center;">
+                <form action="/restaurar/{{ atv['id'] }}" method="POST" style="margin:0; width: 100%;">
+                  <input type="hidden" name="next" value="{{ request.path }}">
+                  <button type="submit" class="btn-restaurar" style="width: 100%; box-sizing: border-box; border-radius: var(--radius-sm); padding: 5px 8px; font-size: 11px; font-weight: 600;">Restaurar</button>
+                </form>
+                <form action="/deletar/{{ atv['id'] }}" method="POST" onsubmit="return confirm('EXCLUIR PERMANENTEMENTE?')" style="margin:0; width: 100%;">
+                  <input type="hidden" name="next" value="{{ request.path }}">
+                  <button type="submit" class="btn-deletar" style="width: 100%; box-sizing: border-box; border-radius: var(--radius-sm); padding: 5px 8px; font-size: 11px; font-weight: 600;">Excluir</button>
+                </form>
+              </div>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="8" style="text-align:center; padding:22px; color:var(--text-muted);">
+            Nenhuma atividade encontrada.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  {# ══════════════ ARQUIVADOS ══════════════ #}
+  {% if modo == 'arquivados' %}
+  <div class="panel">
+    <div class="panel-header-with-export">
+      <h3>🗄️ Atividades Arquivadas</h3>
+      <a href="/exportar/arquivados" class="btn-exportar">📄 Exportar PDF</a>
+    </div>
+<table id="tabelaAtividades">
+      <thead>
+        <tr>
+          <th class="w-data sortable" onclick="ordenarTabela(0)">Prazo ↕</th>
+          <th class="w-ativ">Área</th>
+          <th>Atividade</th>
+          <th class="w-resp">Responsável</th>
+          <th class="w-status">Status</th>
+          <th class="w-prio">Prioridade</th>
+          <th style="width: 120px;">Detalhamento</th>
+          <th class="w-acoes" style="text-align:center;"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for atv in atividades %}
+                <tr class="linha-dado">
+          <td><input type="date" class="auto-save" data-id="{{ atv['id'] }}" data-campo="prazo" value="{{ atv['prazo'] }}"></td>
+
+          <td>
+            <select class="tag-select auto-save" data-id="{{ atv['id'] }}" data-campo="area" onchange="ajustarCorSelect(this)">
+              {% set ns = namespace(found=false) %}
+              {% for cat in categorias %}
+              <option value="{{ cat['nome'] }}" data-color="{{ cat['cor'] }}"
+                      {% if (atv['area']|string|lower|trim) == (cat['nome']|string|lower|trim) %}selected{% set ns.found = true %}{% endif %}>
+                {{ cat['nome'] }}
+              </option>
+              {% endfor %}
+              {% if not ns.found %}
+              <option value="{{ atv['area'] }}" data-color="#475569" selected>{{ atv['area'] }}</option>
+              {% endif %}
+            </select>
+          </td>
+
+          <td>
+            <textarea class="auto-save" data-id="{{ atv['id'] }}" data-campo="atividade" rows="2" style="resize:vertical;">{{ atv['atividade'] }}</textarea>
+          </td>
+
+          <td>
+            <div style="display:flex; align-items:center; gap:5px;">
+              <div id="img-resp-{{ atv['id'] }}">
+                {% set resp_foto = "" %}
+                {% for r in responsaveis %}{% if atv['responsavel'] == r['nome'] and r['foto'] %}{% set resp_foto = url_for('static', filename=r['foto']) %}{% endif %}{% endfor %}
+                {% if resp_foto %}
+                  <img src="{{ resp_foto }}" style="width:26px;height:26px;border-radius:50%;object-fit:cover;border:1px solid var(--border-color);">
+                {% else %}
+                  <div style="width:26px;height:26px;border-radius:50%;background:var(--table-even);display:flex;align-items:center;justify-content:center;font-size:13px;border:1px solid var(--border-color);">👤</div>
+                {% endif %}
+              </div>
+              <select class="auto-save" data-id="{{ atv['id'] }}" data-campo="responsavel"
+                      onchange="ajustarFotoResp(this,'img-resp-{{ atv['id'] }}')"
+                      style="flex:1; min-width:0;">
+                {% for resp in responsaveis %}
+                <option value="{{ resp['nome'] }}"
+                        data-foto="{% if resp['foto'] %}{{ url_for('static', filename=resp['foto']) }}{% endif %}"
+                        {% if atv['responsavel'] == resp['nome'] %}selected{% endif %}>
+                  {{ resp['nome'] }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+          </td>
+
+          <td>
+            <select class="auto-save" data-id="{{ atv['id'] }}" data-campo="status">
+              <option value="Pendente"     {% if atv['status'] == 'Pendente'     %}selected{% endif %}>⚠️ Pendente</option>
+              <option value="Em andamento" {% if atv['status'] == 'Em andamento' %}selected{% endif %}>🔄 Em andamento</option>
+              <option value="Feito"        {% if atv['status'] == 'Feito'        %}selected{% endif %}>✅ Feito</option>
+            </select>
+          </td>
+
+          <td>
+            <select class="prio-select auto-save" data-id="{{ atv['id'] }}" data-campo="prioridade" onchange="ajustarCorPrio(this)">
+              <option value="Baixa" data-color="#22c55e" {% if atv['prioridade'] == 'Baixa' %}selected{% endif %}>Baixa</option>
+              <option value="Média" data-color="#eab308" {% if atv['prioridade'] == 'Média' %}selected{% endif %}>Média</option>
+              <option value="Alta"  data-color="#ef4444" {% if atv['prioridade'] == 'Alta'  %}selected{% endif %}>Alta</option>
+            </select>
+          </td>
+
+          <td>
+            <button type="button" onclick="abrirModalPassos({{ atv['id'] }})" style="background:var(--btn-primary); color:white; border:none; padding:5px 8px; font-size: 11px; cursor:pointer; border-radius:var(--radius-sm); width:100%; min-width: 100%; font-weight:600;">Ver Passos</button>
+          </td>
+
+          <td style="vertical-align: middle;">
+            {% if modo == 'ativos' or modo.startswith('usuario_detalhe') %}
+              <form action="/arquivar/{{ atv['id'] }}" method="POST" onsubmit="return confirm('Mover para arquivados?')" style="margin:0; width: 100%; display: flex; align-items: center; justify-content: center;">
+                <input type="hidden" name="next" value="{{ request.path }}">
+                <button type="submit" class="btn-arquivar">Arquivar</button>
+              </form>
+            {% else %}
+              <div style="display: flex; flex-direction: column; gap: 6px; width: 100%; justify-content: center; align-items: center;">
+                <form action="/restaurar/{{ atv['id'] }}" method="POST" style="margin:0; width: 100%;">
+                  <input type="hidden" name="next" value="{{ request.path }}">
+                  <button type="submit" class="btn-restaurar" style="width: 100%; box-sizing: border-box; border-radius: var(--radius-sm); padding: 5px 8px; font-size: 11px; font-weight: 600;">Restaurar</button>
+                </form>
+                <form action="/deletar/{{ atv['id'] }}" method="POST" onsubmit="return confirm('EXCLUIR PERMANENTEMENTE?')" style="margin:0; width: 100%;">
+                  <input type="hidden" name="next" value="{{ request.path }}">
+                  <button type="submit" class="btn-deletar" style="width: 100%; box-sizing: border-box; border-radius: var(--radius-sm); padding: 5px 8px; font-size: 11px; font-weight: 600;">Excluir</button>
+                </form>
+              </div>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="8" style="text-align:center; padding:22px; color:var(--text-muted);">
+            Nenhuma atividade encontrada.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  
+  {# ══════════════ CONFIGURAÇÕES ══════════════ #}
+  {% if modo == 'configuracoes' %}
+  <div style="display: flex; flex-direction: column; gap: 20px;">
+    <div class="panel" style="flex:1; min-width: 300px;">
+      <h3>🏷️ Áreas de Atuação</h3>
+      <form action="/adicionar_categoria" method="POST" style="margin-bottom:20px; display:flex; flex-direction:column; gap:10px;">
+        <input type="text" name="nome" placeholder="Nova Área..." required style="width:100%; padding: 12px; font-size: 15px;">
+        <div style="display:flex; justify-content:flex-end; gap:10px; height: 36px;">
+          <input type="color" name="cor" value="#3b82f6" style="width:36px; height:100%; padding:0; border:none; cursor:pointer; border-radius:4px;" title="Cor da Área">
+          <button type="submit" class="btn-principal" style="height:100%; padding: 0 15px; font-size:12px; font-weight:bold;">Adicionar Nova Área</button>
+        </div>
+      </form>
+      <table style="width:100%; min-width: 100%; border-collapse:collapse;">
+        <tbody>
+          {% for cat in categorias %}
+          <tr style="border-bottom:1px solid var(--border-color);">
+            <td style="padding:12px 8px; font-size:14px;">
+              <span style="display:inline-block; width:12px; height:12px; background:{{ cat['cor'] }}; border-radius:50%; margin-right:8px;"></span>
+              <strong>{{ cat['nome'] }}</strong>
+            </td>
+            <td style="text-align:right;">
+              <form action="/deletar_categoria/{{ cat['id'] }}" method="POST" onsubmit="return confirm('Excluir Área?')">
+                <button type="submit" class="btn-deletar" style="padding:4px 8px; font-size:11px;">Excluir</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="panel" style="flex:1; min-width: 300px;">
+      <h3>👥 Responsáveis</h3>
+      <form action="/adicionar_responsavel" method="POST" style="margin-bottom:20px; display:flex; flex-direction:column; gap:10px;">
+        <input type="text" name="nome" placeholder="Novo Responsável..." required style="width:100%; padding: 12px; font-size: 15px;">
+        <div style="display:flex; justify-content:flex-end; height: 36px;">
+          <button type="submit" class="btn-principal" style="height:100%; padding: 0 15px; font-size:12px; font-weight:bold;">Adicionar Responsável</button>
+        </div>
+      </form>
+      <table style="width:100%; min-width: 100%; border-collapse:collapse;">
+        <tbody>
+          {% for resp in responsaveis %}
+          <tr style="border-bottom:1px solid var(--border-color);">
+            <td style="padding:12px 8px; font-size:14px;"><strong>{{ resp['nome'] }}</strong></td>
+            <td style="text-align:right;">
+              <form action="/deletar_responsavel/{{ resp['id'] }}" method="POST" onsubmit="return confirm('Excluir Responsável?')">
+                <button type="submit" class="btn-deletar" style="padding:4px 8px; font-size:11px;">Excluir</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+  {# ══════════════ PROCEDIMENTOS ══════════════ #}
+  {% if modo == 'procedimentos' %}
+  
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h2>📚 Base de Conhecimento</h2>
+    <button onclick="abrirModalProcedimento()" class="btn-principal" style="padding: 10px 20px; font-size: 14px; font-weight: bold;">
+      ➕ Criar Novo Procedimento
+    </button>
+  </div>
+
+  <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap:15px;">
+    {% for proc in procedimentos %}
+    <div style="border:1px solid var(--border-color); padding:15px; border-radius:8px; background:var(--panel-bg); display: flex; flex-direction: column; justify-content: space-between;">
+      <div>
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; gap: 10px;">
+          <h4 style="margin:0; font-size:16px; line-height: 1.3;">{{ proc['titulo'] }}</h4>
+          <span style="background:var(--btn-toolbar); padding:3px 8px; border-radius:4px; font-size:11px; white-space: nowrap;">{{ proc['categoria'] }}</span>
+        </div>
+        <p style="font-size:11px; color:var(--text-muted); margin-bottom: 15px;">Atualizado em: {{ proc['data_atualizacao'] }}</p>
+      </div>
+      
+      <!-- Hidden content to load into Quill -->
+      <div id="proc-conteudo-{{ proc['id'] }}" style="display: none;">{{ proc['conteudo'] | safe }}</div>
+      <input type="hidden" id="proc-titulo-{{ proc['id'] }}" value="{{ proc['titulo'] }}">
+      <input type="hidden" id="proc-cat-{{ proc['id'] }}" value="{{ proc['categoria'] }}">
+
+      <div style="display:flex; gap:10px;">
+        <button onclick="abrirModalProcedimento({{ proc['id'] }})" class="btn-restaurar" style="flex:1; padding:8px; border-radius:4px; font-weight:600; cursor:pointer;">Ler / Editar</button>
+        <form action="/procedimentos/deletar/{{ proc['id'] }}" method="POST" onsubmit="return confirm('Excluir este procedimento permanentemente?')" style="margin:0;">
+          <button type="submit" class="btn-deletar" style="padding:8px 12px; border-radius:4px; font-weight:600; cursor:pointer;" title="Excluir">🗑️</button>
+        </form>
+      </div>
+    </div>
+    {% else %}
+    <div style="grid-column: 1 / -1; padding: 40px; text-align:center; color:var(--text-muted); border: 2px dashed var(--border-color); border-radius: 8px;">
+      Nenhum procedimento cadastrado. Clique no botão acima para criar o primeiro!
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Modal de Procedimento (Quill) -->
+  <div id="modal-procedimento" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; align-items:center; justify-content:center; padding: 20px; box-sizing: border-box;">
+    <div style="background:var(--bg-panel); width:100%; max-width:900px; height: 90vh; border-radius:12px; display:flex; flex-direction:column; box-shadow:0 10px 30px rgba(0,0,0,0.5); overflow: hidden;">
+      
+      <!-- Header do Modal -->
+      <div style="padding:15px 20px; background:var(--panel-bg); border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
+        <h3 id="modal-proc-title-text" style="margin:0; font-size:18px;">Procedimento</h3>
+        <button onclick="fecharModalProcedimento()" style="background:transparent; border:none; color:var(--text-main); font-size:24px; cursor:pointer; line-height:1;">&times;</button>
+      </div>
+      
+      <!-- Form Container -->
+      <form id="form-procedimento" method="POST" style="flex:1; display:flex; flex-direction:column; margin:0; overflow: hidden;">
+        
+        <div style="padding: 15px 20px; display: flex; gap: 15px; border-bottom: 1px solid var(--border-color); background: var(--bg-panel);">
+          <input type="text" id="proc-titulo-input" name="titulo" placeholder="Título do Procedimento" required style="flex:2; padding: 10px; font-size: 15px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--input-bg); color: var(--text-main);">
+          <select id="proc-categoria-input" name="categoria" style="flex:1; padding: 10px; font-size: 15px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--input-bg); color: var(--text-main);">
+            <option value="Geral">Geral</option>
+            {% for cat in categorias %}
+            <option value="{{ cat['nome'] }}">{{ cat['nome'] }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Quill Editor Container -->
+        <div style="flex:1; display:flex; flex-direction:column; background: #fff; overflow:hidden;">
+          <div id="quill-editor" style="flex:1; overflow-y:auto; font-size: 14px;"></div>
+        </div>
+        
+        <!-- Hidden input to store HTML content for form submission -->
+        <input type="hidden" id="proc-conteudo-input" name="conteudo">
+
+        <div style="padding:15px 20px; background:var(--panel-bg); border-top:1px solid var(--border-color); display:flex; justify-content:flex-end; gap:10px;">
+          <button type="button" onclick="fecharModalProcedimento()" class="btn-restaurar" style="padding:10px 20px; font-weight:bold; cursor:pointer; border-radius: 4px;">Cancelar</button>
+          <button type="submit" class="btn-principal" style="padding:10px 25px; font-weight:bold; cursor:pointer; font-size: 14px;">Salvar Procedimento</button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <style>
+    /* Customizando o Quill para o Dark Mode (a barra do quill snow é branca por padrão, vamos deixar a área de edição com texto escuro) */
+    .ql-toolbar.ql-snow {
+      border: none !important;
+      border-bottom: 1px solid #ccc !important;
+      background: #f8f9fa;
+    }
+    .ql-container.ql-snow {
+      border: none !important;
+      color: #333;
+    }
+    .ql-editor {
+      padding: 20px;
+    }
+    .ql-editor p {
+      margin-bottom: 10px;
+    }
+    /* Estilizando scrollbar do Quill */
+    .ql-editor::-webkit-scrollbar { width: 8px; }
+    .ql-editor::-webkit-scrollbar-track { background: transparent; }
+    .ql-editor::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+  </style>
+
+  {% endif %}
+  {# ══════════════ CREDENCIAIS (LOGIN) ══════════════ #}
+  {% if modo == 'credenciais_login' %}
+  <div class="panel" style="max-width:400px; margin:40px auto; text-align:center;">
+    <h3>🔐 Acesso Restrito</h3>
+    <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px;">Insira a Senha Mestre para acessar o cofre.</p>
+    {% if erro %}
+    <div style="background:#fee2e2; color:#ef4444; padding:10px; border-radius:4px; margin-bottom:15px; font-size:13px;">{{ erro }}</div>
+    {% endif %}
+    <form action="/credenciais" method="POST">
+      <input type="hidden" name="acao" value="login">
+      <input type="password" name="senha_mestre" placeholder="Senha Mestre" required style="width:100%; min-width: 100%; margin-bottom:15px; text-align:center;">
+      <button type="submit" class="btn-principal" style="width:100%; min-width: 100%;">Desbloquear</button>
+    </form>
+  </div>
+  {% endif %}
+
+  {# ══════════════ CREDENCIAIS (COFRE) ══════════════ #}
+  {% if modo == 'credenciais' %}
+  <div class="panel">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+      <h3>🔐 Cofre de Senhas</h3>
+      <a href="/credenciais/sair" class="btn-arquivar" style="text-decoration:none;">Bloquear Cofre</a>
+    </div>
+    
+    <form action="/credenciais/adicionar" method="POST" style="margin-bottom:20px;">
+      <div class="form-row">
+        <input type="text" name="servico" placeholder="Serviço/Plataforma" required style="flex:1;">
+        <input type="text" name="usuario" placeholder="Usuário/E-mail" required style="flex:1;">
+        <input type="password" name="senha" placeholder="Senha" required style="flex:1;">
+      </div>
+      <div style="margin-top:10px; display:flex; gap:10px;">
+        <input type="text" name="observacoes" placeholder="Observações..." style="flex:3;">
+        <button type="submit" class="btn-principal" style="flex:1;">Salvar Credencial</button>
+      </div>
+    </form>
+
+    <table style="width:100%; min-width: 100%; border-collapse:collapse;">
+      <thead>
+        <tr style="border-bottom:2px solid var(--border-color); text-align:left;">
+          <th style="padding:10px;">Serviço</th>
+          <th style="padding:10px;">Usuário</th>
+          <th style="padding:10px;">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for conta in contas %}
+        <tr style="border-bottom:1px solid var(--border-color);">
+          <td style="padding:10px;"><strong>{{ conta['servico'] }}</strong></td>
+          <td style="padding:10px;">{{ conta['usuario'] }}</td>
+          <td style="padding:10px;">
+            <form action="/credenciais/deletar/{{ conta['id'] }}" method="POST" onsubmit="return confirm('Excluir do cofre?')" style="display:inline;">
+              <button type="submit" class="btn-deletar" style="padding:4px 8px; font-size:11px;">Excluir</button>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="3" style="text-align:center; padding:20px; color:var(--text-muted);">Cofre vazio.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+
+  {# ══════════════ USUÁRIOS — LISTA ══════════════ #}
+  {% if modo == 'usuarios' %}
+  <div class="panel">
+    <h3>👤 Integrantes Cadastrados no Sistema</h3>
+    <div class="config-grid">
+      {% for resp in responsaveis %}
+      <div class="config-col" style="text-align: center; padding: 22px 14px;">
+        {% if resp['foto'] %}
+          <img src="{{ url_for('static', filename=resp['foto']) }}"
+               alt="{{ resp['nome'] }}"
+               style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover;
+                      margin-bottom: 10px; border: 3px solid var(--accent);">
+        {% else %}
+          <div style="font-size: 42px; margin-bottom: 10px; line-height: 1;">👤</div>
+        {% endif %}
+        <h4 style="margin: 0 0 5px; border: none; padding: 0; font-size: 1.1em;">{{ resp['nome'] }}</h4>
+        <p style="color: var(--text-muted); font-size: 12.5px; min-height: 36px; margin: 0 0 14px;">
+          {{ resp['cargo'] or 'Integrante do projeto' }}
+        </p>
+        <a href="/usuarios/{{ resp['id'] }}"
+           style="text-decoration: none; display: inline-block;
+                  background: var(--accent); color: #fff;
+                  padding: 7px 14px; border-radius: var(--radius-sm);
+                  font-size: 12.5px; font-weight: 600;
+                  transition: background .15s;"
+           onmouseover="this.style.background='var(--accent-hover)'"
+           onmouseout="this.style.background='var(--accent)'">
+          Ver Dashboard e Perfil
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+
+  {# ══════════════ USUÁRIO — DETALHE ══════════════ #}
+  {% if modo == 'usuario_detalhe' %}
+  <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px;">
+
+    <!-- Dados Cadastrais -->
+    <div class="panel" style="flex: 1; min-width: 280px; margin-bottom: 0;">
+      <h3>📋 Dados Cadastrais</h3>
+      <div style="text-align: center; margin-bottom: 14px;">
+        {% if usuario['foto'] %}
+          <img src="{{ url_for('static', filename=usuario['foto']) }}"
+               style="width: 86px; height: 86px; border-radius: 50%; object-fit: cover;
+                      border: 3px solid var(--accent);">
+        {% else %}
+          <div style="font-size: 52px; line-height: 1;">👤</div>
+        {% endif %}
+      </div>
+
+      <form action="/usuarios/editar_cadastro/{{ usuario['id'] }}" method="POST" enctype="multipart/form-data">
+        <div style="margin-bottom: 9px;">
+          <label class="label-editor">Alterar Foto de Perfil</label>
+          <input type="file" name="foto" accept="image/*" style="font-size: 12px; padding: 5px;">
+        </div>
+        <div style="margin-bottom: 9px;">
+          <label class="label-editor">Cargo / Ocupação</label>
+          <input type="text" name="cargo" value="{{ usuario['cargo'] or '' }}" placeholder="Ex: Analista de Dados">
+        </div>
+        <div style="margin-bottom: 12px;">
+          <label class="label-editor">E-mail Corporativo</label>
+          <input type="email" name="email" value="{{ usuario['email'] or '' }}" placeholder="Ex: nome@projeto.com">
+        </div>
+        
+      </form>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="panel" style="flex: 2; min-width: 320px; margin-bottom: 0;">
+      <h3>📊 Dashboard de {{ usuario['nome'] }}</h3>
+
+      <!-- Abas de visualização -->
+      <div style="display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 2px solid var(--border-color); flex-wrap: wrap;">
+        <button onclick="mudarAbaDashboard('ativos')" id="aba-ativos"
+                style="background: none; border: none; padding: 8px 14px; cursor: pointer; font-weight: 600;
+                       border-bottom: 3px solid var(--accent); color: var(--text-main);">
+          📁 Ativas
+        </button>
+        <button onclick="mudarAbaDashboard('arquivados')" id="aba-arquivados"
+                style="background: none; border: none; padding: 8px 14px; cursor: pointer; font-weight: 600;
+                       border-bottom: 3px solid transparent; color: var(--text-muted);">
+          🗄️ Arquivadas
+        </button>
+        <button onclick="mudarAbaDashboard('geral')" id="aba-geral"
+                style="background: none; border: none; padding: 8px 14px; cursor: pointer; font-weight: 600;
+                       border-bottom: 3px solid transparent; color: var(--text-muted);">
+          📈 Visão Geral
+        </button>
+      </div>
+
+      <!-- Aba Ativas -->
+      <div id="dash-ativos" style="display: block;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px;">
+          <div style="background: rgba(245,158,11,.1); border: 1px solid #f59e0b; padding: 14px; border-radius: 8px; text-align: center; color: #b45309;">
+            <div id="metric-pendente" style="font-size: 18px; font-weight: 700;">{{ metricas.Pendente }}</div>
+            <div style="font-size: 11px; font-weight: 600; margin-top: 3px;">⚠️ Pendentes</div>
+          </div>
+          <div style="background: rgba(59,130,246,.1); border: 1px solid #3b82f6; padding: 14px; border-radius: 8px; text-align: center; color: #1d4ed8;">
+            <div id="metric-emandamento" style="font-size: 18px; font-weight: 700;">{{ metricas['Em andamento'] }}</div>
+            <div style="font-size: 11px; font-weight: 600; margin-top: 3px;">🔄 Em andamento</div>
+          </div>
+          <div style="background: rgba(34,197,94,.1); border: 1px solid #22c55e; padding: 14px; border-radius: 8px; text-align: center; color: #15803d;">
+            <div id="metric-feito" style="font-size: 18px; font-weight: 700;">{{ metricas.Feito }}</div>
+            <div style="font-size: 11px; font-weight: 600; margin-top: 3px;">✅ Concluídas</div>
+          </div>
+          <div style="background: var(--btn-toolbar); border: 1px solid var(--border-color); padding: 14px; border-radius: 8px; text-align: center;">
+            <div id="metric-total" style="font-size: 18px; font-weight: 700; color: var(--text-main);">{{ metricas.Total }}</div>
+            <div style="font-size: 11px; font-weight: 600; margin-top: 3px; color: var(--text-muted);">Total Ativas</div>
+          </div>
+        </div>
+        <canvas id="chartAtivos"
+                data-pendente="{{ metricas['Pendente'] }}"
+                data-emandamento="{{ metricas['Em andamento'] }}"
+                data-feito="{{ metricas['Feito'] }}"
+                style="margin-top: 16px; max-height: 250px;"></canvas>      </div>
+
+      <!-- Aba Arquivadas -->
+      <div id="dash-arquivados" style="display: none;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px;">
+          <div style="background: rgba(245,158,11,.1); border: 1px solid #f59e0b; padding: 14px; border-radius: 8px; text-align: center; color: #b45309;">
+            <div style="font-size: 26px; font-weight: 700;">{{ metricas.Pendente_Arq }}</div>
+            <div style="font-size: 11px; font-weight: 600; margin-top: 3px;">⚠️ Pendentes</div>
+          </div>
+          <div style="background: rgba(59,130,246,.1); border: 1px solid #3b82f6; padding: 14px; border-radius: 8px; text-align: center; color: #1d4ed8;">
+            <div style="font-size: 26px; font-weight: 700;">{{ metricas['Em andamento_Arq'] }}</div>
+            <div style="font-size: 11px; font-weight: 600; margin-top: 3px;">🔄 Em andamento</div>
+          </div>
+          <div style="background: rgba(34,197,94,.1); border: 1px solid #22c55e; padding: 14px; border-radius: 8px; text-align: center; color: #15803d;">
+            <div style="font-size: 26px; font-weight: 700;">{{ metricas.Feito_Arq }}</div>
+            <div style="font-size: 11px; font-weight: 600; margin-top: 3px;">✅ Concluídas</div>
+          </div>
+          <div style="background: var(--btn-toolbar); border: 1px solid var(--border-color); padding: 14px; border-radius: 8px; text-align: center;">
+            <div style="font-size: 26px; font-weight: 700; color: var(--text-main);">{{ metricas.Total_Arq }}</div>
+            <div style="font-size: 11px; font-weight: 600; margin-top: 3px; color: var(--text-muted);">Total Arquivadas</div>
+          </div>
+        </div>
+        <canvas id="chartArquivados"
+                data-pendentearq="{{ metricas['Pendente_Arq'] }}"
+                data-emandamentoarq="{{ metricas['Em andamento_Arq'] }}"
+                data-feitoarq="{{ metricas['Feito_Arq'] }}"
+                style="margin-top: 16px; max-height: 250px;"></canvas>
+      </div>
+
+      <!-- Aba Visão Geral -->
+      <div id="dash-geral" style="display: none;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 16px;">
+          <div style="background: var(--btn-toolbar); border: 1px solid var(--border-color); padding: 16px; border-radius: 8px; text-align: center;">
+            <div style="font-size: 28px; font-weight: 700; color: var(--text-main);">{{ metricas.Total_Geral }}</div>
+            <div style="font-size: 11px; font-weight: 600; margin-top: 3px; color: var(--text-muted);">🎯 Total Geral</div>
+          </div>
+          <div style="background: rgba(34,197,94,.1); border: 1px solid #22c55e; padding: 16px; border-radius: 8px; text-align: center;">
+            <div style="font-size: 28px; font-weight: 700; color: #15803d;">{{ metricas.Feito + metricas.Feito_Arq }}</div>
+            <div style="font-size: 11px; font-weight: 600; margin-top: 3px; color: #15803d;">✅ Concluídas (Total)</div>
+          </div>
+          <div style="background: rgba(59,130,246,.1); border: 1px solid #3b82f6; padding: 16px; border-radius: 8px; text-align: center;">
+            <div style="font-size: 28px; font-weight: 700; color: #1d4ed8;">{{ metricas['Em andamento'] + metricas['Em andamento_Arq'] }}</div>
+            <div style="font-size: 11px; font-weight: 600; margin-top: 3px; color: #1d4ed8;">🔄 Em andamento (Total)</div>
+          </div>
+          <div style="background: rgba(245,158,11,.1); border: 1px solid #f59e0b; padding: 16px; border-radius: 8px; text-align: center;">
+            <div style="font-size: 28px; font-weight: 700; color: #b45309;">{{ metricas.Pendente + metricas.Pendente_Arq }}</div>
+            <div style="font-size: 11px; font-weight: 600; margin-top: 3px; color: #b45309;">⚠️ Pendentes (Total)</div>
+          </div>
+        </div>
+        <canvas id="chartGeral"
+                data-pendenteativos="{{ metricas['Pendente'] }}"
+                data-emandamentoativos="{{ metricas['Em andamento'] }}"
+                data-feitoativos="{{ metricas['Feito'] }}"
+                data-pendentearquivados="{{ metricas['Pendente_Arq'] }}"
+                data-emandamentoarquivados="{{ metricas['Em andamento_Arq'] }}"
+                data-feitoarquivados="{{ metricas['Feito_Arq'] }}"
+                style="margin-top: 16px; max-height: 300px;"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Formulário de nova atividade -->
+  <div class="panel">
+    <h3>➕ Inserir Nova Atividade para {{ usuario['nome'] }}</h3>
+    <form action="/adicionar" method="POST" onsubmit="prepararEnvioNovaAtividade()">
+      <input type="hidden" name="modo_origem" value="usuario_detalhe_{{ usuario['id'] }}">
+      <div class="form-row">
+        <select name="area" id="select-nova-area" onchange="ajustarCorSelect(this)" class="tag-select">
+          {% for cat in categorias %}
+          <option value="{{ cat['nome'] }}" data-color="{{ cat['cor'] }}">{{ cat['nome'] }}</option>
+          {% endfor %}
+        </select>
+
+        <div style="display:flex; align-items:center; gap:6px; flex:1; min-width:130px;">
+          <div id="img-novo-resp-container"></div>
+          <select name="responsavel" id="select-novo-resp"
+                  onchange="ajustarFotoResp(this,'img-novo-resp-container')"
+                  required style="flex:1; min-width:0;">
+            {% for resp in responsaveis %}
+            <option value="{{ resp['nome'] }}"
+                    data-foto="{% if resp['foto'] %}{{ url_for('static', filename=resp['foto']) }}{% endif %}"
+                    {% if usuario is defined and resp['nome'] == usuario['nome'] %}selected{% endif %}>
+              {{ resp['nome'] }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <select name="status">
+          <option value="Pendente">⚠️ Pendente</option>
+          <option value="Em andamento">🔄 Em andamento</option>
+          <option value="Feito">✅ Feito</option>
+        </select>
+        <select name="prioridade" class="prio-select" onchange="ajustarCorPrio(this)">
+          <option value="Baixa"  data-color="#22c55e">Baixa Prioridade</option>
+          <option value="Média"  data-color="#eab308">Média Prioridade</option>
+          <option value="Alta"   data-color="#ef4444">Alta Prioridade</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <div class="form-coluna">
+          <label class="label-editor">Atividade (Título)</label>
+          <input type="text" name="atividade" required placeholder="Digite o título da atividade..." style="margin-bottom: 10px;">
+          <label class="label-editor">Prazo Geral</label>
+          <input type="date" name="prazo" style="margin-bottom: 10px;">
+        </div>
+        <div class="form-coluna" id="container-passos-form">
+          <label class="label-editor">Passos (Detalhamento)</label>
+          <div id="lista-passos-form">
+             <div style="display:flex; gap:5px; margin-bottom:5px;">
+                <input type="text" name="passos_desc[]" placeholder="Descrição do passo..." style="flex:2">
+                <input type="date" name="passos_prazo[]" style="flex:1">
+             </div>
+          </div>
+          <button type="button" onclick="adicionarCampoPasso()" style="align-self:flex-start; margin-top:5px; background:var(--btn-toolbar); border:1px solid var(--border-color); padding:5px 10px; border-radius:4px; font-size:12px; cursor:pointer;">+ Adicionar Passo</button>
+        </div>
+      </div>
+      <button type="submit" class="btn-principal">Adicionar à Base Geral</button>
+    </form>
+  </div>
+
+  <!-- Tabela de atividades do usuário com botão de exportação -->
+  <div class="panel">
+    <div class="panel-header-with-export">
+      <h3>📋 Atividades Sob Responsabilidade de {{ usuario['nome'] }}</h3>
+      <a href="/exportar/usuario/{{ usuario['id'] }}" class="btn-exportar">📄 Exportar PDF</a>
+    </div>
+    <table id="tabelaAtividades">
+      <thead>
+        <tr>
+          <th class="w-data sortable" onclick="ordenarTabela(0)">Prazo ↕</th>
+          <th class="w-ativ">Área</th>
+          <th>Atividade</th>
+          <th class="w-resp">Responsável</th>
+          <th class="w-status">Status</th>
+          <th class="w-prio">Prioridade</th>
+          <th style="width: 120px;">Detalhamento</th>
+          <th class="w-acoes" style="text-align:center;">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for atv in atividades %}
+                <tr class="linha-dado">
+          <td><input type="date" class="auto-save" data-id="{{ atv['id'] }}" data-campo="prazo" value="{{ atv['prazo'] }}"></td>
+
+          <td>
+            <select class="tag-select auto-save" data-id="{{ atv['id'] }}" data-campo="area" onchange="ajustarCorSelect(this)">
+              {% set ns = namespace(found=false) %}
+              {% for cat in categorias %}
+              <option value="{{ cat['nome'] }}" data-color="{{ cat['cor'] }}"
+                      {% if (atv['area']|string|lower|trim) == (cat['nome']|string|lower|trim) %}selected{% set ns.found = true %}{% endif %}>
+                {{ cat['nome'] }}
+              </option>
+              {% endfor %}
+              {% if not ns.found %}
+              <option value="{{ atv['area'] }}" data-color="#475569" selected>{{ atv['area'] }}</option>
+              {% endif %}
+            </select>
+          </td>
+
+          <td>
+            <textarea class="auto-save" data-id="{{ atv['id'] }}" data-campo="atividade" rows="2" style="resize:vertical;">{{ atv['atividade'] }}</textarea>
+          </td>
+
+          <td>
+            <div style="display:flex; align-items:center; gap:5px;">
+              <div id="img-resp-{{ atv['id'] }}">
+                {% set resp_foto = "" %}
+                {% for r in responsaveis %}{% if atv['responsavel'] == r['nome'] and r['foto'] %}{% set resp_foto = url_for('static', filename=r['foto']) %}{% endif %}{% endfor %}
+                {% if resp_foto %}
+                  <img src="{{ resp_foto }}" style="width:26px;height:26px;border-radius:50%;object-fit:cover;border:1px solid var(--border-color);">
+                {% else %}
+                  <div style="width:26px;height:26px;border-radius:50%;background:var(--table-even);display:flex;align-items:center;justify-content:center;font-size:13px;border:1px solid var(--border-color);">👤</div>
+                {% endif %}
+              </div>
+              <select class="auto-save" data-id="{{ atv['id'] }}" data-campo="responsavel"
+                      onchange="ajustarFotoResp(this,'img-resp-{{ atv['id'] }}')"
+                      style="flex:1; min-width:0;">
+                {% for resp in responsaveis %}
+                <option value="{{ resp['nome'] }}"
+                        data-foto="{% if resp['foto'] %}{{ url_for('static', filename=resp['foto']) }}{% endif %}"
+                        {% if atv['responsavel'] == resp['nome'] %}selected{% endif %}>
+                  {{ resp['nome'] }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+          </td>
+
+          <td>
+            <select class="auto-save" data-id="{{ atv['id'] }}" data-campo="status">
+              <option value="Pendente"     {% if atv['status'] == 'Pendente'     %}selected{% endif %}>⚠️ Pendente</option>
+              <option value="Em andamento" {% if atv['status'] == 'Em andamento' %}selected{% endif %}>🔄 Em andamento</option>
+              <option value="Feito"        {% if atv['status'] == 'Feito'        %}selected{% endif %}>✅ Feito</option>
+            </select>
+          </td>
+
+          <td>
+            <select class="prio-select auto-save" data-id="{{ atv['id'] }}" data-campo="prioridade" onchange="ajustarCorPrio(this)">
+              <option value="Baixa" data-color="#22c55e" {% if atv['prioridade'] == 'Baixa' %}selected{% endif %}>Baixa</option>
+              <option value="Média" data-color="#eab308" {% if atv['prioridade'] == 'Média' %}selected{% endif %}>Média</option>
+              <option value="Alta"  data-color="#ef4444" {% if atv['prioridade'] == 'Alta'  %}selected{% endif %}>Alta</option>
+            </select>
+          </td>
+
+          <td>
+            <button type="button" onclick="abrirModalPassos({{ atv['id'] }})" style="background:var(--btn-primary); color:white; border:none; padding:5px 8px; font-size: 11px; cursor:pointer; border-radius:var(--radius-sm); width:100%; min-width: 100%; font-weight:600;">Ver Passos</button>
+          </td>
+
+          <td style="vertical-align: middle;">
+            {% if modo == 'ativos' or modo.startswith('usuario_detalhe') %}
+              <form action="/arquivar/{{ atv['id'] }}" method="POST" onsubmit="return confirm('Mover para arquivados?')" style="margin:0; width: 100%; display: flex; align-items: center; justify-content: center;">
+                <input type="hidden" name="next" value="{{ request.path }}">
+                <button type="submit" class="btn-arquivar">Arquivar</button>
+              </form>
+            {% else %}
+              <div style="display: flex; flex-direction: column; gap: 6px; width: 100%; justify-content: center; align-items: center;">
+                <form action="/restaurar/{{ atv['id'] }}" method="POST" style="margin:0; width: 100%;">
+                  <input type="hidden" name="next" value="{{ request.path }}">
+                  <button type="submit" class="btn-restaurar" style="width: 100%; box-sizing: border-box; border-radius: var(--radius-sm); padding: 5px 8px; font-size: 11px; font-weight: 600;">Restaurar</button>
+                </form>
+                <form action="/deletar/{{ atv['id'] }}" method="POST" onsubmit="return confirm('EXCLUIR PERMANENTEMENTE?')" style="margin:0; width: 100%;">
+                  <input type="hidden" name="next" value="{{ request.path }}">
+                  <button type="submit" class="btn-deletar" style="width: 100%; box-sizing: border-box; border-radius: var(--radius-sm); padding: 5px 8px; font-size: 11px; font-weight: 600;">Excluir</button>
+                </form>
+              </div>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="8" style="text-align:center; padding:22px; color:var(--text-muted);">
+            Nenhuma atividade encontrada.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+
+</div><!-- /container -->
+  </div> <!-- Fim main-content -->
+</div> <!-- Fim app-layout -->
+
+<script>
+  /* ── Restaurar posição de scroll ── */
+  window.addEventListener("beforeunload", () =>
+    sessionStorage.setItem("scrollY", window.scrollY));
+  window.addEventListener("DOMContentLoaded", () => {
+    const y = sessionStorage.getItem("scrollY");
+    if (y) { window.scrollTo(0, +y); sessionStorage.removeItem("scrollY"); }
+  });
+
+  /* ── Tema claro/escuro ── */
+  function aplicarTema() {
+    document.body.classList.toggle('dark-theme', localStorage.getItem('tema') === 'escuro');
+  }
+  function toggleTema() {
+    localStorage.setItem('tema', document.body.classList.contains('dark-theme') ? 'claro' : 'escuro');
+    aplicarTema();
+  }
+  aplicarTema();
+
+  /* ── Toast de feedback ao salvar ── */
+  function mostrarToast() {
+    const t = document.getElementById('toast');
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  /* ── Ordenação da tabela ── */
+  const direcoesSort = {};
+  function ordenarTabela(col) {
+    const tbody = document.querySelector("#tabelaAtividades tbody");
+    if (!tbody) return;
+    const linhas = [...tbody.querySelectorAll(".linha-dado")];
+    const asc = direcoesSort[col] !== "asc";
+    direcoesSort[col] = asc ? "asc" : "desc";
+    linhas.sort((a, b) => {
+      const tA = a.querySelectorAll("td"), tB = b.querySelectorAll("td");
+      const vA = col === 0
+        ? (tA[0].querySelector("input")?.value  || "")
+        : (tA[1].querySelector("select")?.value || "");
+      const vB = col === 0
+        ? (tB[0].querySelector("input")?.value  || "")
+        : (tB[1].querySelector("select")?.value || "");
+      return asc ? vA.localeCompare(vB) : vB.localeCompare(vA);
+    });
+    linhas.forEach(l => tbody.appendChild(l));
+  }
+
+  /* ── Editores rich text (formulário) ── */
+  function execFormCmd(cmd, id) {
+    const ed = document.getElementById(id);
+    ed.focus();
+    document.execCommand(cmd, false, null);
+    ed.parentElement.querySelector('input[type="hidden"]').value = ed.innerHTML;
+  }
+  function inserirLinkForm(id) {
+    const url = prompt("URL do link:");
+    if (!url) return;
+    const ed = document.getElementById(id);
+    ed.focus();
+    document.execCommand("createLink", false, url);
+    ed.parentElement.querySelector('input[type="hidden"]').value = ed.innerHTML;
+  }
+
+  /* ── Editores rich text (tabela) ── */
+  function execTableCmd(btn, cmd) {
+    const td = btn.closest("td");
+    const ed = td.querySelector(".editor-box-table");
+    ed.focus();
+    document.execCommand(cmd, false, null);
+    td.querySelector('input[type="hidden"]').value = ed.innerHTML;
+  }
+  function inserirLinkTable(btn) {
+    const url = prompt("URL do link:");
+    if (!url) return;
+    const td = btn.closest("td");
+    const ed = td.querySelector(".editor-box-table");
+    ed.focus();
+    document.execCommand("createLink", false, url);
+    td.querySelector('input[type="hidden"]').value = ed.innerHTML;
+  }
+
+  /* ── Sincronização de campos hidden ── */
+  function prepararEnvioNovaAtividade() {
+    const desc = document.getElementById('editor-nova-desc');
+    const obs  = document.getElementById('editor-nova-obs');
+    if (desc) document.getElementById('input-nova-desc').value = desc.innerHTML;
+    if (obs)  document.getElementById('input-nova-obs').value  = obs.innerHTML;
+  }
+  function prepararEnvioProcedimento() {
+    const ed = document.getElementById('editor-proc-conteudo');
+    if (ed) document.getElementById('input-proc-conteudo').value = ed.innerHTML;
+  }
+  function inserirBlocoCodigo(id) {
+    const codigo = prompt("Insira o código aqui:");
+    if (!codigo) return;
+    const ed = document.getElementById(id);
+    ed.focus();
+    // Escapa HTML básico para evitar quebras
+    const codigoEscapado = codigo.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const html = `<pre><code>${codigoEscapado}</code></pre><p><br></p>`;
+    document.execCommand("insertHTML", false, html);
+    ed.parentElement.querySelector('input[type="hidden"]').value = ed.innerHTML;
+  }
+  function filtrarProcedimentos() {
+    const val = document.getElementById('filtroProcedimentos').value.toLowerCase();
+    document.querySelectorAll('.proc-item').forEach(item => {
+      const titulo = item.querySelector('.proc-title').innerText.toLowerCase();
+      item.style.display = titulo.includes(val) ? "" : "none";
+    });
+  }
+  function sincronizarInputTabela(ed) {
+    ed.closest("td").querySelector('input[type="hidden"]').value = ed.innerHTML;
+  }
+
+  /* ── Cores de selects ── */
+  function ajustarCorSelect(el) {
+    el.style.backgroundColor = el.selectedOptions[0]?.dataset.color || '#475569';
+  }
+  function ajustarCorPrio(el) {
+    el.style.backgroundColor = el.selectedOptions[0]?.dataset.color || '#22c55e';
+  }
+
+  /* ── Foto do responsável ── */
+  function ajustarFotoResp(el, containerId) {
+    const foto = el.selectedOptions[0]?.dataset.foto || '';
+    const c = document.getElementById(containerId);
+    if (!c) return;
+    c.innerHTML = foto
+      ? `<img src="${foto}" style="width:26px;height:26px;border-radius:50%;object-fit:cover;border:1px solid var(--border-color);">`
+      : `<div style="width:26px;height:26px;border-radius:50%;background:var(--table-even);display:flex;align-items:center;justify-content:center;font-size:13px;border:1px solid var(--border-color);">👤</div>`;
+  }
+
+  /* ── Filtros da tabela ── */
+    function filtrarTabelaAvancado() {
+    const fArea = document.getElementById("filtro-area") ? document.getElementById("filtro-area").value.toLowerCase() : "";
+    const fResp = document.getElementById("filtro-responsavel") ? document.getElementById("filtro-responsavel").value.toLowerCase() : "";
+    const fStatus = document.getElementById("filtro-status") ? document.getElementById("filtro-status").value.toLowerCase() : "";
+    const fPrio = document.getElementById("filtro-prioridade") ? document.getElementById("filtro-prioridade").value.toLowerCase() : "";
+
+    let selector = abaAtivaGlobal === 'arquivados' ? '#tabelaArquivadasOculta .linha-dado' : '#tabelaAtividades .linha-dado';
+    const linhas = [...document.querySelectorAll(selector)];
+    let pendente = 0, andamento = 0, feito = 0;
+
+    linhas.forEach(tr => {
+      // Data reading from normal table or hidden table
+      const vArea = (tr.querySelector('select[data-campo="area"]')?.value || tr.querySelector('.w-area')?.innerText || tr.querySelector('td:nth-child(2)')?.innerText || "").toLowerCase().trim();
+      const vResp = (tr.querySelector('select[data-campo="responsavel"]')?.value || tr.querySelector('.w-resp')?.innerText || "").toLowerCase().trim();
+      const vStatus = (tr.querySelector('select[data-campo="status"]')?.value || tr.querySelector('.w-status')?.innerText || "").toLowerCase().trim();
+      const vPrio = (tr.querySelector('select[data-campo="prioridade"]')?.value || tr.querySelector('.w-prio')?.innerText || "").toLowerCase().trim();
+
+      const show = 
+        (!fArea || vArea === fArea) &&
+        (!fResp || vResp === fResp) &&
+        (!fStatus || vStatus === fStatus) &&
+        (!fPrio || vPrio === fPrio);
+
+      tr.style.display = show ? "" : "none";
+
+      if (show) {
+          if (vStatus === 'pendente') pendente++;
+          else if (vStatus === 'em andamento') andamento++;
+          else if (vStatus === 'feito') feito++;
+      }
+    });
+
+    if (abaAtivaGlobal === 'ativos') {
+        const bPendente = document.getElementById("metric-pendente");
+        const bAndamento = document.getElementById("metric-emandamento");
+        const bFeito = document.getElementById("metric-feito");
+        const bTotal = document.getElementById("metric-total");
+        if (bPendente) bPendente.innerText = pendente;
+        if (bAndamento) bAndamento.innerText = andamento;
+        if (bFeito) bFeito.innerText = feito;
+        if (bTotal) bTotal.innerText = pendente + andamento + feito;
+
+        if (window.chartDashboardInstance) {
+            window.chartDashboardInstance.data.datasets[0].data = [pendente, andamento, feito];
+            window.chartDashboardInstance.update();
+        }
+    } else {
+        const bPendente = document.getElementById("metric-pendente-arq");
+        const bAndamento = document.getElementById("metric-emandamento-arq");
+        const bFeito = document.getElementById("metric-feito-arq");
+        const bTotal = document.getElementById("metric-total-arq");
+        if (bPendente) bPendente.innerText = pendente;
+        if (bAndamento) bAndamento.innerText = andamento;
+        if (bFeito) bFeito.innerText = feito;
+        if (bTotal) bTotal.innerText = pendente + andamento + feito;
+
+        if (window.chartArquivadosDashInstance) {
+            window.chartArquivadosDashInstance.data.datasets[0].data = [pendente, andamento, feito];
+            window.chartArquivadosDashInstance.update();
+        }
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('select.tag-select').forEach(ajustarCorSelect);
+    document.querySelectorAll('select.prio-select').forEach(ajustarCorPrio);
+
+    // Clique em links dentro dos editores abre em nova aba
+    document.querySelectorAll('.editor-box, .editor-box-table').forEach(ed => {
+      ed.addEventListener('click', e => {
+        if (e.target.tagName === 'A') { e.preventDefault(); window.open(e.target.href, '_blank'); }
+      });
+    });
+
+    if (document.getElementById('chartGeralDashboard')) {
+      criarGraficoDashboardGlobal();
+    }
+  });
+
+        const barValuePluginGlobal = {
+    id: 'barValuePluginGlobal',
+    afterDatasetsDraw(chart) {
+      const { ctx } = chart;
+      chart.data.datasets.forEach((dataset, datasetIndex) => {
+        const meta = chart.getDatasetMeta(datasetIndex);
+        if (meta.hidden) return;
+        meta.data.forEach((datapoint, index) => {
+          const value = dataset.data[index];
+          if (value > 0) {
+              const { x, y } = datapoint.tooltipPosition();
+              ctx.font = 'bold 15px "Poppins", sans-serif';
+              
+              if (chart.options.indexAxis === 'y') {
+                  ctx.fillStyle = dataset.backgroundColor;
+                  ctx.textAlign = 'left';
+                  ctx.textBaseline = 'middle';
+                  ctx.fillText(` ${value}`, x + 5, y);
+              } else {
+                  ctx.fillStyle = Array.isArray(dataset.backgroundColor) ? dataset.backgroundColor[index] : dataset.backgroundColor;
+                  ctx.textAlign = 'center';
+                  ctx.textBaseline = 'bottom';
+                  ctx.fillText(value, x, y - 5);
+              }
+          }
+        });
+      });
+    }
+  };
+  function criarGraficoArquivadosDashboard() {
+    const canvas = document.getElementById('chartArquivadosDashboard');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    const pendente = parseInt(document.getElementById("metric-pendente-arq")?.innerText || canvas.dataset.pendentearq) || 0;
+    const emAndamento = parseInt(document.getElementById("metric-emandamento-arq")?.innerText || canvas.dataset.emandamentoarq) || 0;
+    const feito = parseInt(document.getElementById("metric-feito-arq")?.innerText || canvas.dataset.feitoarq) || 0;
+
+    if (window.chartArquivadosDashInstance) window.chartArquivadosDashInstance.destroy();
+
+    window.chartArquivadosDashInstance = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Pendentes', ['Em', 'andamento'], 'Concluídas'],
+        datasets: [{
+          label: 'Arquivadas',
+          data: [pendente, emAndamento, feito],
+          backgroundColor: ['#ff4757', '#1e90ff', '#2ed573'],
+          borderWidth: 0, borderRadius: 8, barPercentage: 0.6, categoryPercentage: 0.7
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            x: { ticks: { maxRotation: 0, minRotation: 0, font: { family: 'Poppins', size: 12, weight: 'bold' } }, grid: { display: false } },
+            y: { beginAtZero: true, ticks: { display: true, precision: 0, font: { family: 'Poppins', size: 11 } }, grid: { display: true, color: 'rgba(150, 150, 150, 0.15)', drawBorder: false } }
+        },
+        layout: { padding: { top: 25, bottom: 10 } }
+      },
+      plugins: [barValuePluginGlobal]
+    });
+  }
+
+  function criarGraficoDashboardGlobal() {
+    const canvas = document.getElementById('chartGeralDashboard');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    const pendente = parseInt(document.getElementById("metric-pendente")?.innerText || canvas.dataset.pendente) || 0;
+    const emAndamento = parseInt(document.getElementById("metric-emandamento")?.innerText || canvas.dataset.emandamento) || 0;
+    const feito = parseInt(document.getElementById("metric-feito")?.innerText || canvas.dataset.feito) || 0;
+
+    if (window.chartDashboardInstance) window.chartDashboardInstance.destroy();
+
+    window.chartDashboardInstance = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Pendentes', ['Em', 'andamento'], 'Concluídas'],
+        datasets: [{
+          label: 'Atividades',
+          data: [pendente, emAndamento, feito],
+          backgroundColor: ['#ff4757', '#1e90ff', '#2ed573'],
+          borderWidth: 0,
+          borderRadius: 8,
+          barPercentage: 0.6, categoryPercentage: 0.7
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false }
+        },
+        scales: {
+            x: {
+                ticks: { maxRotation: 0, minRotation: 0, font: { family: 'Poppins', size: 12, weight: 'bold' } },
+                grid: { display: true, color: 'rgba(150, 150, 150, 0.15)', drawBorder: false }
+            },
+            y: {
+                beginAtZero: true,
+                ticks: { display: true, precision: 0, font: { family: 'Poppins', size: 11 } },
+                grid: { display: true, color: 'rgba(150, 150, 150, 0.15)', drawBorder: false }
+            }
+        },
+        layout: { padding: { top: 25, bottom: 10 } }
+      },
+      plugins: [{
+        id: 'barValuePlugin',
+        afterDatasetsDraw(chart) {
+          const { ctx } = chart;
+          chart.data.datasets.forEach((dataset, datasetIndex) => {
+            const meta = chart.getDatasetMeta(datasetIndex);
+            if (meta.hidden) return;
+            meta.data.forEach((datapoint, index) => {
+              const value = dataset.data[index];
+              if (value > 0) {
+                  const { x, y } = datapoint.tooltipPosition();
+                  ctx.font = 'bold 16px "Poppins", sans-serif';
+                  ctx.fillStyle = dataset.backgroundColor[index] || '#1e293b';
+                  ctx.textAlign = 'center';
+                  ctx.textBaseline = 'bottom';
+                  ctx.fillText(value, x, y - 5);
+              }
+            });
+          });
+        }
+      }]
+    });
+  }
+
+  /* ── Dashboard — Abas e Gráficos ── */
+
+  // Helper para ler as cores ativas do CSS (Claro ou Escuro)
+  function getCoresTema() {
+    const estilo = getComputedStyle(document.body);
+    return {
+      texto: estilo.getPropertyValue('--text-main').trim() || '#0f172a',
+      mutado: estilo.getPropertyValue('--text-muted').trim() || '#64748b',
+      grade: estilo.getPropertyValue('--border-color').trim() || '#e2e8f0'
+    };
+  }
+
+  let abaAtivaGlobal = 'ativos';
+  function mudarAbaDashboard(aba) {
+    abaAtivaGlobal = aba;
+    const dash_ativos = document.getElementById('dash-ativos');
+    const dash_arquivados = document.getElementById('dash-arquivados');
+
+    if (dash_ativos) dash_ativos.style.display = 'none';
+    if (dash_arquivados) dash_arquivados.style.display = 'none';
+
+    const aba_ativos = document.getElementById('aba-ativos');
+    const aba_arquivados = document.getElementById('aba-arquivados');
+
+    if (aba_ativos) aba_ativos.style.borderBottomColor = 'transparent';
+    if (aba_arquivados) aba_arquivados.style.borderBottomColor = 'transparent';
+
+    if (aba === 'ativos' && dash_ativos) {
+      dash_ativos.style.display = 'block';
+      if (aba_ativos) aba_ativos.style.borderBottomColor = 'var(--accent)';
+      setTimeout(criarGraficoDashboardGlobal, 50);
+    } else if (aba === 'arquivados' && dash_arquivados) {
+      dash_arquivados.style.display = 'block';
+      if (aba_arquivados) aba_arquivados.style.borderBottomColor = 'var(--accent)';
+      setTimeout(criarGraficoArquivadosDashboard, 50);
+    }
+    
+    // Call filter to recalculate counts for the active tab
+    filtrarTabelaAvancado();
+  }
+
+
+  function criarGraficoAtivos() {
+    const canvas = document.getElementById('chartAtivos');
+    if (!canvas) return;
+    if (chartAtivos) chartAtivos.destroy();
+
+    const ctx = canvas.getContext('2d');
+    const pendente = parseInt(canvas.dataset.pendente) || 0;
+    const emAndamento = parseInt(canvas.dataset.emandamento) || 0;
+    const feito = parseInt(canvas.dataset.feito) || 0;
+
+    chartAtivos = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Pendentes', ['Em', 'andamento'], 'Concluídas'],
+        datasets: [{
+          data: [pendente, emAndamento, feito],
+          backgroundColor: ['#ff4757', '#1e90ff', '#2ed573'],
+          borderRadius: 8, barPercentage: 0.6, categoryPercentage: 0.7
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { 
+            x: { ticks: { maxRotation: 0, minRotation: 0, font: { family: 'Poppins', size: 12, weight: 'bold' } }, grid: { display: true, color: 'rgba(150, 150, 150, 0.15)', drawBorder: false } },
+            y: { beginAtZero: true, ticks: { display: true, precision: 0, font: { family: 'Poppins', size: 11 } }, grid: { display: true, color: 'rgba(150, 150, 150, 0.15)', drawBorder: false } }
+        },
+        layout: { padding: { top: 25, bottom: 10 } }
+      },
+      plugins: [barValuePluginGlobal]
+    });
+  }
+
+  function criarGraficoArquivados() {
+    const canvas = document.getElementById('chartArquivados');
+    if (!canvas) return;
+    if (chartArquivados) chartArquivados.destroy();
+
+    const ctx = canvas.getContext('2d');
+    const pendente = parseInt(canvas.dataset.pendentearq) || 0;
+    const emAndamento = parseInt(canvas.dataset.emandamentoarq) || 0;
+    const feito = parseInt(canvas.dataset.feitoarq) || 0;
+
+    chartArquivados = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Pendentes', ['Em', 'andamento'], 'Concluídas'],
+        datasets: [{
+          data: [pendente, emAndamento, feito],
+          backgroundColor: ['#ff4757', '#1e90ff', '#2ed573'],
+          borderRadius: 8, barPercentage: 0.6, categoryPercentage: 0.7
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { 
+            x: { ticks: { maxRotation: 0, minRotation: 0, font: { family: 'Poppins', size: 12, weight: 'bold' } }, grid: { display: true, color: 'rgba(150, 150, 150, 0.15)', drawBorder: false } },
+            y: { beginAtZero: true, ticks: { display: true, precision: 0, font: { family: 'Poppins', size: 11 } }, grid: { display: true, color: 'rgba(150, 150, 150, 0.15)', drawBorder: false } }
+        },
+        layout: { padding: { top: 25, bottom: 10 } }
+      },
+      plugins: [barValuePluginGlobal]
+    });
+  }
+
+  function criarGraficoGeral() {
+    const canvas = document.getElementById('chartGeral');
+    if (!canvas) return;
+    if (chartGeral) chartGeral.destroy();
+
+    const ctx = canvas.getContext('2d');
+    const pendenteAtivos = parseInt(canvas.dataset.pendenteativos) || 0;
+    const emAndamentoAtivos = parseInt(canvas.dataset.emandamentoativos) || 0;
+    const feitoAtivos = parseInt(canvas.dataset.feitoativos) || 0;
+    const pendenteArquivados = parseInt(canvas.dataset.pendentearquivados) || 0;
+    const emAndamentoArquivados = parseInt(canvas.dataset.emandamentoarquivados) || 0;
+    const feitoArquivados = parseInt(canvas.dataset.feitoarquivados) || 0;
+
+    const dadosAtivos = [pendenteAtivos, emAndamentoAtivos, feitoAtivos];
+    const dadosArquivados = [pendenteArquivados, emAndamentoArquivados, feitoArquivados];
+
+    chartGeral = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Pendentes', ['Em', 'andamento'], 'Concluídas'],
+        datasets: [
+          {
+            label: 'Ativas',
+            data: dadosAtivos,
+            backgroundColor: '#1e90ff',
+            borderRadius: 6,
+            maxBarThickness: 45, barPercentage: 0.7, categoryPercentage: 0.8
+          },
+          {
+            label: 'Arquivadas',
+            data: dadosArquivados,
+            backgroundColor: '#ff4757',
+            borderRadius: 6,
+            maxBarThickness: 45, barPercentage: 0.7, categoryPercentage: 0.8
+          }
+        ]
+      },
+      options: {
+        indexAxis: 'x',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom', labels: { font: { family: 'Poppins' }, usePointStyle: true } } },
+        scales: { 
+            x: { ticks: { maxRotation: 0, minRotation: 0, font: { family: 'Poppins', size: 12, weight: 'bold' } }, grid: { display: true, color: 'rgba(150, 150, 150, 0.15)', drawBorder: false } },
+            y: { beginAtZero: true, ticks: { display: true, precision: 0, font: { family: 'Poppins', size: 11 } }, grid: { display: true, color: 'rgba(150, 150, 150, 0.15)', drawBorder: false } }
+        },
+        layout: { padding: { top: 25, bottom: 10 } }
+      },
+      plugins: [barValuePluginGlobal]
+    });
+  }
+
+  /* ── Sidebar Toggle ── */
+  function toggleSidebar() {
+    document.getElementById("sidebar").classList.toggle("fechada");
+    document.getElementById("main-content").classList.toggle("expandido");
+  }
+
+</script>
+
+  <!-- MODAL DE PASSOS (DETALHAMENTO) -->
+  <div id="modalPassos" style="display:none; position:fixed; top:0; left:0; width:100%; min-width: 100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center;">
+    <div style="background:white; padding:20px; border-radius:var(--radius); width:90%; max-width:600px; max-height:80vh; overflow-y:auto;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+        <h3 style="margin:0;">Detalhamento da Atividade</h3>
+        <button onclick="fecharModalPassos()" style="background:none; border:none; font-size:20px; cursor:pointer;">&times;</button>
+      </div>
+      
+      <div id="listaPassos" style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
+        <!-- Passos carregados via AJAX -->
+      </div>
+      
+      <div style="border-top:1px solid var(--border-color); padding-top:15px;">
+        <h4 style="margin:0 0 10px 0;">Adicionar Passo</h4>
+        <div style="display:flex; gap:10px;">
+          <input type="text" id="novoPassoDesc" placeholder="Descrição do passo..." style="flex:2;">
+          <input type="date" id="novoPassoPrazo" style="flex:1;">
+          <button type="button" onclick="salvarNovoPasso()" style="background:var(--btn-success); color:white; border:none; padding:8px 12px; border-radius:var(--radius-sm); cursor:pointer;">Adicionar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  let atividadeAtualId = null;
+
+  function adicionarCampoPasso() {
+      const container = document.getElementById('lista-passos-form');
+      const div = document.createElement('div');
+      div.style.cssText = "display:flex; gap:5px; margin-bottom:5px;";
+      div.innerHTML = `
+        <input type="text" name="passos_desc[]" placeholder="Descrição do passo..." style="flex:2">
+        <input type="date" name="passos_prazo[]" style="flex:1">
+        <button type="button" onclick="this.parentElement.remove()" style="background:transparent; border:none; color:#ef4444; font-weight:bold; cursor:pointer;">X</button>
+      `;
+      container.appendChild(div);
+  }
+
+  function abrirModalPassos(id) {
+      atividadeAtualId = id;
+      document.getElementById('modalPassos').style.display = 'flex';
+      carregarPassos();
+  }
+
+  function fecharModalPassos() {
+      document.getElementById('modalPassos').style.display = 'none';
+  }
+
+  async function carregarPassos() {
+      const resp = await fetch(`/api/atividades/${atividadeAtualId}/passos`);
+      const passos = await resp.json();
+      const container = document.getElementById('listaPassos');
+      container.innerHTML = '';
+      
+      if (passos.length === 0) {
+          container.innerHTML = '<p style="color:var(--text-muted); font-size:13px;">Nenhum passo cadastrado.</p>';
+          return;
+      }
+      
+      passos.forEach(p => {
+          container.innerHTML += `
+            <div style="display:flex; gap:10px; align-items:center; background:var(--table-even); padding:10px; border-radius:var(--radius-sm); border:1px solid var(--border-color);">
+              <input type="checkbox" ${p.concluido ? 'checked' : ''} onchange="togglePasso(${p.id}, this.checked)" style="width:18px; height:18px; cursor:pointer;">
+              <input type="text" value="${p.descricao}" onchange="atualizarPasso(${p.id}, 'descricao', this.value)" style="flex:2; border:none; background:transparent; ${p.concluido ? 'text-decoration:line-through; color:var(--text-muted);' : ''}">
+              <input type="date" value="${p.prazo || ''}" onchange="atualizarPasso(${p.id}, 'prazo', this.value)" style="flex:1; border:none; background:transparent; font-size:12px;">
+              <button onclick="excluirPasso(${p.id})" style="background:transparent; border:none; color:#ef4444; font-weight:bold; cursor:pointer;" title="Excluir">X</button>
+            </div>
+          `;
+      });
+  }
+
+  async function togglePasso(id, checked) {
+      const data = new FormData();
+      data.append('concluido', checked);
+      const resp = await fetch(`/api/passos/${id}/toggle`, { method: 'POST', body: data });
+      const res = await resp.json();
+      carregarPassos(); 
+      
+      if (res.novo_status_atividade) {
+          const sel = document.querySelector(`select[data-campo="status"][data-id="${atividadeAtualId}"]`);
+          if (sel) {
+              sel.value = res.novo_status_atividade;
+          }
+      }
+  }
+
+  async function atualizarPasso(id, campo, valor) {
+      const data = new FormData();
+      data.append('campo', campo);
+      data.append('valor', valor);
+      await fetch(`/api/passos/${id}/atualizar`, { method: 'POST', body: data });
+  }
+
+  async function salvarNovoPasso() {
+      const desc = document.getElementById('novoPassoDesc').value;
+      const prazo = document.getElementById('novoPassoPrazo').value;
+      if (!desc.trim()) return;
+      
+      const data = new FormData();
+      data.append('atividade_id', atividadeAtualId);
+      data.append('descricao', desc);
+      data.append('prazo', prazo);
+      
+      await fetch('/api/passos/adicionar', { method: 'POST', body: data });
+      document.getElementById('novoPassoDesc').value = '';
+      document.getElementById('novoPassoPrazo').value = '';
+      carregarPassos();
+      
+      // Se estava feito, volta pra andamento
+      const sel = document.querySelector(`select[data-campo="status"][data-id="${atividadeAtualId}"]`);
+      if (sel && sel.value === "Feito") {
+          sel.value = "Em andamento";
+          ajustarCorSelect(sel);
+      }
+  }
+
+  async function excluirPasso(id) {
+      if (!confirm("Excluir este passo?")) return;
+      await fetch(`/api/passos/${id}/excluir`, { method: 'POST' });
+      carregarPassos();
+  }
+
+  // AUTO-SAVE nas tabelas
+  window.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.auto-save').forEach(el => {
+          el.addEventListener('change', async function() {
+              const id = this.getAttribute('data-id');
+              const campo = this.getAttribute('data-campo');
+              const valor = this.value;
+              
+              const data = new FormData();
+              data.append('campo', campo);
+              data.append('valor', valor);
+              
+              await fetch(`/api/atividades/${id}/atualizar`, { method: 'POST', body: data });
+              
+              // Se for o select de status ou prioridade, ajusta a cor
+              if (this.tagName === 'SELECT' && this.classList.contains('tag-select')) ajustarCorSelect(this);
+              if (this.tagName === 'SELECT' && this.classList.contains('prio-select')) ajustarCorPrio(this);
+          });
+      });
+  });
+</script>
+
+<script>
+  // --- PROCEDIMENTOS QUILL EDITOR ---
+  let quill;
+  
+  window.addEventListener('DOMContentLoaded', () => {
+    // Inicializa o Quill apenas se estiver na aba de procedimentos
+    if (document.getElementById('quill-editor')) {
+      quill = new Quill('#quill-editor', {
+        theme: 'snow',
+        placeholder: 'Escreva o conteúdo do procedimento aqui...',
+        modules: {
+          toolbar: [
+            [{ 'header': [1, 2, 3, false] }],
+            ['bold', 'italic', 'underline', 'strike'],
+            [{ 'color': [] }, { 'background': [] }],
+            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+            [{ 'indent': '-1'}, { 'indent': '+1' }],
+            [{ 'align': [] }],
+            ['link', 'image', 'video'],
+            ['clean']
+          ]
+        }
+      });
+
+      // Interceptar o submit do form para jogar o HTML do Quill no input escondido
+      const formProc = document.getElementById('form-procedimento');
+      if (formProc) {
+        formProc.addEventListener('submit', function(e) {
+          const htmlContent = quill.root.innerHTML;
+          document.getElementById('proc-conteudo-input').value = htmlContent;
+        });
+      }
+    }
+  });
+
+  function abrirModalProcedimento(id = null) {
+    const modal = document.getElementById('modal-procedimento');
+    const form = document.getElementById('form-procedimento');
+    const titleText = document.getElementById('modal-proc-title-text');
+    
+    if (id) {
+      // Editar existente
+      titleText.innerText = "Editar Procedimento";
+      form.action = `/procedimentos/editar/${id}`;
+      
+      document.getElementById('proc-titulo-input').value = document.getElementById(`proc-titulo-${id}`).value;
+      document.getElementById('proc-categoria-input').value = document.getElementById(`proc-cat-${id}`).value;
+      
+      // Carregar HTML no Quill
+      const htmlContent = document.getElementById(`proc-conteudo-${id}`).innerHTML;
+      quill.clipboard.dangerouslyPasteHTML(0, htmlContent);
+    } else {
+      // Criar novo
+      titleText.innerText = "Novo Procedimento";
+      form.action = `/procedimentos/adicionar`;
+      
+      document.getElementById('proc-titulo-input').value = "";
+      document.getElementById('proc-categoria-input').value = "Geral";
+      quill.setContents([{ insert: '\n' }]); // Limpa o editor
+    }
+    
+    modal.style.display = 'flex';
+  }
+
+  function fecharModalProcedimento() {
+    document.getElementById('modal-procedimento').style.display = 'none';
+  }
+</script>
+</body>
+
+</html>
