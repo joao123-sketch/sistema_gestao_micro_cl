@@ -727,12 +727,12 @@
     </div>
     
     <div class="botoes-topo">
-      <a href="/"            class="{% if modo == 'ativos'      %}active-tab{% endif %}">📁 Ativos</a>
-      <a href="/arquivados"  class="{% if modo == 'arquivados'  %}active-tab{% endif %}">🗄️ Arquivados</a>
-      <a href="/procedimentos" class="{% if modo == 'procedimentos' %}active-tab{% endif %}">📝 Procedimentos</a>
-      <a href="/usuarios"    class="{% if modo in ['usuarios','usuario_detalhe'] %}active-tab{% endif %}">👤 Usuários</a>
-      <a href="/configuracoes" class="{% if modo == 'configuracoes' %}active-tab{% endif %}">⚙️ Ajustes</a>
-      <a href="/credenciais" class="{% if modo in ['credenciais','credenciais_login'] %}active-tab{% endif %}">🔑 Contas</a>
+      <a href="{{ url_for('index') }}"            class="{% if modo == 'ativos'      %}active-tab{% endif %}">📁 Ativos</a>
+      <a href="{{ url_for('arquivados') }}"  class="{% if modo == 'arquivados'  %}active-tab{% endif %}">🗄️ Arquivados</a>
+      <a href="{{ url_for('procedimentos') }}" class="{% if modo == 'procedimentos' %}active-tab{% endif %}">📝 Procedimentos</a>
+      <a href="{{ url_for('usuarios') }}"    class="{% if modo in ['usuarios','usuario_detalhe'] %}active-tab{% endif %}">👤 Usuários</a>
+      <a href="{{ url_for('configuracoes') }}" class="{% if modo == 'configuracoes' %}active-tab{% endif %}">⚙️ Ajustes</a>
+      <a href="{{ url_for('credenciais') }}" class="{% if modo in ['credenciais','credenciais_login'] %}active-tab{% endif %}">🔑 Contas</a>
     </div>
   </aside>
 
@@ -752,8 +752,8 @@
       </h1>
 
       <div class="botoes-topo" style="flex-direction: row;">
-        <a href="/alterar-fonte/{{ font_size - 1 }}" title="Diminuir Fonte" style="font-size:13px; color:#000000; padding:6px 12px;">A−</a>
-        <a href="/alterar-fonte/{{ font_size + 1 }}" title="Aumentar Fonte" style="font-size:15px; color:#000000; padding:6px 12px;">A+</a>
+        <a href="{{ url_for(\'alterar_fonte\', tamanho=font_size - 1) }}" title="Diminuir Fonte" style="font-size:13px; color:#000000; padding:6px 12px;">A−</a>
+        <a href="{{ url_for(\'alterar_fonte\', tamanho=font_size + 1) }}" title="Aumentar Fonte" style="font-size:15px; color:#000000; padding:6px 12px;">A+</a>
       </div>
     </div>
 
@@ -876,7 +876,7 @@
   <!-- Formulário de nova atividade -->
   <div class="panel">
     <h3>➕ Inserir Nova Atividade</h3>
-    <form action="/adicionar" method="POST">
+    <form action="{{ url_for('adicionar') }}" method="POST">
       <input type="hidden" name="modo_origem" value="ativos">
       <div class="form-row">
         <select name="area" id="select-nova-area" onchange="ajustarCorSelect(this)" class="tag-select">
@@ -936,7 +936,7 @@
   <div class="panel">
     <div class="panel-header-with-export">
       <h3>📋 Painel de Controle de Atividades</h3>
-      <a href="/exportar/ativos" class="btn-exportar">📄 Exportar PDF</a>
+      <a href="{{ url_for('exportar_ativos') }}" class="btn-exportar">📄 Exportar PDF</a>
     </div>
 <table id="tabelaAtividades">
       <thead>
@@ -1022,17 +1022,17 @@
 
           <td style="vertical-align: middle;">
             {% if modo == 'ativos' or modo.startswith('usuario_detalhe') %}
-              <form action="/arquivar/{{ atv['id'] }}" method="POST" onsubmit="return confirm('Mover para arquivados?')" style="margin:0; width: 100%; display: flex; align-items: center; justify-content: center;">
+              <form action="{{ url_for(\'arquivar\', id=atv[\'id\']) }}" method="POST" onsubmit="return confirm('Mover para arquivados?')" style="margin:0; width: 100%; display: flex; align-items: center; justify-content: center;">
                 <input type="hidden" name="next" value="{{ request.path }}">
                 <button type="submit" class="btn-arquivar">Arquivar</button>
               </form>
             {% else %}
               <div style="display: flex; flex-direction: column; gap: 6px; width: 100%; justify-content: center; align-items: center;">
-                <form action="/restaurar/{{ atv['id'] }}" method="POST" style="margin:0; width: 100%;">
+                <form action="{{ url_for(\'restaurar\', id=atv[\'id\']) }}" method="POST" style="margin:0; width: 100%;">
                   <input type="hidden" name="next" value="{{ request.path }}">
                   <button type="submit" class="btn-restaurar" style="width: 100%; box-sizing: border-box; border-radius: var(--radius-sm); padding: 5px 8px; font-size: 11px; font-weight: 600;">Restaurar</button>
                 </form>
-                <form action="/deletar/{{ atv['id'] }}" method="POST" onsubmit="return confirm('EXCLUIR PERMANENTEMENTE?')" style="margin:0; width: 100%;">
+                <form action="{{ url_for(\'deletar\', id=atv[\'id\']) }}" method="POST" onsubmit="return confirm('EXCLUIR PERMANENTEMENTE?')" style="margin:0; width: 100%;">
                   <input type="hidden" name="next" value="{{ request.path }}">
                   <button type="submit" class="btn-deletar" style="width: 100%; box-sizing: border-box; border-radius: var(--radius-sm); padding: 5px 8px; font-size: 11px; font-weight: 600;">Excluir</button>
                 </form>
@@ -1057,7 +1057,7 @@
   <div class="panel">
     <div class="panel-header-with-export">
       <h3>🗄️ Atividades Arquivadas</h3>
-      <a href="/exportar/arquivados" class="btn-exportar">📄 Exportar PDF</a>
+      <a href="{{ url_for('exportar_arquivados') }}" class="btn-exportar">📄 Exportar PDF</a>
     </div>
 <table id="tabelaAtividades">
       <thead>
@@ -1143,17 +1143,17 @@
 
           <td style="vertical-align: middle;">
             {% if modo == 'ativos' or modo.startswith('usuario_detalhe') %}
-              <form action="/arquivar/{{ atv['id'] }}" method="POST" onsubmit="return confirm('Mover para arquivados?')" style="margin:0; width: 100%; display: flex; align-items: center; justify-content: center;">
+              <form action="{{ url_for(\'arquivar\', id=atv[\'id\']) }}" method="POST" onsubmit="return confirm('Mover para arquivados?')" style="margin:0; width: 100%; display: flex; align-items: center; justify-content: center;">
                 <input type="hidden" name="next" value="{{ request.path }}">
                 <button type="submit" class="btn-arquivar">Arquivar</button>
               </form>
             {% else %}
               <div style="display: flex; flex-direction: column; gap: 6px; width: 100%; justify-content: center; align-items: center;">
-                <form action="/restaurar/{{ atv['id'] }}" method="POST" style="margin:0; width: 100%;">
+                <form action="{{ url_for(\'restaurar\', id=atv[\'id\']) }}" method="POST" style="margin:0; width: 100%;">
                   <input type="hidden" name="next" value="{{ request.path }}">
                   <button type="submit" class="btn-restaurar" style="width: 100%; box-sizing: border-box; border-radius: var(--radius-sm); padding: 5px 8px; font-size: 11px; font-weight: 600;">Restaurar</button>
                 </form>
-                <form action="/deletar/{{ atv['id'] }}" method="POST" onsubmit="return confirm('EXCLUIR PERMANENTEMENTE?')" style="margin:0; width: 100%;">
+                <form action="{{ url_for(\'deletar\', id=atv[\'id\']) }}" method="POST" onsubmit="return confirm('EXCLUIR PERMANENTEMENTE?')" style="margin:0; width: 100%;">
                   <input type="hidden" name="next" value="{{ request.path }}">
                   <button type="submit" class="btn-deletar" style="width: 100%; box-sizing: border-box; border-radius: var(--radius-sm); padding: 5px 8px; font-size: 11px; font-weight: 600;">Excluir</button>
                 </form>
@@ -1179,7 +1179,7 @@
   <div style="display: flex; flex-direction: column; gap: 20px;">
     <div class="panel" style="flex:1; min-width: 300px;">
       <h3>🏷️ Áreas de Atuação</h3>
-      <form action="/adicionar_categoria" method="POST" style="margin-bottom:20px; display:flex; flex-direction:column; gap:10px;">
+      <form action="{{ url_for('adicionar_categoria') }}" method="POST" style="margin-bottom:20px; display:flex; flex-direction:column; gap:10px;">
         <input type="text" name="nome" placeholder="Nova Área..." required style="width:100%; padding: 12px; font-size: 15px;">
         <div style="display:flex; justify-content:flex-end; gap:10px; height: 36px;">
           <input type="color" name="cor" value="#3b82f6" style="width:36px; height:100%; padding:0; border:none; cursor:pointer; border-radius:4px;" title="Cor da Área">
@@ -1195,7 +1195,7 @@
               <strong>{{ cat['nome'] }}</strong>
             </td>
             <td style="text-align:right;">
-              <form action="/deletar_categoria/{{ cat['id'] }}" method="POST" onsubmit="return confirm('Excluir Área?')">
+              <form action="{{ url_for(\'deletar_categoria\', id=cat[\'id\']) }}" method="POST" onsubmit="return confirm('Excluir Área?')">
                 <button type="submit" class="btn-deletar" style="padding:4px 8px; font-size:11px;">Excluir</button>
               </form>
             </td>
@@ -1207,7 +1207,7 @@
 
     <div class="panel" style="flex:1; min-width: 300px;">
       <h3>👥 Responsáveis</h3>
-      <form action="/adicionar_responsavel" method="POST" style="margin-bottom:20px; display:flex; flex-direction:column; gap:10px;">
+      <form action="{{ url_for('adicionar_responsavel') }}" method="POST" style="margin-bottom:20px; display:flex; flex-direction:column; gap:10px;">
         <input type="text" name="nome" placeholder="Novo Responsável..." required style="width:100%; padding: 12px; font-size: 15px;">
         <div style="display:flex; justify-content:flex-end; height: 36px;">
           <button type="submit" class="btn-principal" style="height:100%; padding: 0 15px; font-size:12px; font-weight:bold;">Adicionar Responsável</button>
@@ -1219,7 +1219,7 @@
           <tr style="border-bottom:1px solid var(--border-color);">
             <td style="padding:12px 8px; font-size:14px;"><strong>{{ resp['nome'] }}</strong></td>
             <td style="text-align:right;">
-              <form action="/deletar_responsavel/{{ resp['id'] }}" method="POST" onsubmit="return confirm('Excluir Responsável?')">
+              <form action="{{ url_for(\'deletar_responsavel\', id=resp[\'id\']) }}" method="POST" onsubmit="return confirm('Excluir Responsável?')">
                 <button type="submit" class="btn-deletar" style="padding:4px 8px; font-size:11px;">Excluir</button>
               </form>
             </td>
@@ -1259,7 +1259,7 @@
 
       <div style="display:flex; gap:10px;">
         <button onclick="abrirModalProcedimento({{ proc['id'] }})" class="btn-restaurar" style="flex:1; padding:8px; border-radius:4px; font-weight:600; cursor:pointer;">Ler / Editar</button>
-        <form action="/procedimentos/deletar/{{ proc['id'] }}" method="POST" onsubmit="return confirm('Excluir este procedimento permanentemente?')" style="margin:0;">
+        <form action="{{ url_for(\'procedimentos_deletar\', id=proc[\'id\']) }}" method="POST" onsubmit="return confirm('Excluir este procedimento permanentemente?')" style="margin:0;">
           <button type="submit" class="btn-deletar" style="padding:8px 12px; border-radius:4px; font-weight:600; cursor:pointer;" title="Excluir">🗑️</button>
         </form>
       </div>
@@ -1343,7 +1343,7 @@
     {% if erro %}
     <div style="background:#fee2e2; color:#ef4444; padding:10px; border-radius:4px; margin-bottom:15px; font-size:13px;">{{ erro }}</div>
     {% endif %}
-    <form action="/credenciais" method="POST">
+    <form action="{{ url_for('credenciais') }}" method="POST">
       <input type="hidden" name="acao" value="login">
       <input type="password" name="senha_mestre" placeholder="Senha Mestre" required style="width:100%; min-width: 100%; margin-bottom:15px; text-align:center;">
       <button type="submit" class="btn-principal" style="width:100%; min-width: 100%;">Desbloquear</button>
@@ -1356,10 +1356,10 @@
   <div class="panel">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
       <h3>🔐 Cofre de Senhas</h3>
-      <a href="/credenciais/sair" class="btn-arquivar" style="text-decoration:none;">Bloquear Cofre</a>
+      <a href="{{ url_for('credenciais_sair') }}" class="btn-arquivar" style="text-decoration:none;">Bloquear Cofre</a>
     </div>
     
-    <form action="/credenciais/adicionar" method="POST" style="margin-bottom:20px;">
+    <form action="{{ url_for('credenciais_adicionar') }}" method="POST" style="margin-bottom:20px;">
       <div class="form-row">
         <input type="text" name="servico" placeholder="Serviço/Plataforma" required style="flex:1;">
         <input type="text" name="usuario" placeholder="Usuário/E-mail" required style="flex:1;">
@@ -1385,7 +1385,7 @@
           <td style="padding:10px;"><strong>{{ conta['servico'] }}</strong></td>
           <td style="padding:10px;">{{ conta['usuario'] }}</td>
           <td style="padding:10px;">
-            <form action="/credenciais/deletar/{{ conta['id'] }}" method="POST" onsubmit="return confirm('Excluir do cofre?')" style="display:inline;">
+            <form action="{{ url_for(\'credenciais_deletar\', id=conta[\'id\']) }}" method="POST" onsubmit="return confirm('Excluir do cofre?')" style="display:inline;">
               <button type="submit" class="btn-deletar" style="padding:4px 8px; font-size:11px;">Excluir</button>
             </form>
           </td>
@@ -1418,7 +1418,7 @@
         <p style="color: var(--text-muted); font-size: 12.5px; min-height: 36px; margin: 0 0 14px;">
           {{ resp['cargo'] or 'Integrante do projeto' }}
         </p>
-        <a href="/usuarios/{{ resp['id'] }}"
+        <a href="{{ url_for(\'usuario_detalhe\', id=resp[\'id\']) }}"
            style="text-decoration: none; display: inline-block;
                   background: var(--accent); color: #fff;
                   padding: 7px 14px; border-radius: var(--radius-sm);
@@ -1452,7 +1452,7 @@
         {% endif %}
       </div>
 
-      <form action="/usuarios/editar_cadastro/{{ usuario['id'] }}" method="POST" enctype="multipart/form-data">
+      <form action="{{ url_for(\'editar_cadastro\', id=usuario[\'id\']) }}" method="POST" enctype="multipart/form-data">
         <div style="margin-bottom: 9px;">
           <label class="label-editor">Alterar Foto de Perfil</label>
           <input type="file" name="foto" accept="image/*" style="font-size: 12px; padding: 5px;">
@@ -1580,7 +1580,7 @@
   <!-- Formulário de nova atividade -->
   <div class="panel">
     <h3>➕ Inserir Nova Atividade para {{ usuario['nome'] }}</h3>
-    <form action="/adicionar" method="POST" onsubmit="prepararEnvioNovaAtividade()">
+    <form action="{{ url_for('adicionar') }}" method="POST" onsubmit="prepararEnvioNovaAtividade()">
       <input type="hidden" name="modo_origem" value="usuario_detalhe_{{ usuario['id'] }}">
       <div class="form-row">
         <select name="area" id="select-nova-area" onchange="ajustarCorSelect(this)" class="tag-select">
@@ -1642,7 +1642,7 @@
   <div class="panel">
     <div class="panel-header-with-export">
       <h3>📋 Atividades Sob Responsabilidade de {{ usuario['nome'] }}</h3>
-      <a href="/exportar/usuario/{{ usuario['id'] }}" class="btn-exportar">📄 Exportar PDF</a>
+      <a href="{{ url_for(\'exportar_usuario\', id=usuario[\'id\']) }}" class="btn-exportar">📄 Exportar PDF</a>
     </div>
     <table id="tabelaAtividades">
       <thead>
@@ -1728,17 +1728,17 @@
 
           <td style="vertical-align: middle;">
             {% if modo == 'ativos' or modo.startswith('usuario_detalhe') %}
-              <form action="/arquivar/{{ atv['id'] }}" method="POST" onsubmit="return confirm('Mover para arquivados?')" style="margin:0; width: 100%; display: flex; align-items: center; justify-content: center;">
+              <form action="{{ url_for(\'arquivar\', id=atv[\'id\']) }}" method="POST" onsubmit="return confirm('Mover para arquivados?')" style="margin:0; width: 100%; display: flex; align-items: center; justify-content: center;">
                 <input type="hidden" name="next" value="{{ request.path }}">
                 <button type="submit" class="btn-arquivar">Arquivar</button>
               </form>
             {% else %}
               <div style="display: flex; flex-direction: column; gap: 6px; width: 100%; justify-content: center; align-items: center;">
-                <form action="/restaurar/{{ atv['id'] }}" method="POST" style="margin:0; width: 100%;">
+                <form action="{{ url_for(\'restaurar\', id=atv[\'id\']) }}" method="POST" style="margin:0; width: 100%;">
                   <input type="hidden" name="next" value="{{ request.path }}">
                   <button type="submit" class="btn-restaurar" style="width: 100%; box-sizing: border-box; border-radius: var(--radius-sm); padding: 5px 8px; font-size: 11px; font-weight: 600;">Restaurar</button>
                 </form>
-                <form action="/deletar/{{ atv['id'] }}" method="POST" onsubmit="return confirm('EXCLUIR PERMANENTEMENTE?')" style="margin:0; width: 100%;">
+                <form action="{{ url_for(\'deletar\', id=atv[\'id\']) }}" method="POST" onsubmit="return confirm('EXCLUIR PERMANENTEMENTE?')" style="margin:0; width: 100%;">
                   <input type="hidden" name="next" value="{{ request.path }}">
                   <button type="submit" class="btn-deletar" style="width: 100%; box-sizing: border-box; border-radius: var(--radius-sm); padding: 5px 8px; font-size: 11px; font-weight: 600;">Excluir</button>
                 </form>
@@ -1762,6 +1762,7 @@
 </div> <!-- Fim app-layout -->
 
 <script>
+    const SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
   /* ── Restaurar posição de scroll ── */
   window.addEventListener("beforeunload", () =>
     sessionStorage.setItem("scrollY", window.scrollY));
@@ -2323,7 +2324,7 @@
   }
 
   async function carregarPassos() {
-      const resp = await fetch(`/api/atividades/${atividadeAtualId}/passos`);
+      const resp = await fetch(`${SCRIPT_ROOT}/api/atividades/${atividadeAtualId}/passos`);
       const passos = await resp.json();
       const container = document.getElementById('listaPassos');
       container.innerHTML = '';
@@ -2348,7 +2349,7 @@
   async function togglePasso(id, checked) {
       const data = new FormData();
       data.append('concluido', checked);
-      const resp = await fetch(`/api/passos/${id}/toggle`, { method: 'POST', body: data });
+      const resp = await fetch(`${SCRIPT_ROOT}/api/passos/${id}/toggle`, { method: 'POST', body: data });
       const res = await resp.json();
       carregarPassos(); 
       
@@ -2364,7 +2365,7 @@
       const data = new FormData();
       data.append('campo', campo);
       data.append('valor', valor);
-      await fetch(`/api/passos/${id}/atualizar`, { method: 'POST', body: data });
+      await fetch(`${SCRIPT_ROOT}/api/passos/${id}/atualizar`, { method: 'POST', body: data });
   }
 
   async function salvarNovoPasso() {
@@ -2377,7 +2378,7 @@
       data.append('descricao', desc);
       data.append('prazo', prazo);
       
-      await fetch('/api/passos/adicionar', { method: 'POST', body: data });
+      await fetch(`${SCRIPT_ROOT}/api/passos/adicionar', { method: 'POST', body: data });
       document.getElementById('novoPassoDesc').value = '';
       document.getElementById('novoPassoPrazo').value = '';
       carregarPassos();
@@ -2392,7 +2393,7 @@
 
   async function excluirPasso(id) {
       if (!confirm("Excluir este passo?")) return;
-      await fetch(`/api/passos/${id}/excluir`, { method: 'POST' });
+      await fetch(`${SCRIPT_ROOT}/api/passos/${id}/excluir`, { method: 'POST' });
       carregarPassos();
   }
 
@@ -2408,7 +2409,7 @@
               data.append('campo', campo);
               data.append('valor', valor);
               
-              await fetch(`/api/atividades/${id}/atualizar`, { method: 'POST', body: data });
+              await fetch(`${SCRIPT_ROOT}/api/atividades/${id}/atualizar`, { method: 'POST', body: data });
               
               // Se for o select de status ou prioridade, ajusta a cor
               if (this.tagName === 'SELECT' && this.classList.contains('tag-select')) ajustarCorSelect(this);
