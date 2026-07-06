@@ -100,11 +100,13 @@
       --text-main: #1E293B;        
       --text-muted: #64748B;       
       --border-color: #E2E8F0;     
-      --input-bg: #FFFFFF;         
-      
+      --input-bg: #F1F5F9;
+      --input-border: #CBD5E1;
       --accent: #4C6870;           /* Azul Petróleo */
       --accent-soft: #EDF5F7;      
       
+      --btn-primary: var(--accent);
+      --btn-primary-hover: #405961;
       --btn-success: #DC5F31;      /* Laranja */
       --btn-success-hover: #C85126; 
       --btn-danger: #EF4444;       
@@ -266,10 +268,12 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      width: 100%;
       min-height: 100vh;
       margin-left: 250px;
       transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .main-content.expandido {
+      margin-left: 0;
     }
     .main-content.expandido {
       margin-left: 0;
@@ -412,7 +416,7 @@
     /* BUG CORRIGIDO: inputs/selects herdam font-size do body */
     input, select, textarea {
       padding: 8px 11px;
-      border: 1px solid var(--border-color);
+      border: 1px solid var(--input-border);
       border-radius: var(--radius-sm);
       font-family: inherit;
       font-size: inherit;  /* ← herdava errado antes */
@@ -429,7 +433,7 @@
 
     /* ── Editor rich text ── */
     .editor-container {
-      border: 1px solid var(--border-color);
+      border: 1px solid var(--input-border);
       border-radius: var(--radius-sm);
       background: var(--input-bg);
       overflow: hidden;
@@ -748,8 +752,8 @@
       </h1>
 
       <div class="botoes-topo" style="flex-direction: row;">
-        <a href="/alterar-fonte/{{ font_size - 1 }}" title="Diminuir Fonte" style="font-size:13px; color:#fff; padding:6px 12px;">A−</a>
-        <a href="/alterar-fonte/{{ font_size + 1 }}" title="Aumentar Fonte" style="font-size:15px; color:#fff; padding:6px 12px;">A+</a>
+        <a href="/alterar-fonte/{{ font_size - 1 }}" title="Diminuir Fonte" style="font-size:13px; color:#000000; padding:6px 12px;">A−</a>
+        <a href="/alterar-fonte/{{ font_size + 1 }}" title="Aumentar Fonte" style="font-size:15px; color:#000000; padding:6px 12px;">A+</a>
       </div>
     </div>
 
