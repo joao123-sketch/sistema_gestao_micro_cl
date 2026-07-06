@@ -92,29 +92,31 @@
     }
     /* ── Variáveis de tema ── */
     :root {
-      --bg-body:          #f8fafc;
-      --bg-panel:         #ffffff;
-      --text-main:        #1F1D1A;
-      --text-muted:       #64748b;
-      --border-color:     rgba(220, 95, 49, 0.5); /* Laranja com 50% de opacidade */
-      --border-focus:     #e16c42; /* Laranja secundária forte */
-      --input-bg:         #ffffff;
-      --table-even:       #f8fafc;
-      --header-bg:        #e16c42;
-      --header-text:      #ffffff;
-      --btn-toolbar:      #f1f5f9;
-      --link-color:       #4C6870;
-      --accent:           #F1C24C;
-      --accent-hover:     #E4863A;
-      --accent-soft:      rgba(241, 194, 76, 0.15);
-      --btn-primary:      #e16c42;
-      --btn-primary-hover: #e16c42;
-      --btn-success:       #e16c42;
-      --btn-success-hover: #CD302D;
-      --shadow-sm:        0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
-      --shadow-md:        0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
-      --radius:           12px;
-      --radius-sm:        8px;
+      /* Modern Sleek Dark Theme */
+      --bg-body: #09090b;          /* Zinc 950 */
+      --bg-panel: #18181b;         /* Zinc 900 */
+      --header-bg: rgba(9, 9, 11, 0.7); /* Translucent */
+      --header-text: #fafafa;
+      --text-main: #f4f4f5;        
+      --text-muted: #a1a1aa;       
+      --border-color: #27272a;     
+      --input-bg: #09090b;         
+      
+      --accent: #4f46e5;           /* Indigo 600 */
+      --accent-soft: rgba(79, 70, 229, 0.15);
+      
+      --btn-success: #4f46e5;      
+      --btn-success-hover: #4338ca; 
+      --btn-danger: #e11d48;       
+      --btn-danger-hover: #be123c;
+      --btn-toolbar: #27272a;
+      
+      --table-even: #18181b;
+      --table-odd: #09090b;
+      --table-header: #27272a;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow-sm: 0 4px 6px -1px rgba(0,0,0,0.5), 0 2px 4px -1px rgba(0,0,0,0.3);
     }
 
     /* ── Estilos para Blocos de Código ── */
@@ -213,6 +215,8 @@
       justify-content: space-between;
       align-items: center;
       box-shadow: 0 4px 20px rgba(0,0,0,.15);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
     }
     .header-banner h1 {
       margin: 0;
@@ -332,7 +336,7 @@
       margin-bottom: 20px;
       box-shadow: var(--shadow-sm);
       border: 2px solid transparent;
-      background-image: linear-gradient(var(--bg-panel), var(--bg-panel)), linear-gradient(135deg, #DC5F31, #F1C24C);
+      background-image: linear-gradient(var(--bg-panel), var(--bg-panel)), linear-gradient(135deg, #4f46e5, #9333ea);
       background-origin: border-box;
       background-clip: padding-box, border-box;
     }
