@@ -92,31 +92,31 @@
     }
     /* ── Variáveis de tema ── */
     :root {
-      /* Modern Sleek Dark Theme */
-      --bg-body: #09090b;          /* Zinc 950 */
-      --bg-panel: #18181b;         /* Zinc 900 */
-      --header-bg: rgba(9, 9, 11, 0.7); /* Translucent */
-      --header-text: #fafafa;
-      --text-main: #f4f4f5;        
-      --text-muted: #a1a1aa;       
-      --border-color: #27272a;     
-      --input-bg: #09090b;         
+      /* User Custom Palette (Light Theme) */
+      --bg-body: #F8FAFC;          
+      --bg-panel: #FFFFFF;         
+      --header-bg: rgba(255, 255, 255, 0.85); 
+      --header-text: #1E293B;      
+      --text-main: #1E293B;        
+      --text-muted: #64748B;       
+      --border-color: #E2E8F0;     
+      --input-bg: #FFFFFF;         
       
-      --accent: #4f46e5;           /* Indigo 600 */
-      --accent-soft: rgba(79, 70, 229, 0.15);
+      --accent: #4C6870;           /* Azul Petróleo */
+      --accent-soft: #EDF5F7;      
       
-      --btn-success: #4f46e5;      
-      --btn-success-hover: #4338ca; 
-      --btn-danger: #e11d48;       
-      --btn-danger-hover: #be123c;
-      --btn-toolbar: #27272a;
+      --btn-success: #DC5F31;      /* Laranja */
+      --btn-success-hover: #C85126; 
+      --btn-danger: #EF4444;       
+      --btn-danger-hover: #CD302D; 
+      --btn-toolbar: #F1F5F9;      
       
-      --table-even: #18181b;
-      --table-odd: #09090b;
-      --table-header: #27272a;
+      --table-even: #FFFFFF;       
+      --table-odd: #F8FAFC;        
+      --table-header: #F1F5F9;     
       --radius: 12px;
       --radius-sm: 8px;
-      --shadow-sm: 0 4px 6px -1px rgba(0,0,0,0.5), 0 2px 4px -1px rgba(0,0,0,0.3);
+      --shadow-sm: 0 4px 6px -1px rgba(15, 23, 42, 0.06), 0 2px 4px -1px rgba(15, 23, 42, 0.04);
     }
 
     /* ── Estilos para Blocos de Código ── */
@@ -256,7 +256,7 @@
     }
     .sidebar-header {
       padding: 0 20px 15px;
-      border-bottom: 1px solid rgba(255,255,255,0.15);
+      border-bottom: 1px solid var(--border-color);
       margin-bottom: 15px;
       display: flex;
       align-items: center;
@@ -297,8 +297,8 @@
       font-weight: 600;
       transition: all .2s;
       cursor: pointer;
-      border: 1px solid rgba(255,255,255,.15);
-      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border-color);
+      background: transparent;
       font-family: inherit;
       display: flex;
       align-items: center;
@@ -306,18 +306,18 @@
     }
     .botoes-topo button:hover,
     .botoes-topo a:hover  { 
-      background: rgba(255,255,255,.15); 
-      border-color: rgba(255,255,255,0.3); 
+      background: var(--accent-soft); 
+      border-color: var(--accent); color: var(--accent); 
     }
 
     .botoes-topo a.active-tab {
-      background: rgba(0, 0, 0, 0.2) !important;
+      background: var(--accent) !important;
       color: #fff !important;
       border-color: transparent !important;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      box-shadow: var(--shadow-sm);
     }
     .botoes-topo a.active-tab:hover {
-      background: rgba(0, 0, 0, 0.3) !important;
+      background: #405961 !important;
       transform: translateY(-1px);
     }
 
@@ -336,7 +336,7 @@
       margin-bottom: 20px;
       box-shadow: var(--shadow-sm);
       border: 2px solid transparent;
-      background-image: linear-gradient(var(--bg-panel), var(--bg-panel)), linear-gradient(135deg, #4f46e5, #9333ea);
+      background-image: linear-gradient(var(--bg-panel), var(--bg-panel)), linear-gradient(135deg, var(--accent), var(--btn-success));
       background-origin: border-box;
       background-clip: padding-box, border-box;
     }
@@ -424,7 +424,7 @@
     input:focus, select:focus, textarea:focus {
       border-color: var(--btn-success);
       outline: none;
-      box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+      box-shadow: 0 0 0 3px rgba(220, 95, 49, 0.20);
     }
 
     /* ── Editor rich text ── */
@@ -439,7 +439,7 @@
     }
     .editor-container:focus-within {
       border-color: var(--btn-success);
-      box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+      box-shadow: 0 0 0 3px rgba(220, 95, 49, 0.20);
     }
     .editor-toolbar, .editor-toolbar-table {
       background: var(--btn-toolbar);
