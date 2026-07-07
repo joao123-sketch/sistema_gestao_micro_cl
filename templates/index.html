@@ -1022,11 +1022,8 @@
 
           <td class="w-acoes">
             <div style="display:flex; gap: 5px;">
-              <form action="{{ url_for('restaurar', id=atv['id']) }}" method="POST" style="display:inline;">
-                <button type="submit" class="btn-icon" title="Restaurar" onclick="event.stopPropagation()">📂</button>
-              </form>
-              <form action="{{ url_for('deletar', id=atv['id']) }}" method="POST" style="display:inline;" onsubmit="return confirm('Tem certeza que deseja excluir esta atividade?');">
-                <button type="submit" class="btn-icon" title="Excluir" style="color:#ef4444;" onclick="event.stopPropagation()">🗑️</button>
+              <form action="{{ url_for('arquivar', id=atv['id']) }}" method="POST" style="display:inline;">
+                <button type="submit" class="btn-icon" title="Arquivar" onclick="event.stopPropagation()">📦</button>
               </form>
             </div>
           </td>
@@ -2466,6 +2463,11 @@
               <div style="font-size:28px; font-weight:700; color:#3b82f6;" id="pg-dias">0</div>
               <div style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase;">Dias Decorridos</div>
             </div>
+            
+            <div style="flex:1; background:var(--bg-main); padding:15px; border-radius:8px; border:1px solid var(--border-color); display:flex; flex-direction:column; justify-content:center; align-items:center;">
+              <div style="font-size:28px; font-weight:700; color:#ef4444;" id="pg-restantes">0</div>
+              <div style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase;">Dias Restantes</div>
+            </div>
           </div>
 
           <!-- Passos -->
@@ -2517,6 +2519,50 @@
       }
   });
 
+
+  function recalcularDias() {
+      const d_ini_str = document.getElementById('pg-inicio').value;
+      const d_prazo_str = document.getElementById('pg-prazo').value;
+      
+      const hoje = new Date();
+      hoje.setHours(0,0,0,0);
+
+      // Decorridos
+      if (d_ini_str) {
+          const d_ini = new Date(d_ini_str + 'T00:00:00');
+          d_ini.setHours(0,0,0,0);
+          
+          if (hoje < d_ini) {
+              document.getElementById('pg-dias').innerText = '0';
+          } else {
+              const diffTime = Math.abs(hoje - d_ini);
+              const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+              document.getElementById('pg-dias').innerText = diffDays;
+          }
+      } else {
+          document.getElementById('pg-dias').innerText = '0';
+      }
+
+      // Restantes
+      if (d_prazo_str) {
+          const d_prazo = new Date(d_prazo_str + 'T00:00:00');
+          d_prazo.setHours(0,0,0,0);
+          
+          if (d_prazo < hoje) {
+              document.getElementById('pg-restantes').innerText = 'Atrasado';
+              document.getElementById('pg-restantes').style.color = '#ef4444';
+          } else {
+              const diffTime = d_prazo - hoje;
+              const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+              document.getElementById('pg-restantes').innerText = diffDays;
+              document.getElementById('pg-restantes').style.color = '#3b82f6';
+          }
+      } else {
+          document.getElementById('pg-restantes').innerText = '-';
+          document.getElementById('pg-restantes').style.color = 'var(--text-muted)';
+      }
+  }
+
   async function atualizarAtividadeModal(campo, valor) {
       if(!painelGeralAtividadeId) return;
       const data = new FormData();
@@ -2524,6 +2570,10 @@
       data.append('valor', valor);
       await fetch(`${SCRIPT_ROOT}/api/atividades/${painelGeralAtividadeId}/atualizar`, { method: 'POST', body: data });
       mostrarToast();
+      
+      if (campo === 'data_inicio' || campo === 'prazo') {
+          recalcularDias();
+      }
   }
 
   async function abrirPainelGeral(id, event) {
@@ -2553,16 +2603,7 @@
       document.getElementById('pg-responsavel').value = data.responsavel;
       document.getElementById('pg-prioridade').value = data.prioridade;
       
-      if (data.data_inicio) {
-          const hoje = new Date();
-          const d_ini = new Date(data.data_inicio);
-          const diffTime = Math.abs(hoje - d_ini);
-          let diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-          if (hoje < d_ini) diffDays = 0; 
-          document.getElementById('pg-dias').innerText = diffDays;
-      } else {
-          document.getElementById('pg-dias').innerText = '0';
-      }
+      recalcularDias();
 
       document.getElementById('pg-perc-txt').innerText = data.perc_execucao + '%';
       document.getElementById('pg-perc-bar').style.width = data.perc_execucao + '%';
