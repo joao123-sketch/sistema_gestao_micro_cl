@@ -2438,8 +2438,11 @@
               <option value="Alta">Alta</option>
             </select>
           </div>
-          <div style="display:flex; flex-direction:column; justify-content:flex-end; padding-bottom:6px;">
-            <div id="pg-status" class="status-badge"></div>
+          <div style="display:flex; flex-direction:column; gap:4px; flex:1; min-width:150px;">
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase;">Status</label>
+            <div style="height:31px; display:flex; align-items:center;">
+              <div id="pg-status" class="status-badge"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -2479,7 +2482,7 @@
             
             <div style="padding:15px; border-top:1px solid var(--border-color); background:var(--bg-panel);">
               <div style="display:flex; gap:10px;">
-                <input type="text" id="novoPassoDesc" placeholder="Descrição do passo..." style="flex:2; padding:8px; border:1px solid var(--border-color); border-radius:6px;">
+                <input type="text" id="pg-novoPassoDesc" placeholder="Descrição do passo..." style="flex:2; padding:8px; border:1px solid var(--border-color); border-radius:6px;">
                 <button type="button" onclick="salvarNovoPassoModal()" style="background:#22c55e; color:white; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; font-weight:600;">Adicionar</button>
               </div>
             </div>
@@ -2635,13 +2638,13 @@
   }
 
   async function salvarNovoPassoModal() {
-      const desc = document.getElementById('novoPassoDesc').value;
+      const desc = document.getElementById('pg-novoPassoDesc').value;
       if (!desc.trim()) return;
       const data = new FormData();
       data.append('atividade_id', painelGeralAtividadeId);
       data.append('descricao', desc);
       await fetch(`${SCRIPT_ROOT}/api/passos/adicionar`, { method: 'POST', body: data });
-      document.getElementById('novoPassoDesc').value = '';
+      document.getElementById('pg-novoPassoDesc').value = '';
       recarregarDadosModal();
   }
 
