@@ -886,7 +886,7 @@
       </table>
 <!-- Aba Ativas -->
       <div id="dash-ativos" style="display: block;">
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px;">
+        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;">
           <div style="background: rgba(239,68,68,.1); border: 1px solid #ef4444; padding: 14px; border-radius: 8px; text-align: center; color: #b91c1c;">
             <div id="metric-atrasado" style="font-size: 22px; font-weight: 700;">{{ metricas.Atrasado }}</div>
             <div style="font-size: 11px; font-weight: 600; margin-top: 3px;">🚨 Atrasadas</div>
@@ -1439,7 +1439,7 @@
 
       <!-- Aba Ativas -->
       <div id="dash-ativos" style="display: block;">
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px;">
+        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;">
           <div style="background: rgba(239,68,68,.1); border: 1px solid #ef4444; padding: 14px; border-radius: 8px; text-align: center; color: #b91c1c;">
             <div id="metric-atrasado" style="font-size: 22px; font-weight: 700;">{{ metricas.Atrasado }}</div>
             <div style="font-size: 11px; font-weight: 600; margin-top: 3px;">🚨 Atrasadas</div>
@@ -1500,7 +1500,7 @@
 
       <!-- Aba Visão Geral -->
       <div id="dash-geral" style="display: none;">
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 16px;">
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px;">
           <div style="background: var(--btn-toolbar); border: 1px solid var(--border-color); padding: 16px; border-radius: 8px; text-align: center;">
             <div style="font-size: 28px; font-weight: 700; color: var(--text-main);">{{ metricas.Total_Geral }}</div>
             <div style="font-size: 11px; font-weight: 600; margin-top: 3px; color: var(--text-muted);">🎯 Total Geral</div>
@@ -2022,24 +2022,40 @@
     abaAtivaGlobal = aba;
     const dash_ativos = document.getElementById('dash-ativos');
     const dash_arquivados = document.getElementById('dash-arquivados');
+    const dash_geral = document.getElementById('dash-geral');
 
     if (dash_ativos) dash_ativos.style.display = 'none';
     if (dash_arquivados) dash_arquivados.style.display = 'none';
+    if (dash_geral) dash_geral.style.display = 'none';
 
     const aba_ativos = document.getElementById('aba-ativos');
     const aba_arquivados = document.getElementById('aba-arquivados');
+    const aba_geral = document.getElementById('aba-geral');
 
     if (aba_ativos) aba_ativos.style.borderBottomColor = 'transparent';
     if (aba_arquivados) aba_arquivados.style.borderBottomColor = 'transparent';
+    if (aba_geral) aba_geral.style.borderBottomColor = 'transparent';
 
     if (aba === 'ativos' && dash_ativos) {
       dash_ativos.style.display = 'block';
       if (aba_ativos) aba_ativos.style.borderBottomColor = 'var(--accent)';
-      setTimeout(criarGraficoDashboardGlobal, 50);
+      setTimeout(() => {
+          if (typeof criarGraficoDashboardGlobal === 'function') criarGraficoDashboardGlobal();
+          if (typeof criarGraficoAtivos === 'function') criarGraficoAtivos();
+      }, 50);
     } else if (aba === 'arquivados' && dash_arquivados) {
       dash_arquivados.style.display = 'block';
       if (aba_arquivados) aba_arquivados.style.borderBottomColor = 'var(--accent)';
-      setTimeout(criarGraficoArquivadosDashboard, 50);
+      setTimeout(() => {
+          if (typeof criarGraficoArquivadosDashboard === 'function') criarGraficoArquivadosDashboard();
+          if (typeof criarGraficoArquivados === 'function') criarGraficoArquivados();
+      }, 50);
+    } else if (aba === 'geral' && dash_geral) {
+      dash_geral.style.display = 'block';
+      if (aba_geral) aba_geral.style.borderBottomColor = 'var(--accent)';
+      setTimeout(() => {
+          if (typeof criarGraficoGeral === 'function') criarGraficoGeral();
+      }, 50);
     }
     
     // Call filter to recalculate counts for the active tab
