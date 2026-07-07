@@ -1912,6 +1912,7 @@
     if (!canvas) return;
     
     const ctx = canvas.getContext('2d');
+    const atrasado = parseInt(document.getElementById("metric-atrasado-arq")?.innerText || canvas.dataset.atrasadoarq) || 0;
     const pendente = parseInt(document.getElementById("metric-pendente-arq")?.innerText || canvas.dataset.pendentearq) || 0;
     const emAndamento = parseInt(document.getElementById("metric-emandamento-arq")?.innerText || canvas.dataset.emandamentoarq) || 0;
     const feito = parseInt(document.getElementById("metric-feito-arq")?.innerText || canvas.dataset.feitoarq) || 0;
