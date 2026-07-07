@@ -82,6 +82,8 @@ def init_db():
 
     # Migrações de colunas que podem já existir
     for sql in [
+        'ALTER TABLE atividades ADD COLUMN data_inicio TEXT',
+        'ALTER TABLE atividades ADD COLUMN observacoes TEXT',
         'ALTER TABLE responsaveis ADD COLUMN email TEXT',
         'ALTER TABLE responsaveis ADD COLUMN cargo TEXT',
         'ALTER TABLE responsaveis ADD COLUMN idade INTEGER',
@@ -196,24 +198,47 @@ def inject_globals():
 #  ROTAS PRINCIPAIS
 # ─────────────────────────────────────────────
 
+def processar_atividades(atividades_rows):
+    import datetime
+    resultado = []
+    hoje = datetime.date.today().strftime('%Y-%m-%d')
+    for a in atividades_rows:
+        d = dict(a)
+        if d['status'] != 'Feito' and d.get('prazo') and d['prazo'] < hoje:
+            d['status_exibicao'] = 'Atrasado'
+        else:
+            d['status_exibicao'] = d['status']
+        resultado.append(d)
+    return resultado
+
+def calcular_metricas(atv_ativas, atv_arq):
+    m = {
+        'Pendente':      sum(1 for a in atv_ativas if a['status_exibicao'] == 'Pendente'),
+        'Em andamento':  sum(1 for a in atv_ativas if a['status_exibicao'] == 'Em andamento'),
+        'Atrasado':      sum(1 for a in atv_ativas if a['status_exibicao'] == 'Atrasado'),
+        'Feito':         sum(1 for a in atv_ativas if a['status_exibicao'] == 'Feito'),
+        'Total':         len(atv_ativas),
+        'Pendente_Arq':  sum(1 for a in atv_arq if a['status_exibicao'] == 'Pendente'),
+        'Em andamento_Arq': sum(1 for a in atv_arq if a['status_exibicao'] == 'Em andamento'),
+        'Atrasado_Arq':  sum(1 for a in atv_arq if a['status_exibicao'] == 'Atrasado'),
+        'Feito_Arq':     sum(1 for a in atv_arq if a['status_exibicao'] == 'Feito'),
+        'Total_Arq':     len(atv_arq)
+    }
+    m['Total_Geral'] = m['Total'] + m['Total_Arq']
+    return m
+
 @app.route('/')
 def index():
     conn = get_db_connection()
-    atividades  = conn.execute('SELECT * FROM atividades WHERE arquivado = 0 ORDER BY id DESC').fetchall()
-    atividades_arq = conn.execute('SELECT * FROM atividades WHERE arquivado = 1 ORDER BY id DESC').fetchall()
+    atividades_raw  = conn.execute('SELECT * FROM atividades WHERE arquivado = 0 ORDER BY id DESC').fetchall()
+    atividades_arq_raw = conn.execute('SELECT * FROM atividades WHERE arquivado = 1 ORDER BY id DESC').fetchall()
     categorias  = conn.execute('SELECT * FROM categorias').fetchall()
     responsaveis = conn.execute('SELECT * FROM responsaveis ORDER BY nome ASC').fetchall()
     
-    metricas = {
-        'Pendente':      sum(1 for a in atividades if a['status'] == 'Pendente'),
-        'Em andamento':  sum(1 for a in atividades if a['status'] == 'Em andamento'),
-        'Feito':         sum(1 for a in atividades if a['status'] == 'Feito'),
-        'Total':         len(atividades),
-        'Pendente_Arq':  sum(1 for a in atividades_arq if a['status'] == 'Pendente'),
-        'Em andamento_Arq': sum(1 for a in atividades_arq if a['status'] == 'Em andamento'),
-        'Feito_Arq':     sum(1 for a in atividades_arq if a['status'] == 'Feito'),
-        'Total_Arq':     len(atividades_arq)
-    }
+    atividades = processar_atividades(atividades_raw)
+    atividades_arq = processar_atividades(atividades_arq_raw)
+    metricas = calcular_metricas(atividades, atividades_arq)
+    
     conn.close()
     return render_template('index.html',
                            atividades=atividades,
@@ -227,9 +252,11 @@ def index():
 @app.route('/arquivados')
 def arquivados():
     conn = get_db_connection()
-    atividades  = conn.execute('SELECT * FROM atividades WHERE arquivado = 1 ORDER BY id DESC').fetchall()
+    atividades_raw  = conn.execute('SELECT * FROM atividades WHERE arquivado = 1 ORDER BY id DESC').fetchall()
     categorias  = conn.execute('SELECT * FROM categorias').fetchall()
     responsaveis = conn.execute('SELECT * FROM responsaveis ORDER BY nome ASC').fetchall()
+    
+    atividades = processar_atividades(atividades_raw)
     conn.close()
     return render_template('index.html',
                            atividades=atividades,
@@ -270,30 +297,20 @@ def usuario_detalhe(id):
         conn.close()
         return redirect(url_for('usuarios'))
 
-    atividades    = conn.execute(
+    atividades_raw = conn.execute(
         'SELECT * FROM atividades WHERE responsavel = ? AND arquivado = 0 ORDER BY id DESC',
+        (usuario['nome'],)
+    ).fetchall()
+    atividades_arq_raw = conn.execute(
+        'SELECT * FROM atividades WHERE responsavel = ? AND arquivado = 1 ORDER BY id DESC',
         (usuario['nome'],)
     ).fetchall()
     categorias    = conn.execute('SELECT * FROM categorias').fetchall()
     responsaveis  = conn.execute('SELECT * FROM responsaveis ORDER BY nome ASC').fetchall()
-
-    metricas = {
-        'Pendente':      conn.execute(
-            'SELECT COUNT(*) FROM atividades WHERE responsavel=? AND status="Pendente"      AND arquivado=0', (usuario['nome'],)).fetchone()[0],
-        'Em andamento':  conn.execute(
-            'SELECT COUNT(*) FROM atividades WHERE responsavel=? AND status="Em andamento"  AND arquivado=0', (usuario['nome'],)).fetchone()[0],
-        'Feito':         conn.execute(
-            'SELECT COUNT(*) FROM atividades WHERE responsavel=? AND status="Feito"         AND arquivado=0', (usuario['nome'],)).fetchone()[0],
-        'Pendente_Arq':  conn.execute(
-            'SELECT COUNT(*) FROM atividades WHERE responsavel=? AND status="Pendente"      AND arquivado=1', (usuario['nome'],)).fetchone()[0],
-        'Em andamento_Arq': conn.execute(
-            'SELECT COUNT(*) FROM atividades WHERE responsavel=? AND status="Em andamento"  AND arquivado=1', (usuario['nome'],)).fetchone()[0],
-        'Feito_Arq':     conn.execute(
-            'SELECT COUNT(*) FROM atividades WHERE responsavel=? AND status="Feito"         AND arquivado=1', (usuario['nome'],)).fetchone()[0],
-    }
-    metricas['Total'] = metricas['Pendente'] + metricas['Em andamento'] + metricas['Feito']
-    metricas['Total_Arq'] = metricas['Pendente_Arq'] + metricas['Em andamento_Arq'] + metricas['Feito_Arq']
-    metricas['Total_Geral'] = metricas['Total'] + metricas['Total_Arq']
+    
+    atividades = processar_atividades(atividades_raw)
+    atividades_arq = processar_atividades(atividades_arq_raw)
+    metricas = calcular_metricas(atividades, atividades_arq)
     conn.close()
 
     return render_template('index.html',
@@ -459,12 +476,59 @@ def api_atualizar_atividade(id):
     campo = request.form.get('campo')
     valor = request.form.get('valor')
     
-    campos_permitidos = ['area', 'atividade', 'responsavel', 'status', 'prazo', 'prioridade']
+    campos_permitidos = ['area', 'atividade', 'responsavel', 'status', 'prazo', 'prioridade', 'data_inicio']
     if campo in campos_permitidos:
         conn.execute(f'UPDATE atividades SET {campo} = ? WHERE id = ?', (valor, id))
         conn.commit()
     conn.close()
     return jsonify({"status": "success"})
+
+@app.route('/api/atividades/<int:id>/painel_geral', methods=['GET'])
+def painel_geral(id):
+    conn = get_db_connection()
+    atv = conn.execute('SELECT * FROM atividades WHERE id = ?', (id,)).fetchone()
+    if not atv:
+        conn.close()
+        return jsonify({'error': 'Not found'}), 404
+        
+    passos = conn.execute('SELECT * FROM passos WHERE atividade_id = ?', (id,)).fetchall()
+    conn.close()
+    
+    total_passos = len(passos)
+    concluidos = sum(1 for p in passos if p['concluido'])
+    perc = int((concluidos / total_passos * 100)) if total_passos > 0 else 0
+    
+    # Calculate Atrasado status
+    import datetime
+    hoje = datetime.date.today().strftime('%Y-%m-%d')
+    d = dict(atv)
+    if d['status'] != 'Feito' and d.get('prazo') and d['prazo'] < hoje:
+        status_exibicao = 'Atrasado'
+    else:
+        status_exibicao = d['status']
+
+    return jsonify({
+        'id': atv['id'],
+        'atividade': atv['atividade'],
+        'area': atv['area'],
+        'responsavel': atv['responsavel'],
+        'prioridade': atv['prioridade'],
+        'data_inicio': atv['data_inicio'] or '',
+        'prazo': atv['prazo'] or '',
+        'observacoes': atv['observacoes'] or '',
+        'perc_execucao': perc,
+        'status': atv['status'],
+        'status_exibicao': status_exibicao
+    })
+
+@app.route('/api/atividades/<int:id>/observacoes', methods=['POST'])
+def salvar_observacoes(id):
+    obs = request.form.get('observacoes', '')
+    conn = get_db_connection()
+    conn.execute('UPDATE atividades SET observacoes = ? WHERE id = ?', (obs, id))
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True})
 
 @app.route('/api/atividades/<int:id>/passos', methods=['GET'])
 def api_get_passos(id):
@@ -566,13 +630,14 @@ def adicionar():
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('''
-        INSERT INTO atividades (area, atividade, responsavel, status, prazo, prioridade, arquivado)
-        VALUES (?, ?, ?, ?, ?, ?, 0)
+        INSERT INTO atividades (area, atividade, responsavel, status, data_inicio, prazo, prioridade, arquivado)
+        VALUES (?, ?, ?, ?, ?, ?, ?, 0)
     ''', (
         request.form.get('area', ''),
         request.form.get('atividade', ''),
         request.form.get('responsavel', ''),
         request.form.get('status', 'Pendente'),
+        request.form.get('data_inicio', datetime.date.today().strftime('%Y-%m-%d')),
         request.form.get('prazo', datetime.date.today().strftime('%Y-%m-%d')),
         request.form.get('prioridade', 'Baixa'),
     ))

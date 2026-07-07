@@ -813,6 +813,10 @@
       <!-- Aba Arquivadas -->
       <div id="dash-arquivados" style="display: none;">
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px;">
+          <div style="background: rgba(239,68,68,.1); border: 1px solid #ef4444; padding: 14px; border-radius: 8px; text-align: center; color: #b91c1c;">
+            <div id="metric-atrasado" style="font-size: 22px; font-weight: 700;">{{ metricas.Atrasado }}</div>
+            <div style="font-size: 11px; font-weight: 600; margin-top: 3px;">🚨 Atrasadas</div>
+          </div>
           <div style="background: rgba(245,158,11,.1); border: 1px solid #f59e0b; padding: 14px; border-radius: 8px; text-align: center; color: #b45309;">
             <div id="metric-pendente-arq" style="font-size: 22px; font-weight: 700;">{{ metricas.Pendente_Arq }}</div>
             <div style="font-size: 11px; font-weight: 600; margin-top: 3px;">⚠️ Pendentes</div>
@@ -838,17 +842,55 @@
       <!-- Hidden table for Arquivadas so JS can filter it -->
       <table id="tabelaArquivadasOculta" style="display: none;">
         {% for atv in atividades_arq %}
-        <tr class="linha-dado arquivado">
-          <td class="w-status">{{ atv['status'] }}</td>
-          <td class="w-resp">{{ atv['responsavel'] }}</td>
-          <td class="w-area">{{ atv['area'] }}</td>
-          <td class="w-prio">{{ atv['prioridade'] }}</td>
+        <tr class="linha-dado cursor-pointer" data-area="{{ atv['area'] }}" data-resp="{{ atv['responsavel'] }}" data-status="{{ atv['status_exibicao'] }}" data-prio="{{ atv['prioridade'] }}" onclick="abrirPainelGeral({{ atv['id'] }}, event)">
+          <td style="font-size: 13px;" class="w-data">{{ atv['prazo'].split('-')|reverse|join('/') if atv['prazo'] else '-' }}</td>
+          <td class="w-ativ"><span class="tag-badge" style="font-weight:600; font-size:12px; color:var(--text-main);">{{ atv['area'] }}</span></td>
+          <td style="font-weight: 500; font-size: 14px;">{{ atv['atividade'] }}</td>
+          <td class="w-resp">
+            <div style="display:flex; align-items:center; gap:8px; font-size: 13px;">
+              <img src="/static/user_icon.png" style="width:24px; height:24px; border-radius:50%; object-fit:cover;" onerror="this.style.display='none';">
+              {{ atv['responsavel'] }}
+            </div>
+          </td>
+          <td class="w-status">
+            <div class="status-badge status-{{ atv['status_exibicao']|lower|replace(' ', '-') }}">
+              {% if atv['status_exibicao'] == 'Atrasado' %}🚨 Atrasado
+              {% elif atv['status_exibicao'] == 'Feito' %}✅ Feito
+              {% elif atv['status_exibicao'] == 'Em andamento' %}🔄 Em andamento
+              {% else %}⚠️ Pendente{% endif %}
+            </div>
+          </td>
+          <td class="w-prio">
+            {% set p = atv['prioridade'] %}
+            <div class="prio-badge prio-{{ p|lower }}">
+              {% if p == 'Baixa' %}🟢 Baixa
+              {% elif p == 'Média' %}🟡 Média
+              {% elif p == 'Alta' %}🔴 Alta
+              {% else %}⚪ {{ p }}
+              {% endif %}
+            </div>
+          </td>
+          <td><!-- empty space for Detalhamento column --></td>
+          <td class="w-acoes">
+            <div style="display:flex; gap: 5px;">
+              <form action="{{ url_for('arquivar', id=atv['id']) }}" method="POST" style="display:inline;">
+                <button type="submit" class="btn-icon" title="Arquivar" onclick="event.stopPropagation()">📁</button>
+              </form>
+              <form action="{{ url_for('deletar', id=atv['id']) }}" method="POST" style="display:inline;" onsubmit="return confirm('Tem certeza que deseja excluir esta atividade?');">
+                <button type="submit" class="btn-icon" title="Excluir" style="color:#ef4444;" onclick="event.stopPropagation()">🗑️</button>
+              </form>
+            </div>
+          </td>
         </tr>
         {% endfor %}
       </table>
 <!-- Aba Ativas -->
       <div id="dash-ativos" style="display: block;">
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px;">
+          <div style="background: rgba(239,68,68,.1); border: 1px solid #ef4444; padding: 14px; border-radius: 8px; text-align: center; color: #b91c1c;">
+            <div id="metric-atrasado" style="font-size: 22px; font-weight: 700;">{{ metricas.Atrasado }}</div>
+            <div style="font-size: 11px; font-weight: 600; margin-top: 3px;">🚨 Atrasadas</div>
+          </div>
           <div style="background: rgba(245,158,11,.1); border: 1px solid #f59e0b; padding: 14px; border-radius: 8px; text-align: center; color: #b45309;">
             <div id="metric-pendente" style="font-size: 22px; font-weight: 700;">{{ metricas.Pendente }}</div>
             <div style="font-size: 11px; font-weight: 600; margin-top: 3px;">⚠️ Pendentes</div>
@@ -867,7 +909,7 @@
           </div>
         </div>
         <div style="margin-top: 20px; max-width: 500px; padding-left: 10px; padding-right: 10px; margin-left: auto; margin-right: auto; height: 250px;">
-            <canvas id="chartGeralDashboard" data-pendente="{{ metricas.Pendente }}" data-emandamento="{{ metricas['Em andamento'] }}" data-feito="{{ metricas.Feito }}"></canvas>
+            <canvas id="chartGeralDashboard" data-atrasado="{{ metricas.Atrasado }}" data-pendente="{{ metricas.Pendente }}" data-emandamento="{{ metricas['Em andamento'] }}" data-feito="{{ metricas.Feito }}"></canvas>
         </div>
       </div>
     </div>
@@ -898,12 +940,6 @@
             {% endfor %}
           </select>
         </div>
-
-        <select name="status">
-          <option value="Pendente">⚠️ Pendente</option>
-          <option value="Em andamento">🔄 Em andamento</option>
-          <option value="Feito">✅ Feito</option>
-        </select>
         <select name="prioridade" class="prio-select" onchange="ajustarCorPrio(this)">
           <option value="Baixa"  data-color="#22c55e">Baixa Prioridade</option>
           <option value="Média"  data-color="#eab308">Média Prioridade</option>
@@ -915,6 +951,8 @@
         <div class="form-coluna">
           <label class="label-editor">Atividade (Título)</label>
           <input type="text" name="atividade" required placeholder="Digite o título da atividade..." style="margin-bottom: 10px;">
+          <label class="label-editor">Data de Início</label>
+          <input type="date" name="data_inicio" style="margin-bottom: 10px;" value="{{ data_hoje }}">
           <label class="label-editor">Prazo Geral</label>
           <input type="date" name="prazo" style="margin-bottom: 10px;">
         </div>
@@ -953,91 +991,44 @@
       </thead>
       <tbody>
         {% for atv in atividades %}
-                <tr class="linha-dado">
-          <td><input type="date" class="auto-save" data-id="{{ atv['id'] }}" data-campo="prazo" value="{{ atv['prazo'] }}"></td>
-
-          <td>
-            <select class="tag-select auto-save" data-id="{{ atv['id'] }}" data-campo="area" onchange="ajustarCorSelect(this)">
-              {% set ns = namespace(found=false) %}
-              {% for cat in categorias %}
-              <option value="{{ cat['nome'] }}" data-color="{{ cat['cor'] }}"
-                      {% if (atv['area']|string|lower|trim) == (cat['nome']|string|lower|trim) %}selected{% set ns.found = true %}{% endif %}>
-                {{ cat['nome'] }}
-              </option>
-              {% endfor %}
-              {% if not ns.found %}
-              <option value="{{ atv['area'] }}" data-color="#475569" selected>{{ atv['area'] }}</option>
-              {% endif %}
-            </select>
-          </td>
-
-          <td>
-            <textarea class="auto-save" data-id="{{ atv['id'] }}" data-campo="atividade" rows="2" style="resize:vertical;">{{ atv['atividade'] }}</textarea>
-          </td>
-
-          <td>
-            <div style="display:flex; align-items:center; gap:5px;">
-              <div id="img-resp-{{ atv['id'] }}">
-                {% set resp_foto = "" %}
-                {% for r in responsaveis %}{% if atv['responsavel'] == r['nome'] and r['foto'] %}{% set resp_foto = url_for('static', filename=r['foto']) %}{% endif %}{% endfor %}
-                {% if resp_foto %}
-                  <img src="{{ resp_foto }}" style="width:26px;height:26px;border-radius:50%;object-fit:cover;border:1px solid var(--border-color);">
-                {% else %}
-                  <div style="width:26px;height:26px;border-radius:50%;background:var(--table-even);display:flex;align-items:center;justify-content:center;font-size:13px;border:1px solid var(--border-color);">👤</div>
-                {% endif %}
-              </div>
-              <select class="auto-save" data-id="{{ atv['id'] }}" data-campo="responsavel"
-                      onchange="ajustarFotoResp(this,'img-resp-{{ atv['id'] }}')"
-                      style="flex:1; min-width:0;">
-                {% for resp in responsaveis %}
-                <option value="{{ resp['nome'] }}"
-                        data-foto="{% if resp['foto'] %}{{ url_for('static', filename=resp['foto']) }}{% endif %}"
-                        {% if atv['responsavel'] == resp['nome'] %}selected{% endif %}>
-                  {{ resp['nome'] }}
-                </option>
-                {% endfor %}
-              </select>
+                <tr class="linha-dado cursor-pointer" data-area="{{ atv['area'] }}" data-resp="{{ atv['responsavel'] }}" data-status="{{ atv['status_exibicao'] }}" data-prio="{{ atv['prioridade'] }}" onclick="abrirPainelGeral({{ atv['id'] }}, event)">
+          <td style="font-size: 13px;" class="w-data">{{ atv['prazo'].split('-')|reverse|join('/') if atv['prazo'] else '-' }}</td>
+          <td class="w-ativ"><span class="tag-badge" style="font-weight:600; font-size:12px; color:var(--text-main);">{{ atv['area'] }}</span></td>
+          <td style="font-weight: 500; font-size: 14px;">{{ atv['atividade'] }}</td>
+          <td class="w-resp">
+            <div style="display:flex; align-items:center; gap:8px; font-size: 13px;">
+              <img src="/static/user_icon.png" style="width:24px; height:24px; border-radius:50%; object-fit:cover;" onerror="this.style.display='none';">
+              {{ atv['responsavel'] }}
             </div>
           </td>
-
-          <td>
-            <select class="auto-save" data-id="{{ atv['id'] }}" data-campo="status">
-              <option value="Pendente"     {% if atv['status'] == 'Pendente'     %}selected{% endif %}>⚠️ Pendente</option>
-              <option value="Em andamento" {% if atv['status'] == 'Em andamento' %}selected{% endif %}>🔄 Em andamento</option>
-              <option value="Feito"        {% if atv['status'] == 'Feito'        %}selected{% endif %}>✅ Feito</option>
-            </select>
+          <td class="w-status">
+            <div class="status-badge status-{{ atv['status_exibicao']|lower|replace(' ', '-') }}">
+              {% if atv['status_exibicao'] == 'Atrasado' %}🚨 Atrasado
+              {% elif atv['status_exibicao'] == 'Feito' %}✅ Feito
+              {% elif atv['status_exibicao'] == 'Em andamento' %}🔄 Em andamento
+              {% else %}⚠️ Pendente{% endif %}
+            </div>
           </td>
-
-          <td>
-            <select class="prio-select auto-save" data-id="{{ atv['id'] }}" data-campo="prioridade" onchange="ajustarCorPrio(this)">
-              <option value="Baixa" data-color="#22c55e" {% if atv['prioridade'] == 'Baixa' %}selected{% endif %}>Baixa</option>
-              <option value="Média" data-color="#eab308" {% if atv['prioridade'] == 'Média' %}selected{% endif %}>Média</option>
-              <option value="Alta"  data-color="#ef4444" {% if atv['prioridade'] == 'Alta'  %}selected{% endif %}>Alta</option>
-            </select>
+          <td class="w-prio">
+            {% set p = atv['prioridade'] %}
+            <div class="prio-badge prio-{{ p|lower }}">
+              {% if p == 'Baixa' %}🟢 Baixa
+              {% elif p == 'Média' %}🟡 Média
+              {% elif p == 'Alta' %}🔴 Alta
+              {% else %}⚪ {{ p }}
+              {% endif %}
+            </div>
           </td>
-
-          <td>
-            <button type="button" onclick="abrirModalPassos({{ atv['id'] }})" style="background:var(--btn-primary); color:white; border:none; padding:5px 8px; font-size: 11px; cursor:pointer; border-radius:var(--radius-sm); width:100%; min-width: 100%; font-weight:600;">Ver Passos</button>
-          </td>
-
-          <td style="vertical-align: middle;">
-            {% if modo == 'ativos' or modo.startswith('usuario_detalhe') %}
-              <form action="{{ url_for('arquivar', id=atv['id']) }}" method="POST" onsubmit="return confirm('Mover para arquivados?')" style="margin:0; width: 100%; display: flex; align-items: center; justify-content: center;">
-                <input type="hidden" name="next" value="{{ request.path }}">
-                <button type="submit" class="btn-arquivar">Arquivar</button>
+          <td><!-- empty space for Detalhamento column --></td>
+          <td class="w-acoes">
+            <div style="display:flex; gap: 5px;">
+              <form action="{{ url_for('restaurar', id=atv['id']) }}" method="POST" style="display:inline;">
+                <button type="submit" class="btn-icon" title="Restaurar" onclick="event.stopPropagation()">📂</button>
               </form>
-            {% else %}
-              <div style="display: flex; flex-direction: column; gap: 6px; width: 100%; justify-content: center; align-items: center;">
-                <form action="{{ url_for('restaurar', id=atv['id']) }}" method="POST" style="margin:0; width: 100%;">
-                  <input type="hidden" name="next" value="{{ request.path }}">
-                  <button type="submit" class="btn-restaurar" style="width: 100%; box-sizing: border-box; border-radius: var(--radius-sm); padding: 5px 8px; font-size: 11px; font-weight: 600;">Restaurar</button>
-                </form>
-                <form action="{{ url_for('deletar', id=atv['id']) }}" method="POST" onsubmit="return confirm('EXCLUIR PERMANENTEMENTE?')" style="margin:0; width: 100%;">
-                  <input type="hidden" name="next" value="{{ request.path }}">
-                  <button type="submit" class="btn-deletar" style="width: 100%; box-sizing: border-box; border-radius: var(--radius-sm); padding: 5px 8px; font-size: 11px; font-weight: 600;">Excluir</button>
-                </form>
-              </div>
-            {% endif %}
+              <form action="{{ url_for('deletar', id=atv['id']) }}" method="POST" style="display:inline;" onsubmit="return confirm('Tem certeza que deseja excluir esta atividade?');">
+                <button type="submit" class="btn-icon" title="Excluir" style="color:#ef4444;" onclick="event.stopPropagation()">🗑️</button>
+              </form>
+            </div>
           </td>
         </tr>
         {% else %}
@@ -1074,91 +1065,44 @@
       </thead>
       <tbody>
         {% for atv in atividades %}
-                <tr class="linha-dado">
-          <td><input type="date" class="auto-save" data-id="{{ atv['id'] }}" data-campo="prazo" value="{{ atv['prazo'] }}"></td>
-
-          <td>
-            <select class="tag-select auto-save" data-id="{{ atv['id'] }}" data-campo="area" onchange="ajustarCorSelect(this)">
-              {% set ns = namespace(found=false) %}
-              {% for cat in categorias %}
-              <option value="{{ cat['nome'] }}" data-color="{{ cat['cor'] }}"
-                      {% if (atv['area']|string|lower|trim) == (cat['nome']|string|lower|trim) %}selected{% set ns.found = true %}{% endif %}>
-                {{ cat['nome'] }}
-              </option>
-              {% endfor %}
-              {% if not ns.found %}
-              <option value="{{ atv['area'] }}" data-color="#475569" selected>{{ atv['area'] }}</option>
-              {% endif %}
-            </select>
-          </td>
-
-          <td>
-            <textarea class="auto-save" data-id="{{ atv['id'] }}" data-campo="atividade" rows="2" style="resize:vertical;">{{ atv['atividade'] }}</textarea>
-          </td>
-
-          <td>
-            <div style="display:flex; align-items:center; gap:5px;">
-              <div id="img-resp-{{ atv['id'] }}">
-                {% set resp_foto = "" %}
-                {% for r in responsaveis %}{% if atv['responsavel'] == r['nome'] and r['foto'] %}{% set resp_foto = url_for('static', filename=r['foto']) %}{% endif %}{% endfor %}
-                {% if resp_foto %}
-                  <img src="{{ resp_foto }}" style="width:26px;height:26px;border-radius:50%;object-fit:cover;border:1px solid var(--border-color);">
-                {% else %}
-                  <div style="width:26px;height:26px;border-radius:50%;background:var(--table-even);display:flex;align-items:center;justify-content:center;font-size:13px;border:1px solid var(--border-color);">👤</div>
-                {% endif %}
-              </div>
-              <select class="auto-save" data-id="{{ atv['id'] }}" data-campo="responsavel"
-                      onchange="ajustarFotoResp(this,'img-resp-{{ atv['id'] }}')"
-                      style="flex:1; min-width:0;">
-                {% for resp in responsaveis %}
-                <option value="{{ resp['nome'] }}"
-                        data-foto="{% if resp['foto'] %}{{ url_for('static', filename=resp['foto']) }}{% endif %}"
-                        {% if atv['responsavel'] == resp['nome'] %}selected{% endif %}>
-                  {{ resp['nome'] }}
-                </option>
-                {% endfor %}
-              </select>
+                <tr class="linha-dado cursor-pointer" data-area="{{ atv['area'] }}" data-resp="{{ atv['responsavel'] }}" data-status="{{ atv['status_exibicao'] }}" data-prio="{{ atv['prioridade'] }}" onclick="abrirPainelGeral({{ atv['id'] }}, event)">
+          <td style="font-size: 13px;" class="w-data">{{ atv['prazo'].split('-')|reverse|join('/') if atv['prazo'] else '-' }}</td>
+          <td class="w-ativ"><span class="tag-badge" style="font-weight:600; font-size:12px; color:var(--text-main);">{{ atv['area'] }}</span></td>
+          <td style="font-weight: 500; font-size: 14px;">{{ atv['atividade'] }}</td>
+          <td class="w-resp">
+            <div style="display:flex; align-items:center; gap:8px; font-size: 13px;">
+              <img src="/static/user_icon.png" style="width:24px; height:24px; border-radius:50%; object-fit:cover;" onerror="this.style.display='none';">
+              {{ atv['responsavel'] }}
             </div>
           </td>
-
-          <td>
-            <select class="auto-save" data-id="{{ atv['id'] }}" data-campo="status">
-              <option value="Pendente"     {% if atv['status'] == 'Pendente'     %}selected{% endif %}>⚠️ Pendente</option>
-              <option value="Em andamento" {% if atv['status'] == 'Em andamento' %}selected{% endif %}>🔄 Em andamento</option>
-              <option value="Feito"        {% if atv['status'] == 'Feito'        %}selected{% endif %}>✅ Feito</option>
-            </select>
+          <td class="w-status">
+            <div class="status-badge status-{{ atv['status_exibicao']|lower|replace(' ', '-') }}">
+              {% if atv['status_exibicao'] == 'Atrasado' %}🚨 Atrasado
+              {% elif atv['status_exibicao'] == 'Feito' %}✅ Feito
+              {% elif atv['status_exibicao'] == 'Em andamento' %}🔄 Em andamento
+              {% else %}⚠️ Pendente{% endif %}
+            </div>
           </td>
-
-          <td>
-            <select class="prio-select auto-save" data-id="{{ atv['id'] }}" data-campo="prioridade" onchange="ajustarCorPrio(this)">
-              <option value="Baixa" data-color="#22c55e" {% if atv['prioridade'] == 'Baixa' %}selected{% endif %}>Baixa</option>
-              <option value="Média" data-color="#eab308" {% if atv['prioridade'] == 'Média' %}selected{% endif %}>Média</option>
-              <option value="Alta"  data-color="#ef4444" {% if atv['prioridade'] == 'Alta'  %}selected{% endif %}>Alta</option>
-            </select>
+          <td class="w-prio">
+            {% set p = atv['prioridade'] %}
+            <div class="prio-badge prio-{{ p|lower }}">
+              {% if p == 'Baixa' %}🟢 Baixa
+              {% elif p == 'Média' %}🟡 Média
+              {% elif p == 'Alta' %}🔴 Alta
+              {% else %}⚪ {{ p }}
+              {% endif %}
+            </div>
           </td>
-
-          <td>
-            <button type="button" onclick="abrirModalPassos({{ atv['id'] }})" style="background:var(--btn-primary); color:white; border:none; padding:5px 8px; font-size: 11px; cursor:pointer; border-radius:var(--radius-sm); width:100%; min-width: 100%; font-weight:600;">Ver Passos</button>
-          </td>
-
-          <td style="vertical-align: middle;">
-            {% if modo == 'ativos' or modo.startswith('usuario_detalhe') %}
-              <form action="{{ url_for('arquivar', id=atv['id']) }}" method="POST" onsubmit="return confirm('Mover para arquivados?')" style="margin:0; width: 100%; display: flex; align-items: center; justify-content: center;">
-                <input type="hidden" name="next" value="{{ request.path }}">
-                <button type="submit" class="btn-arquivar">Arquivar</button>
+          <td><!-- empty space for Detalhamento column --></td>
+          <td class="w-acoes">
+            <div style="display:flex; gap: 5px;">
+              <form action="{{ url_for('restaurar', id=atv['id']) }}" method="POST" style="display:inline;">
+                <button type="submit" class="btn-icon" title="Restaurar" onclick="event.stopPropagation()">📂</button>
               </form>
-            {% else %}
-              <div style="display: flex; flex-direction: column; gap: 6px; width: 100%; justify-content: center; align-items: center;">
-                <form action="{{ url_for('restaurar', id=atv['id']) }}" method="POST" style="margin:0; width: 100%;">
-                  <input type="hidden" name="next" value="{{ request.path }}">
-                  <button type="submit" class="btn-restaurar" style="width: 100%; box-sizing: border-box; border-radius: var(--radius-sm); padding: 5px 8px; font-size: 11px; font-weight: 600;">Restaurar</button>
-                </form>
-                <form action="{{ url_for('deletar', id=atv['id']) }}" method="POST" onsubmit="return confirm('EXCLUIR PERMANENTEMENTE?')" style="margin:0; width: 100%;">
-                  <input type="hidden" name="next" value="{{ request.path }}">
-                  <button type="submit" class="btn-deletar" style="width: 100%; box-sizing: border-box; border-radius: var(--radius-sm); padding: 5px 8px; font-size: 11px; font-weight: 600;">Excluir</button>
-                </form>
-              </div>
-            {% endif %}
+              <form action="{{ url_for('deletar', id=atv['id']) }}" method="POST" style="display:inline;" onsubmit="return confirm('Tem certeza que deseja excluir esta atividade?');">
+                <button type="submit" class="btn-icon" title="Excluir" style="color:#ef4444;" onclick="event.stopPropagation()">🗑️</button>
+              </form>
+            </div>
           </td>
         </tr>
         {% else %}
@@ -1499,6 +1443,10 @@
       <!-- Aba Ativas -->
       <div id="dash-ativos" style="display: block;">
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px;">
+          <div style="background: rgba(239,68,68,.1); border: 1px solid #ef4444; padding: 14px; border-radius: 8px; text-align: center; color: #b91c1c;">
+            <div id="metric-atrasado" style="font-size: 22px; font-weight: 700;">{{ metricas.Atrasado }}</div>
+            <div style="font-size: 11px; font-weight: 600; margin-top: 3px;">🚨 Atrasadas</div>
+          </div>
           <div style="background: rgba(245,158,11,.1); border: 1px solid #f59e0b; padding: 14px; border-radius: 8px; text-align: center; color: #b45309;">
             <div id="metric-pendente" style="font-size: 18px; font-weight: 700;">{{ metricas.Pendente }}</div>
             <div style="font-size: 11px; font-weight: 600; margin-top: 3px;">⚠️ Pendentes</div>
@@ -1525,6 +1473,10 @@
       <!-- Aba Arquivadas -->
       <div id="dash-arquivados" style="display: none;">
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px;">
+          <div style="background: rgba(239,68,68,.1); border: 1px solid #ef4444; padding: 14px; border-radius: 8px; text-align: center; color: #b91c1c;">
+            <div id="metric-atrasado" style="font-size: 22px; font-weight: 700;">{{ metricas.Atrasado }}</div>
+            <div style="font-size: 11px; font-weight: 600; margin-top: 3px;">🚨 Atrasadas</div>
+          </div>
           <div style="background: rgba(245,158,11,.1); border: 1px solid #f59e0b; padding: 14px; border-radius: 8px; text-align: center; color: #b45309;">
             <div style="font-size: 26px; font-weight: 700;">{{ metricas.Pendente_Arq }}</div>
             <div style="font-size: 11px; font-weight: 600; margin-top: 3px;">⚠️ Pendentes</div>
@@ -1607,12 +1559,6 @@
             {% endfor %}
           </select>
         </div>
-
-        <select name="status">
-          <option value="Pendente">⚠️ Pendente</option>
-          <option value="Em andamento">🔄 Em andamento</option>
-          <option value="Feito">✅ Feito</option>
-        </select>
         <select name="prioridade" class="prio-select" onchange="ajustarCorPrio(this)">
           <option value="Baixa"  data-color="#22c55e">Baixa Prioridade</option>
           <option value="Média"  data-color="#eab308">Média Prioridade</option>
@@ -1624,6 +1570,8 @@
         <div class="form-coluna">
           <label class="label-editor">Atividade (Título)</label>
           <input type="text" name="atividade" required placeholder="Digite o título da atividade..." style="margin-bottom: 10px;">
+          <label class="label-editor">Data de Início</label>
+          <input type="date" name="data_inicio" style="margin-bottom: 10px;" value="{{ data_hoje }}">
           <label class="label-editor">Prazo Geral</label>
           <input type="date" name="prazo" style="margin-bottom: 10px;">
         </div>
@@ -1663,91 +1611,44 @@
       </thead>
       <tbody>
         {% for atv in atividades %}
-                <tr class="linha-dado">
-          <td><input type="date" class="auto-save" data-id="{{ atv['id'] }}" data-campo="prazo" value="{{ atv['prazo'] }}"></td>
-
-          <td>
-            <select class="tag-select auto-save" data-id="{{ atv['id'] }}" data-campo="area" onchange="ajustarCorSelect(this)">
-              {% set ns = namespace(found=false) %}
-              {% for cat in categorias %}
-              <option value="{{ cat['nome'] }}" data-color="{{ cat['cor'] }}"
-                      {% if (atv['area']|string|lower|trim) == (cat['nome']|string|lower|trim) %}selected{% set ns.found = true %}{% endif %}>
-                {{ cat['nome'] }}
-              </option>
-              {% endfor %}
-              {% if not ns.found %}
-              <option value="{{ atv['area'] }}" data-color="#475569" selected>{{ atv['area'] }}</option>
-              {% endif %}
-            </select>
-          </td>
-
-          <td>
-            <textarea class="auto-save" data-id="{{ atv['id'] }}" data-campo="atividade" rows="2" style="resize:vertical;">{{ atv['atividade'] }}</textarea>
-          </td>
-
-          <td>
-            <div style="display:flex; align-items:center; gap:5px;">
-              <div id="img-resp-{{ atv['id'] }}">
-                {% set resp_foto = "" %}
-                {% for r in responsaveis %}{% if atv['responsavel'] == r['nome'] and r['foto'] %}{% set resp_foto = url_for('static', filename=r['foto']) %}{% endif %}{% endfor %}
-                {% if resp_foto %}
-                  <img src="{{ resp_foto }}" style="width:26px;height:26px;border-radius:50%;object-fit:cover;border:1px solid var(--border-color);">
-                {% else %}
-                  <div style="width:26px;height:26px;border-radius:50%;background:var(--table-even);display:flex;align-items:center;justify-content:center;font-size:13px;border:1px solid var(--border-color);">👤</div>
-                {% endif %}
-              </div>
-              <select class="auto-save" data-id="{{ atv['id'] }}" data-campo="responsavel"
-                      onchange="ajustarFotoResp(this,'img-resp-{{ atv['id'] }}')"
-                      style="flex:1; min-width:0;">
-                {% for resp in responsaveis %}
-                <option value="{{ resp['nome'] }}"
-                        data-foto="{% if resp['foto'] %}{{ url_for('static', filename=resp['foto']) }}{% endif %}"
-                        {% if atv['responsavel'] == resp['nome'] %}selected{% endif %}>
-                  {{ resp['nome'] }}
-                </option>
-                {% endfor %}
-              </select>
+                <tr class="linha-dado cursor-pointer" data-area="{{ atv['area'] }}" data-resp="{{ atv['responsavel'] }}" data-status="{{ atv['status_exibicao'] }}" data-prio="{{ atv['prioridade'] }}" onclick="abrirPainelGeral({{ atv['id'] }}, event)">
+          <td style="font-size: 13px;" class="w-data">{{ atv['prazo'].split('-')|reverse|join('/') if atv['prazo'] else '-' }}</td>
+          <td class="w-ativ"><span class="tag-badge" style="font-weight:600; font-size:12px; color:var(--text-main);">{{ atv['area'] }}</span></td>
+          <td style="font-weight: 500; font-size: 14px;">{{ atv['atividade'] }}</td>
+          <td class="w-resp">
+            <div style="display:flex; align-items:center; gap:8px; font-size: 13px;">
+              <img src="/static/user_icon.png" style="width:24px; height:24px; border-radius:50%; object-fit:cover;" onerror="this.style.display='none';">
+              {{ atv['responsavel'] }}
             </div>
           </td>
-
-          <td>
-            <select class="auto-save" data-id="{{ atv['id'] }}" data-campo="status">
-              <option value="Pendente"     {% if atv['status'] == 'Pendente'     %}selected{% endif %}>⚠️ Pendente</option>
-              <option value="Em andamento" {% if atv['status'] == 'Em andamento' %}selected{% endif %}>🔄 Em andamento</option>
-              <option value="Feito"        {% if atv['status'] == 'Feito'        %}selected{% endif %}>✅ Feito</option>
-            </select>
+          <td class="w-status">
+            <div class="status-badge status-{{ atv['status_exibicao']|lower|replace(' ', '-') }}">
+              {% if atv['status_exibicao'] == 'Atrasado' %}🚨 Atrasado
+              {% elif atv['status_exibicao'] == 'Feito' %}✅ Feito
+              {% elif atv['status_exibicao'] == 'Em andamento' %}🔄 Em andamento
+              {% else %}⚠️ Pendente{% endif %}
+            </div>
           </td>
-
-          <td>
-            <select class="prio-select auto-save" data-id="{{ atv['id'] }}" data-campo="prioridade" onchange="ajustarCorPrio(this)">
-              <option value="Baixa" data-color="#22c55e" {% if atv['prioridade'] == 'Baixa' %}selected{% endif %}>Baixa</option>
-              <option value="Média" data-color="#eab308" {% if atv['prioridade'] == 'Média' %}selected{% endif %}>Média</option>
-              <option value="Alta"  data-color="#ef4444" {% if atv['prioridade'] == 'Alta'  %}selected{% endif %}>Alta</option>
-            </select>
+          <td class="w-prio">
+            {% set p = atv['prioridade'] %}
+            <div class="prio-badge prio-{{ p|lower }}">
+              {% if p == 'Baixa' %}🟢 Baixa
+              {% elif p == 'Média' %}🟡 Média
+              {% elif p == 'Alta' %}🔴 Alta
+              {% else %}⚪ {{ p }}
+              {% endif %}
+            </div>
           </td>
-
-          <td>
-            <button type="button" onclick="abrirModalPassos({{ atv['id'] }})" style="background:var(--btn-primary); color:white; border:none; padding:5px 8px; font-size: 11px; cursor:pointer; border-radius:var(--radius-sm); width:100%; min-width: 100%; font-weight:600;">Ver Passos</button>
-          </td>
-
-          <td style="vertical-align: middle;">
-            {% if modo == 'ativos' or modo.startswith('usuario_detalhe') %}
-              <form action="{{ url_for('arquivar', id=atv['id']) }}" method="POST" onsubmit="return confirm('Mover para arquivados?')" style="margin:0; width: 100%; display: flex; align-items: center; justify-content: center;">
-                <input type="hidden" name="next" value="{{ request.path }}">
-                <button type="submit" class="btn-arquivar">Arquivar</button>
+          <td><!-- empty space for Detalhamento column --></td>
+          <td class="w-acoes">
+            <div style="display:flex; gap: 5px;">
+              <form action="{{ url_for('restaurar', id=atv['id']) }}" method="POST" style="display:inline;">
+                <button type="submit" class="btn-icon" title="Restaurar" onclick="event.stopPropagation()">📂</button>
               </form>
-            {% else %}
-              <div style="display: flex; flex-direction: column; gap: 6px; width: 100%; justify-content: center; align-items: center;">
-                <form action="{{ url_for('restaurar', id=atv['id']) }}" method="POST" style="margin:0; width: 100%;">
-                  <input type="hidden" name="next" value="{{ request.path }}">
-                  <button type="submit" class="btn-restaurar" style="width: 100%; box-sizing: border-box; border-radius: var(--radius-sm); padding: 5px 8px; font-size: 11px; font-weight: 600;">Restaurar</button>
-                </form>
-                <form action="{{ url_for('deletar', id=atv['id']) }}" method="POST" onsubmit="return confirm('EXCLUIR PERMANENTEMENTE?')" style="margin:0; width: 100%;">
-                  <input type="hidden" name="next" value="{{ request.path }}">
-                  <button type="submit" class="btn-deletar" style="width: 100%; box-sizing: border-box; border-radius: var(--radius-sm); padding: 5px 8px; font-size: 11px; font-weight: 600;">Excluir</button>
-                </form>
-              </div>
-            {% endif %}
+              <form action="{{ url_for('deletar', id=atv['id']) }}" method="POST" style="display:inline;" onsubmit="return confirm('Tem certeza que deseja excluir esta atividade?');">
+                <button type="submit" class="btn-icon" title="Excluir" style="color:#ef4444;" onclick="event.stopPropagation()">🗑️</button>
+              </form>
+            </div>
           </td>
         </tr>
         {% else %}
@@ -1911,11 +1812,10 @@
 
     linhas.forEach(tr => {
       // Data reading from normal table or hidden table
-      const vArea = (tr.querySelector('select[data-campo="area"]')?.value || tr.querySelector('.w-area')?.innerText || tr.querySelector('td:nth-child(2)')?.innerText || "").toLowerCase().trim();
-      const vResp = (tr.querySelector('select[data-campo="responsavel"]')?.value || tr.querySelector('.w-resp')?.innerText || "").toLowerCase().trim();
-      const vStatus = (tr.querySelector('select[data-campo="status"]')?.value || tr.querySelector('.w-status')?.innerText || "").toLowerCase().trim();
-      const vPrio = (tr.querySelector('select[data-campo="prioridade"]')?.value || tr.querySelector('.w-prio')?.innerText || "").toLowerCase().trim();
-
+      const vArea = (tr.dataset.area || "").toLowerCase().trim();
+      const vResp = (tr.dataset.resp || "").toLowerCase().trim();
+      const vStatus = (tr.dataset.status || "").toLowerCase().trim();
+      const vPrio = (tr.dataset.prio || "").toLowerCase().trim();
       const show = 
         (!fArea || vArea === fArea) &&
         (!fResp || vResp === fResp) &&
@@ -2021,11 +1921,11 @@
     window.chartArquivadosDashInstance = new Chart(ctx, {
       type: 'bar',
       data: {
-        labels: ['Pendentes', ['Em', 'andamento'], 'Concluídas'],
+        labels: ['Atrasadas', 'Pendentes', ['Em', 'andamento'], 'Concluídas'],
         datasets: [{
           label: 'Arquivadas',
-          data: [pendente, emAndamento, feito],
-          backgroundColor: ['#ff4757', '#1e90ff', '#2ed573'],
+          data: [atrasado, pendente, emAndamento, feito],
+          backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6', '#22c55e'],
           borderWidth: 0, borderRadius: 8, barPercentage: 0.6, categoryPercentage: 0.7
         }]
       },
@@ -2047,6 +1947,7 @@
     if (!canvas) return;
     
     const ctx = canvas.getContext('2d');
+    const atrasado = parseInt(document.getElementById("metric-atrasado")?.innerText || canvas.dataset.atrasado) || 0;
     const pendente = parseInt(document.getElementById("metric-pendente")?.innerText || canvas.dataset.pendente) || 0;
     const emAndamento = parseInt(document.getElementById("metric-emandamento")?.innerText || canvas.dataset.emandamento) || 0;
     const feito = parseInt(document.getElementById("metric-feito")?.innerText || canvas.dataset.feito) || 0;
@@ -2056,11 +1957,11 @@
     window.chartDashboardInstance = new Chart(ctx, {
       type: 'bar',
       data: {
-        labels: ['Pendentes', ['Em', 'andamento'], 'Concluídas'],
+        labels: ['Atrasadas', 'Pendentes', ['Em', 'andamento'], 'Concluídas'],
         datasets: [{
           label: 'Atividades',
-          data: [pendente, emAndamento, feito],
-          backgroundColor: ['#ff4757', '#1e90ff', '#2ed573'],
+          data: [atrasado, pendente, emAndamento, feito],
+          backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6', '#22c55e'],
           borderWidth: 0,
           borderRadius: 8,
           barPercentage: 0.6, categoryPercentage: 0.7
@@ -2164,10 +2065,10 @@
     chartAtivos = new Chart(ctx, {
       type: 'bar',
       data: {
-        labels: ['Pendentes', ['Em', 'andamento'], 'Concluídas'],
+        labels: ['Atrasadas', 'Pendentes', ['Em', 'andamento'], 'Concluídas'],
         datasets: [{
-          data: [pendente, emAndamento, feito],
-          backgroundColor: ['#ff4757', '#1e90ff', '#2ed573'],
+          data: [atrasado, pendente, emAndamento, feito],
+          backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6', '#22c55e'],
           borderRadius: 8, barPercentage: 0.6, categoryPercentage: 0.7
         }]
       },
@@ -2198,10 +2099,10 @@
     chartArquivados = new Chart(ctx, {
       type: 'bar',
       data: {
-        labels: ['Pendentes', ['Em', 'andamento'], 'Concluídas'],
+        labels: ['Atrasadas', 'Pendentes', ['Em', 'andamento'], 'Concluídas'],
         datasets: [{
-          data: [pendente, emAndamento, feito],
-          backgroundColor: ['#ff4757', '#1e90ff', '#2ed573'],
+          data: [atrasado, pendente, emAndamento, feito],
+          backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6', '#22c55e'],
           borderRadius: 8, barPercentage: 0.6, categoryPercentage: 0.7
         }]
       },
@@ -2238,7 +2139,7 @@
     chartGeral = new Chart(ctx, {
       type: 'bar',
       data: {
-        labels: ['Pendentes', ['Em', 'andamento'], 'Concluídas'],
+        labels: ['Atrasadas', 'Pendentes', ['Em', 'andamento'], 'Concluídas'],
         datasets: [
           {
             label: 'Ativas',
@@ -2325,6 +2226,7 @@
 
   function fecharModalPassos() {
       document.getElementById('modalPassos').style.display = 'none';
+      window.location.reload();
   }
 
   async function carregarPassos() {
@@ -2491,6 +2393,262 @@
     document.getElementById('modal-procedimento').style.display = 'none';
   }
 </script>
-</body>
 
-</html>
+  <!-- MODAL PAINEL GERAL CENTRALIZADO -->
+  <div id="modalPainelGeral" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; align-items:center; justify-content:center; padding: 20px; box-sizing: border-box;">
+    <div style="background:var(--bg-panel); width:100%; max-width:1100px; height: 95vh; border-radius:12px; display:flex; flex-direction:column; box-shadow:0 10px 40px rgba(0,0,0,0.6); overflow: hidden;">
+      
+      <!-- Cabeçalho / Inputs -->
+      <div style="padding: 20px 25px; border-bottom: 1px solid var(--border-color); display:flex; flex-direction:column; gap:15px; background:var(--bg-main);">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+          <input type="text" id="pg-atividade" onchange="atualizarAtividadeModal('atividade', this.value)" style="font-size:22px; font-weight:700; color:var(--text-main); border:none; background:transparent; width:100%; outline:none;" placeholder="Título da Atividade">
+          <button onclick="fecharPainelGeral()" style="background:transparent; border:none; color:var(--text-muted); font-size:24px; cursor:pointer; margin-left:15px;">&times;</button>
+        </div>
+        
+        <div style="display:flex; gap:15px; flex-wrap:wrap; align-items:center;">
+          <div style="display:flex; flex-direction:column; gap:4px; flex:1; min-width:150px;">
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase;">Início</label>
+            <input type="date" id="pg-inicio" onchange="atualizarAtividadeModal('data_inicio', this.value)" style="font-size:14px; padding:6px; border:1px solid var(--border-color); border-radius:6px; background:var(--bg-panel); color:var(--text-main);">
+          </div>
+          <div style="display:flex; flex-direction:column; gap:4px; flex:1; min-width:150px;">
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase;">Prazo</label>
+            <input type="date" id="pg-prazo" onchange="atualizarAtividadeModal('prazo', this.value)" style="font-size:14px; padding:6px; border:1px solid var(--border-color); border-radius:6px; background:var(--bg-panel); color:var(--text-main);">
+          </div>
+          <div style="display:flex; flex-direction:column; gap:4px; flex:1; min-width:150px;">
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase;">Área</label>
+            <select id="pg-area" onchange="atualizarAtividadeModal('area', this.value)" style="font-size:14px; padding:6px; border:1px solid var(--border-color); border-radius:6px; background:var(--bg-panel); color:var(--text-main);">
+              {% for cat in categorias %}
+              <option value="{{ cat['nome'] }}">{{ cat['nome'] }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:4px; flex:1; min-width:150px;">
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase;">Responsável</label>
+            <select id="pg-responsavel" onchange="atualizarAtividadeModal('responsavel', this.value)" style="font-size:14px; padding:6px; border:1px solid var(--border-color); border-radius:6px; background:var(--bg-panel); color:var(--text-main);">
+              {% for resp in responsaveis %}
+              <option value="{{ resp['nome'] }}">{{ resp['nome'] }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:4px; flex:1; min-width:150px;">
+            <label style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase;">Prioridade</label>
+            <select id="pg-prioridade" onchange="atualizarAtividadeModal('prioridade', this.value)" style="font-size:14px; padding:6px; border:1px solid var(--border-color); border-radius:6px; background:var(--bg-panel); color:var(--text-main);">
+              <option value="Baixa">Baixa</option>
+              <option value="Média">Média</option>
+              <option value="Alta">Alta</option>
+            </select>
+          </div>
+          <div style="display:flex; flex-direction:column; justify-content:flex-end; padding-bottom:6px;">
+            <div id="pg-status" class="status-badge"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Corpo Principal -->
+      <div style="padding: 25px; flex:1; display:flex; gap:25px; overflow-y:auto; background:var(--bg-panel);">
+        
+        <!-- Coluna Esquerda: Passos & Métricas -->
+        <div style="flex:1; display:flex; flex-direction:column; gap:20px; max-width: 50%;">
+          
+          <div style="display:flex; gap:15px;">
+            <div style="flex:1; background:var(--bg-main); padding:15px; border-radius:8px; border:1px solid var(--border-color);">
+              <div style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; margin-bottom:5px;">Execução</div>
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:5px;">
+                <span style="font-size:24px; font-weight:700;" id="pg-perc-txt">0%</span>
+              </div>
+              <div style="width:100%; height:8px; background:var(--border-color); border-radius:4px; overflow:hidden;">
+                <div id="pg-perc-bar" style="height:100%; background:#22c55e; width:0%; transition:width 0.5s ease;"></div>
+              </div>
+            </div>
+            
+            <div style="flex:1; background:var(--bg-main); padding:15px; border-radius:8px; border:1px solid var(--border-color); display:flex; flex-direction:column; justify-content:center; align-items:center;">
+              <div style="font-size:28px; font-weight:700; color:#3b82f6;" id="pg-dias">0</div>
+              <div style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase;">Dias Decorridos</div>
+            </div>
+          </div>
+
+          <!-- Passos -->
+          <div style="flex:1; border:1px solid var(--border-color); border-radius:8px; display:flex; flex-direction:column; background:var(--bg-main); overflow:hidden;">
+            <div style="padding:12px 15px; border-bottom:1px solid var(--border-color); font-weight:600; font-size:14px; background:var(--bg-panel);">
+              ✅ Checklist (Passos)
+            </div>
+            
+            <div id="pg-lista-passos" style="padding:15px; flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px;">
+              <!-- Javascript populates this -->
+            </div>
+            
+            <div style="padding:15px; border-top:1px solid var(--border-color); background:var(--bg-panel);">
+              <div style="display:flex; gap:10px;">
+                <input type="text" id="novoPassoDesc" placeholder="Descrição do passo..." style="flex:2; padding:8px; border:1px solid var(--border-color); border-radius:6px;">
+                <button type="button" onclick="salvarNovoPassoModal()" style="background:#22c55e; color:white; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; font-weight:600;">Adicionar</button>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+
+        <!-- Coluna Direita: Observações -->
+        <div style="flex:1; display:flex; flex-direction:column; border:1px solid var(--border-color); border-radius:8px; overflow:hidden;">
+          <div style="padding:12px 15px; background:var(--bg-panel); border-bottom:1px solid var(--border-color); font-weight:600; font-size:14px; display:flex; justify-content:space-between; align-items:center;">
+            <span>📝 Observações Gerais</span>
+            <button type="button" onclick="salvarObservacoes()" style="background:#3b82f6; color:white; border:none; padding:4px 10px; border-radius:4px; font-size:12px; cursor:pointer;">Salvar</button>
+          </div>
+          <div style="flex:1; display:flex; flex-direction:column; background: #fff; overflow:hidden;">
+            <div id="quill-painel-geral" style="flex:1; overflow-y:auto; font-size: 14px; color: #000;"></div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+<script>
+  let quillPainelGeral;
+  let painelGeralAtividadeId = null;
+
+  window.addEventListener('DOMContentLoaded', () => {
+      if (document.getElementById('quill-painel-geral')) {
+          quillPainelGeral = new Quill('#quill-painel-geral', {
+              theme: 'snow',
+              placeholder: 'Escreva observações, relatórios e evolução da atividade aqui...'
+          });
+      }
+  });
+
+  async function atualizarAtividadeModal(campo, valor) {
+      if(!painelGeralAtividadeId) return;
+      const data = new FormData();
+      data.append('campo', campo);
+      data.append('valor', valor);
+      await fetch(`${SCRIPT_ROOT}/api/atividades/${painelGeralAtividadeId}/atualizar`, { method: 'POST', body: data });
+      mostrarToast();
+  }
+
+  async function abrirPainelGeral(id, event) {
+      if (event && event.target) {
+          const tag = event.target.tagName.toLowerCase();
+          if (['input', 'select', 'button', 'a', 'path', 'svg'].includes(tag)) return;
+      }
+
+      painelGeralAtividadeId = id;
+      document.getElementById('modalPainelGeral').style.display = 'flex';
+      
+      document.getElementById('pg-atividade').value = 'Carregando...';
+      if(quillPainelGeral) quillPainelGeral.setContents([{ insert: '\n' }]);
+      document.getElementById('pg-lista-passos').innerHTML = 'Carregando...';
+      
+      await recarregarDadosModal();
+  }
+  
+  async function recarregarDadosModal() {
+      const resp = await fetch(`${SCRIPT_ROOT}/api/atividades/${painelGeralAtividadeId}/painel_geral`);
+      const data = await resp.json();
+      
+      document.getElementById('pg-atividade').value = data.atividade;
+      document.getElementById('pg-inicio').value = data.data_inicio;
+      document.getElementById('pg-prazo').value = data.prazo;
+      document.getElementById('pg-area').value = data.area;
+      document.getElementById('pg-responsavel').value = data.responsavel;
+      document.getElementById('pg-prioridade').value = data.prioridade;
+      
+      if (data.data_inicio) {
+          const hoje = new Date();
+          const d_ini = new Date(data.data_inicio);
+          const diffTime = Math.abs(hoje - d_ini);
+          let diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+          if (hoje < d_ini) diffDays = 0; 
+          document.getElementById('pg-dias').innerText = diffDays;
+      } else {
+          document.getElementById('pg-dias').innerText = '0';
+      }
+
+      document.getElementById('pg-perc-txt').innerText = data.perc_execucao + '%';
+      document.getElementById('pg-perc-bar').style.width = data.perc_execucao + '%';
+      
+      const s = data.status_exibicao;
+      const b = document.getElementById('pg-status');
+      b.className = 'status-badge status-' + s.toLowerCase().replace(' ', '-');
+      if (s === 'Atrasado') b.innerHTML = '🚨 Atrasado';
+      else if (s === 'Feito') b.innerHTML = '✅ Feito';
+      else if (s === 'Em andamento') b.innerHTML = '🔄 Em andamento';
+      else b.innerHTML = '⚠️ Pendente';
+      
+      if (data.observacoes && quillPainelGeral) {
+          quillPainelGeral.clipboard.dangerouslyPasteHTML(0, data.observacoes);
+      }
+      
+      carregarPassosModal();
+  }
+
+  function fecharPainelGeral() {
+      document.getElementById('modalPainelGeral').style.display = 'none';
+      window.location.reload(); 
+  }
+
+  async function salvarObservacoes() {
+      if (!painelGeralAtividadeId || !quillPainelGeral) return;
+      const htmlContent = quillPainelGeral.root.innerHTML;
+      const data = new FormData();
+      data.append('observacoes', htmlContent);
+      await fetch(`${SCRIPT_ROOT}/api/atividades/${painelGeralAtividadeId}/observacoes`, { method: 'POST', body: data });
+      mostrarToast(); 
+  }
+  
+  // PASSOS DENTRO DO MODAL
+  async function carregarPassosModal() {
+      const resp = await fetch(`${SCRIPT_ROOT}/api/atividades/${painelGeralAtividadeId}/passos`);
+      const passos = await resp.json();
+      const div = document.getElementById('pg-lista-passos');
+      div.innerHTML = '';
+      
+      if(passos.length === 0) {
+          div.innerHTML = '<div style="color:var(--text-muted); font-size:13px; text-align:center; margin-top:20px;">Nenhum passo adicionado.</div>';
+          return;
+      }
+      
+      passos.forEach(p => {
+          const concluidoStyle = p.concluido ? 'text-decoration:line-through; color:var(--text-muted); opacity:0.7;' : '';
+          div.innerHTML += `
+            <div style="display:flex; align-items:center; gap:10px; background:var(--bg-panel); padding:8px 12px; border-radius:6px; border:1px solid var(--border-color);">
+              <input type="checkbox" ${p.concluido ? 'checked' : ''} onchange="togglePassoModal(${p.id}, this.checked)" style="width:16px; height:16px; cursor:pointer;">
+              <input type="text" value="${p.descricao}" onchange="atualizarPassoModal(${p.id}, 'descricao', this.value)" style="flex:2; border:none; background:transparent; font-size:13px; outline:none; ${concluidoStyle}">
+              <button onclick="excluirPassoModal(${p.id})" style="background:transparent; border:none; color:#ef4444; font-weight:bold; cursor:pointer; font-size:14px;" title="Excluir">X</button>
+            </div>
+          `;
+      });
+  }
+
+  async function togglePassoModal(id, checked) {
+      const data = new FormData();
+      data.append('concluido', checked);
+      await fetch(`${SCRIPT_ROOT}/api/passos/${id}/toggle`, { method: 'POST', body: data });
+      recarregarDadosModal();
+  }
+
+  async function atualizarPassoModal(id, campo, valor) {
+      const data = new FormData();
+      data.append('campo', campo);
+      data.append('valor', valor);
+      await fetch(`${SCRIPT_ROOT}/api/passos/${id}/atualizar`, { method: 'POST', body: data });
+      mostrarToast();
+  }
+
+  async function salvarNovoPassoModal() {
+      const desc = document.getElementById('novoPassoDesc').value;
+      if (!desc.trim()) return;
+      const data = new FormData();
+      data.append('atividade_id', painelGeralAtividadeId);
+      data.append('descricao', desc);
+      await fetch(`${SCRIPT_ROOT}/api/passos/adicionar`, { method: 'POST', body: data });
+      document.getElementById('novoPassoDesc').value = '';
+      recarregarDadosModal();
+  }
+
+  async function excluirPassoModal(id) {
+      if (!confirm("Excluir este passo?")) return;
+      await fetch(`${SCRIPT_ROOT}/api/passos/${id}/excluir`, { method: 'POST' });
+      recarregarDadosModal();
+  }
+</script>
+</body>
