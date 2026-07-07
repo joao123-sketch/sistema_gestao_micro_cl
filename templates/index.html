@@ -873,8 +873,8 @@
 
           <td class="w-acoes">
             <div style="display:flex; gap: 5px;">
-              <form action="{{ url_for('arquivar', id=atv['id']) }}" method="POST" style="display:inline;">
-                <button type="submit" class="btn-icon" title="Arquivar" onclick="event.stopPropagation()">📁</button>
+              <form action="{{ url_for('restaurar', id=atv['id']) }}" method="POST" style="display:inline;">
+                <button type="submit" class="btn-icon" title="Restaurar" onclick="event.stopPropagation()">📂</button>
               </form>
               <form action="{{ url_for('deletar', id=atv['id']) }}" method="POST" style="display:inline;" onsubmit="return confirm('Tem certeza que deseja excluir esta atividade?');">
                 <button type="submit" class="btn-icon" title="Excluir" style="color:#ef4444;" onclick="event.stopPropagation()">🗑️</button>
@@ -1642,11 +1642,8 @@
 
           <td class="w-acoes">
             <div style="display:flex; gap: 5px;">
-              <form action="{{ url_for('restaurar', id=atv['id']) }}" method="POST" style="display:inline;">
-                <button type="submit" class="btn-icon" title="Restaurar" onclick="event.stopPropagation()">📂</button>
-              </form>
-              <form action="{{ url_for('deletar', id=atv['id']) }}" method="POST" style="display:inline;" onsubmit="return confirm('Tem certeza que deseja excluir esta atividade?');">
-                <button type="submit" class="btn-icon" title="Excluir" style="color:#ef4444;" onclick="event.stopPropagation()">🗑️</button>
+              <form action="{{ url_for('arquivar', id=atv['id']) }}" method="POST" style="display:inline;">
+                <button type="submit" class="btn-icon" title="Arquivar" onclick="event.stopPropagation()">📦</button>
               </form>
             </div>
           </td>
