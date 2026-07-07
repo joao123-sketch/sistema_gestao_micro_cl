@@ -782,7 +782,7 @@
       </div>
 
       <!-- Filtros do Dashboard -->
-      <div style="display: none; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;">
+      <div style="display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;">
         <select id="filtro-area" onchange="filtrarTabelaAvancado()" style="flex:1;">
           <option value="">Todas as Áreas</option>
           {% for cat in categorias %}
@@ -842,51 +842,17 @@
       <!-- Hidden table for Arquivadas so JS can filter it -->
       <table id="tabelaArquivadasOculta" style="display: none;">
         {% for atv in atividades_arq %}
-        <tr class="linha-dado cursor-pointer" data-area="{{ atv['area'] }}" data-resp="{{ atv['responsavel'] }}" data-status="{{ atv['status_exibicao'] }}" data-prio="{{ atv['prioridade'] }}" onclick="abrirPainelGeral({{ atv['id'] }}, event)">
-          <td style="font-size: 13px;" class="w-data">{{ atv['prazo'].split('-')|reverse|join('/') if atv['prazo'] else '-' }}</td>
-          <td class="w-ativ"><span class="tag-badge" style="font-weight:600; font-size:12px; color:var(--text-main);">{{ atv['area'] }}</span></td>
-          <td style="font-weight: 500; font-size: 14px;">{{ atv['atividade'] }}</td>
-          <td class="w-resp">
-            <div style="display:flex; align-items:center; gap:8px; font-size: 13px;">
-              <img src="/static/user_icon.png" style="width:24px; height:24px; border-radius:50%; object-fit:cover;" onerror="this.style.display='none';">
-              {{ atv['responsavel'] }}
-            </div>
-          </td>
-          <td class="w-status">
-            <div class="status-badge status-{{ atv['status_exibicao']|lower|replace(' ', '-') }}">
-              {% if atv['status_exibicao'] == 'Atrasado' %}🚨 Atrasado
-              {% elif atv['status_exibicao'] == 'Feito' %}✅ Feito
-              {% elif atv['status_exibicao'] == 'Em andamento' %}🔄 Em andamento
-              {% else %}⚠️ Pendente{% endif %}
-            </div>
-          </td>
-          <td class="w-prio">
-            {% set p = atv['prioridade'] %}
-            <div class="prio-badge prio-{{ p|lower }}">
-              {% if p == 'Baixa' %}🟢 Baixa
-              {% elif p == 'Média' %}🟡 Média
-              {% elif p == 'Alta' %}🔴 Alta
-              {% else %}⚪ {{ p }}
-              {% endif %}
-            </div>
-          </td>
-
-          <td class="w-acoes">
-            <div style="display:flex; gap: 5px;">
-              <form action="{{ url_for('restaurar', id=atv['id']) }}" method="POST" style="display:inline;">
-                <button type="submit" class="btn-icon" title="Restaurar" onclick="event.stopPropagation()">📂</button>
-              </form>
-              <form action="{{ url_for('deletar', id=atv['id']) }}" method="POST" style="display:inline;" onsubmit="return confirm('Tem certeza que deseja excluir esta atividade?');">
-                <button type="submit" class="btn-icon" title="Excluir" style="color:#ef4444;" onclick="event.stopPropagation()">🗑️</button>
-              </form>
-            </div>
-          </td>
+        <tr class="linha-dado arquivado">
+          <td class="w-status">{{ atv['status'] }}</td>
+          <td class="w-resp">{{ atv['responsavel'] }}</td>
+          <td class="w-area">{{ atv['area'] }}</td>
+          <td class="w-prio">{{ atv['prioridade'] }}</td>
         </tr>
         {% endfor %}
       </table>
 <!-- Aba Ativas -->
       <div id="dash-ativos" style="display: block;">
-        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px;">
           <div style="background: rgba(239,68,68,.1); border: 1px solid #ef4444; padding: 14px; border-radius: 8px; text-align: center; color: #b91c1c;">
             <div id="metric-atrasado" style="font-size: 22px; font-weight: 700;">{{ metricas.Atrasado }}</div>
             <div style="font-size: 11px; font-weight: 600; margin-top: 3px;">🚨 Atrasadas</div>
@@ -979,62 +945,109 @@
 <table id="tabelaAtividades">
       <thead>
         <tr>
-          <th onclick="ordenarTabela(0)" style="cursor: pointer;" class="sortable">Prazo ↕</th>
-          <th onclick="ordenarTabela(1)" style="cursor: pointer;" class="sortable w-ativ">Área</th>
-          <th onclick="ordenarTabela(2)" style="cursor: pointer;" class="sortable">Atividade</th>
-          <th onclick="ordenarTabela(3)" style="cursor: pointer;" class="sortable w-resp">Responsável</th>
-          <th onclick="ordenarTabela(4)" style="cursor: pointer;" class="sortable w-status">Status</th>
-          <th onclick="ordenarTabela(5)" style="cursor: pointer;" class="sortable w-prio">Prioridade</th>
-
+          <th class="w-data sortable" onclick="ordenarTabela(0)">Prazo ↕</th>
+          <th class="w-ativ">Área</th>
+          <th>Atividade</th>
+          <th class="w-resp">Responsável</th>
+          <th class="w-status">Status</th>
+          <th class="w-prio">Prioridade</th>
+          <th style="width: 120px;">Detalhamento</th>
           <th class="w-acoes" style="text-align:center;">Ações</th>
-        </tr>
-              <tr class="col-filters-row">
-          <th></th>
-          <th><select class="col-filter" data-col="1" onchange="filtrarPorColunas()" style="width:100%; padding:2px; font-size:11px; border-radius:4px; border:1px solid #ccc;"><option value="">Todas</option>{% for cat in categorias %}<option value="{{ cat['nome'] }}">{{ cat['nome'] }}</option>{% endfor %}</select></th>
-          <th><input type="text" class="col-filter" data-col="2" onkeyup="filtrarPorColunas()" placeholder="Buscar..." style="width:100%; padding:2px; font-size:11px; border-radius:4px; border:1px solid #ccc;"></th>
-          <th><select class="col-filter" data-col="3" onchange="filtrarPorColunas()" style="width:100%; padding:2px; font-size:11px; border-radius:4px; border:1px solid #ccc;"><option value="">Todos</option>{% for resp in responsaveis %}<option value="{{ resp['nome'] }}">{{ resp['nome'] }}</option>{% endfor %}</select></th>
-          <th><select class="col-filter" data-col="4" onchange="filtrarPorColunas()" style="width:100%; padding:2px; font-size:11px; border-radius:4px; border:1px solid #ccc;"><option value="">Todos</option><option value="Atrasado">Atrasado</option><option value="Pendente">Pendente</option><option value="Em andamento">Em andamento</option><option value="Feito">Feito</option></select></th>
-          <th><select class="col-filter" data-col="5" onchange="filtrarPorColunas()" style="width:100%; padding:2px; font-size:11px; border-radius:4px; border:1px solid #ccc;"><option value="">Todas</option><option value="Baixa">Baixa</option><option value="Média">Média</option><option value="Alta">Alta</option></select></th>
-          <th></th>
         </tr>
       </thead>
       <tbody>
         {% for atv in atividades %}
-                <tr class="linha-dado cursor-pointer" data-area="{{ atv['area'] }}" data-resp="{{ atv['responsavel'] }}" data-status="{{ atv['status_exibicao'] }}" data-prio="{{ atv['prioridade'] }}" onclick="abrirPainelGeral({{ atv['id'] }}, event)">
-          <td style="font-size: 13px;" class="w-data">{{ atv['prazo'].split('-')|reverse|join('/') if atv['prazo'] else '-' }}</td>
-          <td class="w-ativ"><span class="tag-badge" style="font-weight:600; font-size:12px; color:var(--text-main);">{{ atv['area'] }}</span></td>
-          <td style="font-weight: 500; font-size: 14px;">{{ atv['atividade'] }}</td>
-          <td class="w-resp">
-            <div style="display:flex; align-items:center; gap:8px; font-size: 13px;">
-              <img src="/static/user_icon.png" style="width:24px; height:24px; border-radius:50%; object-fit:cover;" onerror="this.style.display='none';">
-              {{ atv['responsavel'] }}
+                <tr class="linha-dado" style="cursor:pointer;" onclick="abrirPainelGeral({{ atv['id'] }}, event)">
+          <td><input type="date" class="auto-save" data-id="{{ atv['id'] }}" data-campo="prazo" value="{{ atv['prazo'] }}"></td>
+
+          <td>
+            <select class="tag-select auto-save" data-id="{{ atv['id'] }}" data-campo="area" onchange="ajustarCorSelect(this)">
+              {% set ns = namespace(found=false) %}
+              {% for cat in categorias %}
+              <option value="{{ cat['nome'] }}" data-color="{{ cat['cor'] }}"
+                      {% if (atv['area']|string|lower|trim) == (cat['nome']|string|lower|trim) %}selected{% set ns.found = true %}{% endif %}>
+                {{ cat['nome'] }}
+              </option>
+              {% endfor %}
+              {% if not ns.found %}
+              <option value="{{ atv['area'] }}" data-color="#475569" selected>{{ atv['area'] }}</option>
+              {% endif %}
+            </select>
+          </td>
+
+          <td>
+            <textarea class="auto-save" data-id="{{ atv['id'] }}" data-campo="atividade" rows="2" style="resize:vertical;">{{ atv['atividade'] }}</textarea>
+          </td>
+
+          <td>
+            <div style="display:flex; align-items:center; gap:5px;">
+              <div id="img-resp-{{ atv['id'] }}">
+                {% set resp_foto = "" %}
+                {% for r in responsaveis %}{% if atv['responsavel'] == r['nome'] and r['foto'] %}{% set resp_foto = url_for('static', filename=r['foto']) %}{% endif %}{% endfor %}
+                {% if resp_foto %}
+                  <img src="{{ resp_foto }}" style="width:26px;height:26px;border-radius:50%;object-fit:cover;border:1px solid var(--border-color);">
+                {% else %}
+                  <div style="width:26px;height:26px;border-radius:50%;background:var(--table-even);display:flex;align-items:center;justify-content:center;font-size:13px;border:1px solid var(--border-color);">👤</div>
+                {% endif %}
+              </div>
+              <select class="auto-save" data-id="{{ atv['id'] }}" data-campo="responsavel"
+                      onchange="ajustarFotoResp(this,'img-resp-{{ atv['id'] }}')"
+                      style="flex:1; min-width:0;">
+                {% for resp in responsaveis %}
+                <option value="{{ resp['nome'] }}"
+                        data-foto="{% if resp['foto'] %}{{ url_for('static', filename=resp['foto']) }}{% endif %}"
+                        {% if atv['responsavel'] == resp['nome'] %}selected{% endif %}>
+                  {{ resp['nome'] }}
+                </option>
+                {% endfor %}
+              </select>
             </div>
           </td>
-          <td class="w-status">
+
+          <td>
             <div class="status-badge status-{{ atv['status_exibicao']|lower|replace(' ', '-') }}">
-              {% if atv['status_exibicao'] == 'Atrasado' %}🚨 Atrasado
-              {% elif atv['status_exibicao'] == 'Feito' %}✅ Feito
-              {% elif atv['status_exibicao'] == 'Em andamento' %}🔄 Em andamento
-              {% else %}⚠️ Pendente{% endif %}
-            </div>
-          </td>
-          <td class="w-prio">
-            {% set p = atv['prioridade'] %}
-            <div class="prio-badge prio-{{ p|lower }}">
-              {% if p == 'Baixa' %}🟢 Baixa
-              {% elif p == 'Média' %}🟡 Média
-              {% elif p == 'Alta' %}🔴 Alta
-              {% else %}⚪ {{ p }}
+              {% if atv['status_exibicao'] == 'Atrasado' %}
+                🚨 Atrasado
+              {% elif atv['status_exibicao'] == 'Feito' %}
+                ✅ Feito
+              {% elif atv['status_exibicao'] == 'Em andamento' %}
+                🔄 Em andamento
+              {% else %}
+                ⚠️ Pendente
               {% endif %}
             </div>
           </td>
 
-          <td class="w-acoes">
-            <div style="display:flex; gap: 5px;">
-              <form action="{{ url_for('arquivar', id=atv['id']) }}" method="POST" style="display:inline;">
-                <button type="submit" class="btn-icon" title="Arquivar" onclick="event.stopPropagation()">📦</button>
+          <td>
+            <select class="prio-select auto-save" data-id="{{ atv['id'] }}" data-campo="prioridade" onchange="ajustarCorPrio(this)">
+              <option value="Baixa" data-color="#22c55e" {% if atv['prioridade'] == 'Baixa' %}selected{% endif %}>Baixa</option>
+              <option value="Média" data-color="#eab308" {% if atv['prioridade'] == 'Média' %}selected{% endif %}>Média</option>
+              <option value="Alta"  data-color="#ef4444" {% if atv['prioridade'] == 'Alta'  %}selected{% endif %}>Alta</option>
+            </select>
+          </td>
+
+          <td>
+            <button type="button" onclick="abrirModalPassos({{ atv['id'] }})" style="background:var(--btn-primary); color:white; border:none; padding:5px 8px; font-size: 11px; cursor:pointer; border-radius:var(--radius-sm); width:100%; min-width: 100%; font-weight:600;">Ver Passos</button>
+          </td>
+
+          <td style="vertical-align: middle;">
+            {% if modo == 'ativos' or modo.startswith('usuario_detalhe') %}
+              <form action="{{ url_for('arquivar', id=atv['id']) }}" method="POST" onsubmit="return confirm('Mover para arquivados?')" style="margin:0; width: 100%; display: flex; align-items: center; justify-content: center;">
+                <input type="hidden" name="next" value="{{ request.path }}">
+                <button type="submit" class="btn-arquivar">Arquivar</button>
               </form>
-            </div>
+            {% else %}
+              <div style="display: flex; flex-direction: column; gap: 6px; width: 100%; justify-content: center; align-items: center;">
+                <form action="{{ url_for('restaurar', id=atv['id']) }}" method="POST" style="margin:0; width: 100%;">
+                  <input type="hidden" name="next" value="{{ request.path }}">
+                  <button type="submit" class="btn-restaurar" style="width: 100%; box-sizing: border-box; border-radius: var(--radius-sm); padding: 5px 8px; font-size: 11px; font-weight: 600;">Restaurar</button>
+                </form>
+                <form action="{{ url_for('deletar', id=atv['id']) }}" method="POST" onsubmit="return confirm('EXCLUIR PERMANENTEMENTE?')" style="margin:0; width: 100%;">
+                  <input type="hidden" name="next" value="{{ request.path }}">
+                  <button type="submit" class="btn-deletar" style="width: 100%; box-sizing: border-box; border-radius: var(--radius-sm); padding: 5px 8px; font-size: 11px; font-weight: 600;">Excluir</button>
+                </form>
+              </div>
+            {% endif %}
           </td>
         </tr>
         {% else %}
@@ -1059,65 +1072,109 @@
 <table id="tabelaAtividades">
       <thead>
         <tr>
-          <th onclick="ordenarTabela(0)" style="cursor: pointer;" class="sortable">Prazo ↕</th>
-          <th onclick="ordenarTabela(1)" style="cursor: pointer;" class="sortable w-ativ">Área</th>
-          <th onclick="ordenarTabela(2)" style="cursor: pointer;" class="sortable">Atividade</th>
-          <th onclick="ordenarTabela(3)" style="cursor: pointer;" class="sortable w-resp">Responsável</th>
-          <th onclick="ordenarTabela(4)" style="cursor: pointer;" class="sortable w-status">Status</th>
-          <th onclick="ordenarTabela(5)" style="cursor: pointer;" class="sortable w-prio">Prioridade</th>
-
+          <th class="w-data sortable" onclick="ordenarTabela(0)">Prazo ↕</th>
+          <th class="w-ativ">Área</th>
+          <th>Atividade</th>
+          <th class="w-resp">Responsável</th>
+          <th class="w-status">Status</th>
+          <th class="w-prio">Prioridade</th>
+          <th style="width: 120px;">Detalhamento</th>
           <th class="w-acoes" style="text-align:center;"></th>
-        </tr>
-              <tr class="col-filters-row">
-          <th></th>
-          <th><select class="col-filter" data-col="1" onchange="filtrarPorColunas()" style="width:100%; padding:2px; font-size:11px; border-radius:4px; border:1px solid #ccc;"><option value="">Todas</option>{% for cat in categorias %}<option value="{{ cat['nome'] }}">{{ cat['nome'] }}</option>{% endfor %}</select></th>
-          <th><input type="text" class="col-filter" data-col="2" onkeyup="filtrarPorColunas()" placeholder="Buscar..." style="width:100%; padding:2px; font-size:11px; border-radius:4px; border:1px solid #ccc;"></th>
-          <th><select class="col-filter" data-col="3" onchange="filtrarPorColunas()" style="width:100%; padding:2px; font-size:11px; border-radius:4px; border:1px solid #ccc;"><option value="">Todos</option>{% for resp in responsaveis %}<option value="{{ resp['nome'] }}">{{ resp['nome'] }}</option>{% endfor %}</select></th>
-          <th><select class="col-filter" data-col="4" onchange="filtrarPorColunas()" style="width:100%; padding:2px; font-size:11px; border-radius:4px; border:1px solid #ccc;"><option value="">Todos</option><option value="Atrasado">Atrasado</option><option value="Pendente">Pendente</option><option value="Em andamento">Em andamento</option><option value="Feito">Feito</option></select></th>
-          <th><select class="col-filter" data-col="5" onchange="filtrarPorColunas()" style="width:100%; padding:2px; font-size:11px; border-radius:4px; border:1px solid #ccc;"><option value="">Todas</option><option value="Baixa">Baixa</option><option value="Média">Média</option><option value="Alta">Alta</option></select></th>
-          <th></th>
         </tr>
       </thead>
       <tbody>
         {% for atv in atividades %}
-                <tr class="linha-dado cursor-pointer" data-area="{{ atv['area'] }}" data-resp="{{ atv['responsavel'] }}" data-status="{{ atv['status_exibicao'] }}" data-prio="{{ atv['prioridade'] }}" onclick="abrirPainelGeral({{ atv['id'] }}, event)">
-          <td style="font-size: 13px;" class="w-data">{{ atv['prazo'].split('-')|reverse|join('/') if atv['prazo'] else '-' }}</td>
-          <td class="w-ativ"><span class="tag-badge" style="font-weight:600; font-size:12px; color:var(--text-main);">{{ atv['area'] }}</span></td>
-          <td style="font-weight: 500; font-size: 14px;">{{ atv['atividade'] }}</td>
-          <td class="w-resp">
-            <div style="display:flex; align-items:center; gap:8px; font-size: 13px;">
-              <img src="/static/user_icon.png" style="width:24px; height:24px; border-radius:50%; object-fit:cover;" onerror="this.style.display='none';">
-              {{ atv['responsavel'] }}
+                <tr class="linha-dado" style="cursor:pointer;" onclick="abrirPainelGeral({{ atv['id'] }}, event)">
+          <td><input type="date" class="auto-save" data-id="{{ atv['id'] }}" data-campo="prazo" value="{{ atv['prazo'] }}"></td>
+
+          <td>
+            <select class="tag-select auto-save" data-id="{{ atv['id'] }}" data-campo="area" onchange="ajustarCorSelect(this)">
+              {% set ns = namespace(found=false) %}
+              {% for cat in categorias %}
+              <option value="{{ cat['nome'] }}" data-color="{{ cat['cor'] }}"
+                      {% if (atv['area']|string|lower|trim) == (cat['nome']|string|lower|trim) %}selected{% set ns.found = true %}{% endif %}>
+                {{ cat['nome'] }}
+              </option>
+              {% endfor %}
+              {% if not ns.found %}
+              <option value="{{ atv['area'] }}" data-color="#475569" selected>{{ atv['area'] }}</option>
+              {% endif %}
+            </select>
+          </td>
+
+          <td>
+            <textarea class="auto-save" data-id="{{ atv['id'] }}" data-campo="atividade" rows="2" style="resize:vertical;">{{ atv['atividade'] }}</textarea>
+          </td>
+
+          <td>
+            <div style="display:flex; align-items:center; gap:5px;">
+              <div id="img-resp-{{ atv['id'] }}">
+                {% set resp_foto = "" %}
+                {% for r in responsaveis %}{% if atv['responsavel'] == r['nome'] and r['foto'] %}{% set resp_foto = url_for('static', filename=r['foto']) %}{% endif %}{% endfor %}
+                {% if resp_foto %}
+                  <img src="{{ resp_foto }}" style="width:26px;height:26px;border-radius:50%;object-fit:cover;border:1px solid var(--border-color);">
+                {% else %}
+                  <div style="width:26px;height:26px;border-radius:50%;background:var(--table-even);display:flex;align-items:center;justify-content:center;font-size:13px;border:1px solid var(--border-color);">👤</div>
+                {% endif %}
+              </div>
+              <select class="auto-save" data-id="{{ atv['id'] }}" data-campo="responsavel"
+                      onchange="ajustarFotoResp(this,'img-resp-{{ atv['id'] }}')"
+                      style="flex:1; min-width:0;">
+                {% for resp in responsaveis %}
+                <option value="{{ resp['nome'] }}"
+                        data-foto="{% if resp['foto'] %}{{ url_for('static', filename=resp['foto']) }}{% endif %}"
+                        {% if atv['responsavel'] == resp['nome'] %}selected{% endif %}>
+                  {{ resp['nome'] }}
+                </option>
+                {% endfor %}
+              </select>
             </div>
           </td>
-          <td class="w-status">
+
+          <td>
             <div class="status-badge status-{{ atv['status_exibicao']|lower|replace(' ', '-') }}">
-              {% if atv['status_exibicao'] == 'Atrasado' %}🚨 Atrasado
-              {% elif atv['status_exibicao'] == 'Feito' %}✅ Feito
-              {% elif atv['status_exibicao'] == 'Em andamento' %}🔄 Em andamento
-              {% else %}⚠️ Pendente{% endif %}
-            </div>
-          </td>
-          <td class="w-prio">
-            {% set p = atv['prioridade'] %}
-            <div class="prio-badge prio-{{ p|lower }}">
-              {% if p == 'Baixa' %}🟢 Baixa
-              {% elif p == 'Média' %}🟡 Média
-              {% elif p == 'Alta' %}🔴 Alta
-              {% else %}⚪ {{ p }}
+              {% if atv['status_exibicao'] == 'Atrasado' %}
+                🚨 Atrasado
+              {% elif atv['status_exibicao'] == 'Feito' %}
+                ✅ Feito
+              {% elif atv['status_exibicao'] == 'Em andamento' %}
+                🔄 Em andamento
+              {% else %}
+                ⚠️ Pendente
               {% endif %}
             </div>
           </td>
 
-          <td class="w-acoes">
-            <div style="display:flex; gap: 5px;">
-              <form action="{{ url_for('restaurar', id=atv['id']) }}" method="POST" style="display:inline;">
-                <button type="submit" class="btn-icon" title="Restaurar" onclick="event.stopPropagation()">📂</button>
+          <td>
+            <select class="prio-select auto-save" data-id="{{ atv['id'] }}" data-campo="prioridade" onchange="ajustarCorPrio(this)">
+              <option value="Baixa" data-color="#22c55e" {% if atv['prioridade'] == 'Baixa' %}selected{% endif %}>Baixa</option>
+              <option value="Média" data-color="#eab308" {% if atv['prioridade'] == 'Média' %}selected{% endif %}>Média</option>
+              <option value="Alta"  data-color="#ef4444" {% if atv['prioridade'] == 'Alta'  %}selected{% endif %}>Alta</option>
+            </select>
+          </td>
+
+          <td>
+            <button type="button" onclick="abrirModalPassos({{ atv['id'] }})" style="background:var(--btn-primary); color:white; border:none; padding:5px 8px; font-size: 11px; cursor:pointer; border-radius:var(--radius-sm); width:100%; min-width: 100%; font-weight:600;">Ver Passos</button>
+          </td>
+
+          <td style="vertical-align: middle;">
+            {% if modo == 'ativos' or modo.startswith('usuario_detalhe') %}
+              <form action="{{ url_for('arquivar', id=atv['id']) }}" method="POST" onsubmit="return confirm('Mover para arquivados?')" style="margin:0; width: 100%; display: flex; align-items: center; justify-content: center;">
+                <input type="hidden" name="next" value="{{ request.path }}">
+                <button type="submit" class="btn-arquivar">Arquivar</button>
               </form>
-              <form action="{{ url_for('deletar', id=atv['id']) }}" method="POST" style="display:inline;" onsubmit="return confirm('Tem certeza que deseja excluir esta atividade?');">
-                <button type="submit" class="btn-icon" title="Excluir" style="color:#ef4444;" onclick="event.stopPropagation()">🗑️</button>
-              </form>
-            </div>
+            {% else %}
+              <div style="display: flex; flex-direction: column; gap: 6px; width: 100%; justify-content: center; align-items: center;">
+                <form action="{{ url_for('restaurar', id=atv['id']) }}" method="POST" style="margin:0; width: 100%;">
+                  <input type="hidden" name="next" value="{{ request.path }}">
+                  <button type="submit" class="btn-restaurar" style="width: 100%; box-sizing: border-box; border-radius: var(--radius-sm); padding: 5px 8px; font-size: 11px; font-weight: 600;">Restaurar</button>
+                </form>
+                <form action="{{ url_for('deletar', id=atv['id']) }}" method="POST" onsubmit="return confirm('EXCLUIR PERMANENTEMENTE?')" style="margin:0; width: 100%;">
+                  <input type="hidden" name="next" value="{{ request.path }}">
+                  <button type="submit" class="btn-deletar" style="width: 100%; box-sizing: border-box; border-radius: var(--radius-sm); padding: 5px 8px; font-size: 11px; font-weight: 600;">Excluir</button>
+                </form>
+              </div>
+            {% endif %}
           </td>
         </tr>
         {% else %}
@@ -1396,11 +1453,6 @@
 
   {# ══════════════ USUÁRIO — DETALHE ══════════════ #}
   {% if modo == 'usuario_detalhe' %}
-  <div style="margin-bottom: 15px;">
-    <a href="{{ url_for('usuarios') }}" style="display: inline-block; padding: 8px 16px; background: var(--btn-toolbar); color: var(--text-main); text-decoration: none; border-radius: 6px; font-weight: 600; border: 1px solid var(--border-color);">
-      &larr; Voltar para Usuários
-    </a>
-  </div>
   <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px;">
 
     <!-- Dados Cadastrais -->
@@ -1462,7 +1514,7 @@
 
       <!-- Aba Ativas -->
       <div id="dash-ativos" style="display: block;">
-        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px;">
           <div style="background: rgba(239,68,68,.1); border: 1px solid #ef4444; padding: 14px; border-radius: 8px; text-align: center; color: #b91c1c;">
             <div id="metric-atrasado" style="font-size: 22px; font-weight: 700;">{{ metricas.Atrasado }}</div>
             <div style="font-size: 11px; font-weight: 600; margin-top: 3px;">🚨 Atrasadas</div>
@@ -1484,19 +1536,17 @@
             <div style="font-size: 11px; font-weight: 600; margin-top: 3px; color: var(--text-muted);">Total Ativas</div>
           </div>
         </div>
-        <div style="height: 250px; position: relative; width: 100%; margin-top: 16px;">
         <canvas id="chartAtivos"
-                data-atrasado="{{ metricas['Atrasado'] }}"
                 data-pendente="{{ metricas['Pendente'] }}"
                 data-emandamento="{{ metricas['Em andamento'] }}"
-                data-feito="{{ metricas['Feito'] }}"></canvas>
-      </div>      </div>
+                data-feito="{{ metricas['Feito'] }}"
+                style="margin-top: 16px; max-height: 250px;"></canvas>      </div>
 
       <!-- Aba Arquivadas -->
       <div id="dash-arquivados" style="display: none;">
-        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px;">
           <div style="background: rgba(239,68,68,.1); border: 1px solid #ef4444; padding: 14px; border-radius: 8px; text-align: center; color: #b91c1c;">
-            <div id="metric-atrasado-arq" style="font-size: 22px; font-weight: 700;">{{ metricas.Atrasado_Arq }}</div>
+            <div id="metric-atrasado" style="font-size: 22px; font-weight: 700;">{{ metricas.Atrasado }}</div>
             <div style="font-size: 11px; font-weight: 600; margin-top: 3px;">🚨 Atrasadas</div>
           </div>
           <div style="background: rgba(245,158,11,.1); border: 1px solid #f59e0b; padding: 14px; border-radius: 8px; text-align: center; color: #b45309;">
@@ -1516,18 +1566,16 @@
             <div style="font-size: 11px; font-weight: 600; margin-top: 3px; color: var(--text-muted);">Total Arquivadas</div>
           </div>
         </div>
-        <div style="height: 250px; position: relative; width: 100%; margin-top: 16px;">
         <canvas id="chartArquivados"
-                data-atrasadoarq="{{ metricas['Atrasado_Arq'] }}"
                 data-pendentearq="{{ metricas['Pendente_Arq'] }}"
                 data-emandamentoarq="{{ metricas['Em andamento_Arq'] }}"
-                data-feitoarq="{{ metricas['Feito_Arq'] }}"></canvas>
-      </div>
+                data-feitoarq="{{ metricas['Feito_Arq'] }}"
+                style="margin-top: 16px; max-height: 250px;"></canvas>
       </div>
 
       <!-- Aba Visão Geral -->
       <div id="dash-geral" style="display: none;">
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 16px;">
           <div style="background: var(--btn-toolbar); border: 1px solid var(--border-color); padding: 16px; border-radius: 8px; text-align: center;">
             <div style="font-size: 28px; font-weight: 700; color: var(--text-main);">{{ metricas.Total_Geral }}</div>
             <div style="font-size: 11px; font-weight: 600; margin-top: 3px; color: var(--text-muted);">🎯 Total Geral</div>
@@ -1546,11 +1594,9 @@
           </div>
         </div>
         <canvas id="chartGeral"
-                data-atrasadoativos="{{ metricas['Atrasado'] }}"
                 data-pendenteativos="{{ metricas['Pendente'] }}"
                 data-emandamentoativos="{{ metricas['Em andamento'] }}"
                 data-feitoativos="{{ metricas['Feito'] }}"
-                data-atrasadoarquivados="{{ metricas['Atrasado_Arq'] }}"
                 data-pendentearquivados="{{ metricas['Pendente_Arq'] }}"
                 data-emandamentoarquivados="{{ metricas['Em andamento_Arq'] }}"
                 data-feitoarquivados="{{ metricas['Feito_Arq'] }}"
@@ -1625,62 +1671,109 @@
     <table id="tabelaAtividades">
       <thead>
         <tr>
-          <th onclick="ordenarTabela(0)" style="cursor: pointer;" class="sortable">Prazo ↕</th>
-          <th onclick="ordenarTabela(1)" style="cursor: pointer;" class="sortable w-ativ">Área</th>
-          <th onclick="ordenarTabela(2)" style="cursor: pointer;" class="sortable">Atividade</th>
-          <th onclick="ordenarTabela(3)" style="cursor: pointer;" class="sortable w-resp">Responsável</th>
-          <th onclick="ordenarTabela(4)" style="cursor: pointer;" class="sortable w-status">Status</th>
-          <th onclick="ordenarTabela(5)" style="cursor: pointer;" class="sortable w-prio">Prioridade</th>
-
+          <th class="w-data sortable" onclick="ordenarTabela(0)">Prazo ↕</th>
+          <th class="w-ativ">Área</th>
+          <th>Atividade</th>
+          <th class="w-resp">Responsável</th>
+          <th class="w-status">Status</th>
+          <th class="w-prio">Prioridade</th>
+          <th style="width: 120px;">Detalhamento</th>
           <th class="w-acoes" style="text-align:center;">Ações</th>
-        </tr>
-              <tr class="col-filters-row">
-          <th></th>
-          <th><select class="col-filter" data-col="1" onchange="filtrarPorColunas()" style="width:100%; padding:2px; font-size:11px; border-radius:4px; border:1px solid #ccc;"><option value="">Todas</option>{% for cat in categorias %}<option value="{{ cat['nome'] }}">{{ cat['nome'] }}</option>{% endfor %}</select></th>
-          <th><input type="text" class="col-filter" data-col="2" onkeyup="filtrarPorColunas()" placeholder="Buscar..." style="width:100%; padding:2px; font-size:11px; border-radius:4px; border:1px solid #ccc;"></th>
-          <th><select class="col-filter" data-col="3" onchange="filtrarPorColunas()" style="width:100%; padding:2px; font-size:11px; border-radius:4px; border:1px solid #ccc;"><option value="">Todos</option>{% for resp in responsaveis %}<option value="{{ resp['nome'] }}">{{ resp['nome'] }}</option>{% endfor %}</select></th>
-          <th><select class="col-filter" data-col="4" onchange="filtrarPorColunas()" style="width:100%; padding:2px; font-size:11px; border-radius:4px; border:1px solid #ccc;"><option value="">Todos</option><option value="Atrasado">Atrasado</option><option value="Pendente">Pendente</option><option value="Em andamento">Em andamento</option><option value="Feito">Feito</option></select></th>
-          <th><select class="col-filter" data-col="5" onchange="filtrarPorColunas()" style="width:100%; padding:2px; font-size:11px; border-radius:4px; border:1px solid #ccc;"><option value="">Todas</option><option value="Baixa">Baixa</option><option value="Média">Média</option><option value="Alta">Alta</option></select></th>
-          <th></th>
         </tr>
       </thead>
       <tbody>
         {% for atv in atividades %}
-                <tr class="linha-dado cursor-pointer" data-area="{{ atv['area'] }}" data-resp="{{ atv['responsavel'] }}" data-status="{{ atv['status_exibicao'] }}" data-prio="{{ atv['prioridade'] }}" onclick="abrirPainelGeral({{ atv['id'] }}, event)">
-          <td style="font-size: 13px;" class="w-data">{{ atv['prazo'].split('-')|reverse|join('/') if atv['prazo'] else '-' }}</td>
-          <td class="w-ativ"><span class="tag-badge" style="font-weight:600; font-size:12px; color:var(--text-main);">{{ atv['area'] }}</span></td>
-          <td style="font-weight: 500; font-size: 14px;">{{ atv['atividade'] }}</td>
-          <td class="w-resp">
-            <div style="display:flex; align-items:center; gap:8px; font-size: 13px;">
-              <img src="/static/user_icon.png" style="width:24px; height:24px; border-radius:50%; object-fit:cover;" onerror="this.style.display='none';">
-              {{ atv['responsavel'] }}
+                <tr class="linha-dado" style="cursor:pointer;" onclick="abrirPainelGeral({{ atv['id'] }}, event)">
+          <td><input type="date" class="auto-save" data-id="{{ atv['id'] }}" data-campo="prazo" value="{{ atv['prazo'] }}"></td>
+
+          <td>
+            <select class="tag-select auto-save" data-id="{{ atv['id'] }}" data-campo="area" onchange="ajustarCorSelect(this)">
+              {% set ns = namespace(found=false) %}
+              {% for cat in categorias %}
+              <option value="{{ cat['nome'] }}" data-color="{{ cat['cor'] }}"
+                      {% if (atv['area']|string|lower|trim) == (cat['nome']|string|lower|trim) %}selected{% set ns.found = true %}{% endif %}>
+                {{ cat['nome'] }}
+              </option>
+              {% endfor %}
+              {% if not ns.found %}
+              <option value="{{ atv['area'] }}" data-color="#475569" selected>{{ atv['area'] }}</option>
+              {% endif %}
+            </select>
+          </td>
+
+          <td>
+            <textarea class="auto-save" data-id="{{ atv['id'] }}" data-campo="atividade" rows="2" style="resize:vertical;">{{ atv['atividade'] }}</textarea>
+          </td>
+
+          <td>
+            <div style="display:flex; align-items:center; gap:5px;">
+              <div id="img-resp-{{ atv['id'] }}">
+                {% set resp_foto = "" %}
+                {% for r in responsaveis %}{% if atv['responsavel'] == r['nome'] and r['foto'] %}{% set resp_foto = url_for('static', filename=r['foto']) %}{% endif %}{% endfor %}
+                {% if resp_foto %}
+                  <img src="{{ resp_foto }}" style="width:26px;height:26px;border-radius:50%;object-fit:cover;border:1px solid var(--border-color);">
+                {% else %}
+                  <div style="width:26px;height:26px;border-radius:50%;background:var(--table-even);display:flex;align-items:center;justify-content:center;font-size:13px;border:1px solid var(--border-color);">👤</div>
+                {% endif %}
+              </div>
+              <select class="auto-save" data-id="{{ atv['id'] }}" data-campo="responsavel"
+                      onchange="ajustarFotoResp(this,'img-resp-{{ atv['id'] }}')"
+                      style="flex:1; min-width:0;">
+                {% for resp in responsaveis %}
+                <option value="{{ resp['nome'] }}"
+                        data-foto="{% if resp['foto'] %}{{ url_for('static', filename=resp['foto']) }}{% endif %}"
+                        {% if atv['responsavel'] == resp['nome'] %}selected{% endif %}>
+                  {{ resp['nome'] }}
+                </option>
+                {% endfor %}
+              </select>
             </div>
           </td>
-          <td class="w-status">
+
+          <td>
             <div class="status-badge status-{{ atv['status_exibicao']|lower|replace(' ', '-') }}">
-              {% if atv['status_exibicao'] == 'Atrasado' %}🚨 Atrasado
-              {% elif atv['status_exibicao'] == 'Feito' %}✅ Feito
-              {% elif atv['status_exibicao'] == 'Em andamento' %}🔄 Em andamento
-              {% else %}⚠️ Pendente{% endif %}
-            </div>
-          </td>
-          <td class="w-prio">
-            {% set p = atv['prioridade'] %}
-            <div class="prio-badge prio-{{ p|lower }}">
-              {% if p == 'Baixa' %}🟢 Baixa
-              {% elif p == 'Média' %}🟡 Média
-              {% elif p == 'Alta' %}🔴 Alta
-              {% else %}⚪ {{ p }}
+              {% if atv['status_exibicao'] == 'Atrasado' %}
+                🚨 Atrasado
+              {% elif atv['status_exibicao'] == 'Feito' %}
+                ✅ Feito
+              {% elif atv['status_exibicao'] == 'Em andamento' %}
+                🔄 Em andamento
+              {% else %}
+                ⚠️ Pendente
               {% endif %}
             </div>
           </td>
 
-          <td class="w-acoes">
-            <div style="display:flex; gap: 5px;">
-              <form action="{{ url_for('arquivar', id=atv['id']) }}" method="POST" style="display:inline;">
-                <button type="submit" class="btn-icon" title="Arquivar" onclick="event.stopPropagation()">📦</button>
+          <td>
+            <select class="prio-select auto-save" data-id="{{ atv['id'] }}" data-campo="prioridade" onchange="ajustarCorPrio(this)">
+              <option value="Baixa" data-color="#22c55e" {% if atv['prioridade'] == 'Baixa' %}selected{% endif %}>Baixa</option>
+              <option value="Média" data-color="#eab308" {% if atv['prioridade'] == 'Média' %}selected{% endif %}>Média</option>
+              <option value="Alta"  data-color="#ef4444" {% if atv['prioridade'] == 'Alta'  %}selected{% endif %}>Alta</option>
+            </select>
+          </td>
+
+          <td>
+            <button type="button" onclick="abrirModalPassos({{ atv['id'] }})" style="background:var(--btn-primary); color:white; border:none; padding:5px 8px; font-size: 11px; cursor:pointer; border-radius:var(--radius-sm); width:100%; min-width: 100%; font-weight:600;">Ver Passos</button>
+          </td>
+
+          <td style="vertical-align: middle;">
+            {% if modo == 'ativos' or modo.startswith('usuario_detalhe') %}
+              <form action="{{ url_for('arquivar', id=atv['id']) }}" method="POST" onsubmit="return confirm('Mover para arquivados?')" style="margin:0; width: 100%; display: flex; align-items: center; justify-content: center;">
+                <input type="hidden" name="next" value="{{ request.path }}">
+                <button type="submit" class="btn-arquivar">Arquivar</button>
               </form>
-            </div>
+            {% else %}
+              <div style="display: flex; flex-direction: column; gap: 6px; width: 100%; justify-content: center; align-items: center;">
+                <form action="{{ url_for('restaurar', id=atv['id']) }}" method="POST" style="margin:0; width: 100%;">
+                  <input type="hidden" name="next" value="{{ request.path }}">
+                  <button type="submit" class="btn-restaurar" style="width: 100%; box-sizing: border-box; border-radius: var(--radius-sm); padding: 5px 8px; font-size: 11px; font-weight: 600;">Restaurar</button>
+                </form>
+                <form action="{{ url_for('deletar', id=atv['id']) }}" method="POST" onsubmit="return confirm('EXCLUIR PERMANENTEMENTE?')" style="margin:0; width: 100%;">
+                  <input type="hidden" name="next" value="{{ request.path }}">
+                  <button type="submit" class="btn-deletar" style="width: 100%; box-sizing: border-box; border-radius: var(--radius-sm); padding: 5px 8px; font-size: 11px; font-weight: 600;">Excluir</button>
+                </form>
+              </div>
+            {% endif %}
           </td>
         </tr>
         {% else %}
@@ -1728,74 +1821,19 @@
   /* ── Ordenação da tabela ── */
   const direcoesSort = {};
   function ordenarTabela(col) {
-    let thead = null;
-    let tbody = null;
-
-    if (abaAtivaGlobal === 'ativos') {
-        const table = document.querySelector("#dash-ativos #tabelaAtividades") || document.querySelector("#tabelaAtividades");
-        if (table) {
-            thead = table.querySelector("thead");
-            tbody = table.querySelector("tbody");
-        }
-    } else if (abaAtivaGlobal === 'arquivados') {
-        const table = document.querySelector("#dash-arquivados #tabelaAtividades") || document.querySelector("#tabelaArquivadasOculta");
-        if (table) {
-            thead = table.querySelector("thead");
-            tbody = table.querySelector("tbody");
-        }
-    } else {
-        // Fallback for user profile or Outros
-        const table = document.querySelector("#tabelaAtividades");
-        if (table) {
-            thead = table.querySelector("thead");
-            tbody = table.querySelector("tbody");
-        }
-    }
-
-    if (!tbody || !thead) return;
-
-    const headers = thead.querySelectorAll("th");
-    headers.forEach((th, idx) => {
-        if (idx !== col && th.classList.contains("sortable")) {
-            th.innerHTML = th.innerHTML.replace(/ [▼▲]/g, "");
-        }
-    });
-
+    const tbody = document.querySelector("#tabelaAtividades tbody");
+    if (!tbody) return;
     const linhas = [...tbody.querySelectorAll(".linha-dado")];
     const asc = direcoesSort[col] !== "asc";
     direcoesSort[col] = asc ? "asc" : "desc";
-
-    const currentTh = headers[col];
-    if (currentTh) {
-        currentTh.innerHTML = currentTh.innerHTML.replace(/ [▼▲]/g, "") + (asc ? " ▲" : " ▼");
-    }
-
-    const mapPrioridade = { "baixa": 1, "média": 2, "media": 2, "alta": 3 };
-    const mapStatus = { "pendente": 1, "em andamento": 2, "feito": 3, "atrasado": 0 };
-
     linhas.sort((a, b) => {
       const tA = a.querySelectorAll("td"), tB = b.querySelectorAll("td");
-      if (!tA[col] || !tB[col]) return 0;
-      
-      let vA = tA[col].innerText.trim().toLowerCase();
-      let vB = tB[col].innerText.trim().toLowerCase();
-      
-      if (col === 0) {
-          // Date format: DD/MM/YYYY -> YYYYMMDD
-          vA = vA === '-' || !vA ? '99999999' : vA.split('/').reverse().join('');
-          vB = vB === '-' || !vB ? '99999999' : vB.split('/').reverse().join('');
-      } else if (col === 5) {
-          // Prioridade
-          let pA = mapPrioridade[vA] || 0;
-          let pB = mapPrioridade[vB] || 0;
-          return asc ? pA - pB : pB - pA;
-      } else if (col === 4) {
-          // Status
-          let sA = mapStatus[vA] !== undefined ? mapStatus[vA] : 99;
-          let sB = mapStatus[vB] !== undefined ? mapStatus[vB] : 99;
-          return asc ? sA - sB : sB - sA;
-      }
-      
+      const vA = col === 0
+        ? (tA[0].querySelector("input")?.value  || "")
+        : (tA[1].querySelector("select")?.value || "");
+      const vB = col === 0
+        ? (tB[0].querySelector("input")?.value  || "")
+        : (tB[1].querySelector("select")?.value || "");
       return asc ? vA.localeCompare(vB) : vB.localeCompare(vA);
     });
     linhas.forEach(l => tbody.appendChild(l));
@@ -1888,132 +1926,73 @@
 
   /* ── Filtros da tabela ── */
     function filtrarTabelaAvancado() {
-      if (typeof filtrarPorColunas === 'function') {
-          filtrarPorColunas();
-      }
-  }
-  function filtrarPorColunas() {
-    let tbody = null;
-    let table = null;
+    const fArea = document.getElementById("filtro-area") ? document.getElementById("filtro-area").value.toLowerCase() : "";
+    const fResp = document.getElementById("filtro-responsavel") ? document.getElementById("filtro-responsavel").value.toLowerCase() : "";
+    const fStatus = document.getElementById("filtro-status") ? document.getElementById("filtro-status").value.toLowerCase() : "";
+    const fPrio = document.getElementById("filtro-prioridade") ? document.getElementById("filtro-prioridade").value.toLowerCase() : "";
 
-    if (abaAtivaGlobal === 'ativos') {
-        table = document.querySelector("#dash-ativos #tabelaAtividades") || document.querySelector("#tabelaAtividades");
-    } else if (abaAtivaGlobal === 'arquivados') {
-        table = document.querySelector("#dash-arquivados #tabelaAtividades") || document.querySelector("#tabelaArquivadasOculta");
-    } else {
-        table = document.querySelector("#tabelaAtividades");
-    }
-    if (!table) return;
-    tbody = table.querySelector("tbody");
-    if (!tbody) return;
-
-    const filters = table.querySelectorAll(".col-filter");
-    const linhas = [...tbody.querySelectorAll(".linha-dado")];
-    
-    let atrasado = 0, pendente = 0, andamento = 0, feito = 0;
+    let selector = abaAtivaGlobal === 'arquivados' ? '#tabelaArquivadasOculta .linha-dado' : '#tabelaAtividades .linha-dado';
+    const linhas = [...document.querySelectorAll(selector)];
+    let pendente = 0, andamento = 0, feito = 0;
 
     linhas.forEach(tr => {
-        const tds = tr.querySelectorAll("td");
-        let show = true;
-        
-        filters.forEach(f => {
-            const colIdx = parseInt(f.getAttribute('data-col'));
-            const filterVal = f.value.toLowerCase().trim();
-            if (filterVal) {
-                let cellVal = "";
-                if (colIdx === 1) cellVal = (tr.dataset.area || "").toLowerCase().trim();
-                else if (colIdx === 3) cellVal = (tr.dataset.resp || "").toLowerCase().trim();
-                else if (colIdx === 4) cellVal = (tr.dataset.status || "").toLowerCase().trim();
-                else if (colIdx === 5) cellVal = (tr.dataset.prio || "").toLowerCase().trim();
-                else cellVal = (tds[colIdx] ? tds[colIdx].innerText.toLowerCase().trim() : "");
-                
-                if (colIdx === 2) {
-                    if (!cellVal.includes(filterVal)) show = false;
-                } else {
-                    if (cellVal !== filterVal) show = false;
-                }
-            }
-        });
+      // Data reading from normal table or hidden table
+      const vArea = (tr.querySelector('select[data-campo="area"]')?.value || tr.querySelector('.w-area')?.innerText || tr.querySelector('td:nth-child(2)')?.innerText || "").toLowerCase().trim();
+      const vResp = (tr.querySelector('select[data-campo="responsavel"]')?.value || tr.querySelector('.w-resp')?.innerText || "").toLowerCase().trim();
+      const vStatus = (tr.querySelector('select[data-campo="status"]')?.value || tr.querySelector('.w-status')?.innerText || "").toLowerCase().trim();
+      const vPrio = (tr.querySelector('select[data-campo="prioridade"]')?.value || tr.querySelector('.w-prio')?.innerText || "").toLowerCase().trim();
 
-        // We MUST also apply the global filters if we want them to stack, OR we just ignore global filters when using col filters.
-        // Actually, combining them is best. But to keep it simple, col filters will be primary here, and we'll check global filters too if they exist.
-        const fArea = document.getElementById("filtro-area") ? document.getElementById("filtro-area").value.toLowerCase() : "";
-        const fResp = document.getElementById("filtro-responsavel") ? document.getElementById("filtro-responsavel").value.toLowerCase() : "";
-        const fStatus = document.getElementById("filtro-status") ? document.getElementById("filtro-status").value.toLowerCase() : "";
-        const fPrio = document.getElementById("filtro-prioridade") ? document.getElementById("filtro-prioridade").value.toLowerCase() : "";
-        
-        const vArea = (tr.dataset.area || "").toLowerCase().trim();
-        const vResp = (tr.dataset.resp || "").toLowerCase().trim();
-        const vStatus = (tr.dataset.status || "").toLowerCase().trim();
-        const vPrio = (tr.dataset.prio || "").toLowerCase().trim();
-        
-        if (fArea && vArea !== fArea) show = false;
-        if (fResp && vResp !== fResp) show = false;
-        if (fStatus && vStatus !== fStatus) show = false;
-        if (fPrio && vPrio !== fPrio) show = false;
+      const show = 
+        (!fArea || vArea === fArea) &&
+        (!fResp || vResp === fResp) &&
+        (!fStatus || vStatus === fStatus) &&
+        (!fPrio || vPrio === fPrio);
 
-        tr.style.display = show ? "" : "none";
+      tr.style.display = show ? "" : "none";
 
-        if (show) {
-            if (vStatus === 'atrasado') atrasado++;
-            else if (vStatus === 'pendente') pendente++;
-            else if (vStatus === 'em andamento') andamento++;
-            else if (vStatus === 'feito') feito++;
-        }
+      if (show) {
+          if (vStatus === 'pendente') pendente++;
+          else if (vStatus === 'em andamento') andamento++;
+          else if (vStatus === 'feito') feito++;
+      }
     });
 
-    // Update charts and metrics
     if (abaAtivaGlobal === 'ativos') {
-        const bAtrasado = document.getElementById("metric-atrasado");
         const bPendente = document.getElementById("metric-pendente");
         const bAndamento = document.getElementById("metric-emandamento");
         const bFeito = document.getElementById("metric-feito");
         const bTotal = document.getElementById("metric-total");
-        if (bAtrasado) bAtrasado.innerText = atrasado;
         if (bPendente) bPendente.innerText = pendente;
         if (bAndamento) bAndamento.innerText = andamento;
         if (bFeito) bFeito.innerText = feito;
-        if (bTotal) bTotal.innerText = atrasado + pendente + andamento + feito;
+        if (bTotal) bTotal.innerText = pendente + andamento + feito;
 
         if (window.chartDashboardInstance) {
-            window.chartDashboardInstance.data.datasets[0].data = [atrasado, pendente, andamento, feito];
+            window.chartDashboardInstance.data.datasets[0].data = [pendente, andamento, feito];
             window.chartDashboardInstance.update();
         }
-        if (window.chartAtivos) {
-            window.chartAtivos.data.datasets[0].data = [atrasado, pendente, andamento, feito];
-            window.chartAtivos.update();
-        }
-    } else if (abaAtivaGlobal === 'arquivados') {
-        const bAtrasado = document.getElementById("metric-atrasado-arq");
+    } else {
         const bPendente = document.getElementById("metric-pendente-arq");
         const bAndamento = document.getElementById("metric-emandamento-arq");
         const bFeito = document.getElementById("metric-feito-arq");
         const bTotal = document.getElementById("metric-total-arq");
-        if (bAtrasado) bAtrasado.innerText = atrasado;
         if (bPendente) bPendente.innerText = pendente;
         if (bAndamento) bAndamento.innerText = andamento;
         if (bFeito) bFeito.innerText = feito;
-        if (bTotal) bTotal.innerText = atrasado + pendente + andamento + feito;
+        if (bTotal) bTotal.innerText = pendente + andamento + feito;
 
         if (window.chartArquivadosDashInstance) {
-            window.chartArquivadosDashInstance.data.datasets[0].data = [atrasado, pendente, andamento, feito];
+            window.chartArquivadosDashInstance.data.datasets[0].data = [pendente, andamento, feito];
             window.chartArquivadosDashInstance.update();
-        }
-        if (window.chartArquivados) {
-            window.chartArquivados.data.datasets[0].data = [atrasado, pendente, andamento, feito];
-            window.chartArquivados.update();
         }
     }
   }
-
-  // Hook original advanced filter to also call this to keep them synced in logic
-  // actually just overwrite filtrarTabelaAvancado to just call filtrarPorColunas
-
 
   window.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('select.tag-select').forEach(ajustarCorSelect);
     document.querySelectorAll('select.prio-select').forEach(ajustarCorPrio);
 
+    // Clique em links dentro dos editores abre em nova aba
     document.querySelectorAll('.editor-box, .editor-box-table').forEach(ed => {
       ed.addEventListener('click', e => {
         if (e.target.tagName === 'A') { e.preventDefault(); window.open(e.target.href, '_blank'); }
@@ -2022,17 +2001,6 @@
 
     if (document.getElementById('chartGeralDashboard')) {
       criarGraficoDashboardGlobal();
-    }
-    if (document.getElementById('chartAtivos')) {
-      criarGraficoAtivos();
-    }
-    
-    // In User Profile, Arquivadas and Geral might be hidden initially, but we can initialize them anyway.
-    if (document.getElementById('chartArquivados')) {
-      criarGraficoArquivados();
-    }
-    if (document.getElementById('chartGeral')) {
-      criarGraficoGeral();
     }
   });
 
@@ -2070,7 +2038,6 @@
     if (!canvas) return;
     
     const ctx = canvas.getContext('2d');
-    const atrasado = parseInt(document.getElementById("metric-atrasado-arq")?.innerText || canvas.dataset.atrasadoarq) || 0;
     const pendente = parseInt(document.getElementById("metric-pendente-arq")?.innerText || canvas.dataset.pendentearq) || 0;
     const emAndamento = parseInt(document.getElementById("metric-emandamento-arq")?.innerText || canvas.dataset.emandamentoarq) || 0;
     const feito = parseInt(document.getElementById("metric-feito-arq")?.innerText || canvas.dataset.feitoarq) || 0;
@@ -2186,43 +2153,24 @@
     abaAtivaGlobal = aba;
     const dash_ativos = document.getElementById('dash-ativos');
     const dash_arquivados = document.getElementById('dash-arquivados');
-    const dash_geral = document.getElementById('dash-geral');
 
     if (dash_ativos) dash_ativos.style.display = 'none';
     if (dash_arquivados) dash_arquivados.style.display = 'none';
-    if (dash_geral) dash_geral.style.display = 'none';
 
     const aba_ativos = document.getElementById('aba-ativos');
     const aba_arquivados = document.getElementById('aba-arquivados');
-    const aba_geral = document.getElementById('aba-geral');
 
     if (aba_ativos) aba_ativos.style.borderBottomColor = 'transparent';
     if (aba_arquivados) aba_arquivados.style.borderBottomColor = 'transparent';
-    if (aba_geral) aba_geral.style.borderBottomColor = 'transparent';
 
     if (aba === 'ativos' && dash_ativos) {
       dash_ativos.style.display = 'block';
       if (aba_ativos) aba_ativos.style.borderBottomColor = 'var(--accent)';
-      setTimeout(() => {
-          if (typeof criarGraficoDashboardGlobal === 'function' && !window.chartDashboardInstance) criarGraficoDashboardGlobal();
-          if (typeof criarGraficoAtivos === 'function' && !window.chartAtivos) criarGraficoAtivos();
-          if (window.chartAtivos) window.chartAtivos.update();
-      }, 50);
+      setTimeout(criarGraficoDashboardGlobal, 50);
     } else if (aba === 'arquivados' && dash_arquivados) {
       dash_arquivados.style.display = 'block';
       if (aba_arquivados) aba_arquivados.style.borderBottomColor = 'var(--accent)';
-      setTimeout(() => {
-          if (typeof criarGraficoArquivadosDashboard === 'function' && !window.chartArquivadosDashInstance) criarGraficoArquivadosDashboard();
-          if (typeof criarGraficoArquivados === 'function' && !window.chartArquivados) criarGraficoArquivados();
-          if (window.chartArquivados) window.chartArquivados.update();
-      }, 50);
-    } else if (aba === 'geral' && dash_geral) {
-      dash_geral.style.display = 'block';
-      if (aba_geral) aba_geral.style.borderBottomColor = 'var(--accent)';
-      setTimeout(() => {
-          if (typeof criarGraficoGeral === 'function' && !window.chartGeral) criarGraficoGeral();
-          if (window.chartGeral) window.chartGeral.update();
-      }, 50);
+      setTimeout(criarGraficoArquivadosDashboard, 50);
     }
     
     // Call filter to recalculate counts for the active tab
@@ -2233,15 +2181,14 @@
   function criarGraficoAtivos() {
     const canvas = document.getElementById('chartAtivos');
     if (!canvas) return;
-    if (window.chartAtivos) window.chartAtivos.destroy();
+    if (chartAtivos) chartAtivos.destroy();
 
     const ctx = canvas.getContext('2d');
-    const atrasado = parseInt(canvas.dataset.atrasado) || 0;
     const pendente = parseInt(canvas.dataset.pendente) || 0;
     const emAndamento = parseInt(canvas.dataset.emandamento) || 0;
     const feito = parseInt(canvas.dataset.feito) || 0;
 
-    window.chartAtivos = new Chart(ctx, {
+    chartAtivos = new Chart(ctx, {
       type: 'bar',
       data: {
         labels: ['Atrasadas', 'Pendentes', ['Em', 'andamento'], 'Concluídas'],
@@ -2268,15 +2215,14 @@
   function criarGraficoArquivados() {
     const canvas = document.getElementById('chartArquivados');
     if (!canvas) return;
-    if (window.chartArquivados) window.chartArquivados.destroy();
+    if (chartArquivados) chartArquivados.destroy();
 
     const ctx = canvas.getContext('2d');
-    const atrasado = parseInt(canvas.dataset.atrasadoarq) || 0;
     const pendente = parseInt(canvas.dataset.pendentearq) || 0;
     const emAndamento = parseInt(canvas.dataset.emandamentoarq) || 0;
     const feito = parseInt(canvas.dataset.feitoarq) || 0;
 
-    window.chartArquivados = new Chart(ctx, {
+    chartArquivados = new Chart(ctx, {
       type: 'bar',
       data: {
         labels: ['Atrasadas', 'Pendentes', ['Em', 'andamento'], 'Concluídas'],
@@ -2303,23 +2249,20 @@
   function criarGraficoGeral() {
     const canvas = document.getElementById('chartGeral');
     if (!canvas) return;
-    if (window.chartGeral) window.chartGeral.destroy();
+    if (chartGeral) chartGeral.destroy();
 
     const ctx = canvas.getContext('2d');
-    const atrasadoAtivos = parseInt(canvas.dataset.atrasadoativos) || 0;
     const pendenteAtivos = parseInt(canvas.dataset.pendenteativos) || 0;
     const emAndamentoAtivos = parseInt(canvas.dataset.emandamentoativos) || 0;
     const feitoAtivos = parseInt(canvas.dataset.feitoativos) || 0;
-    
-    const atrasadoArquivados = parseInt(canvas.dataset.atrasadoarquivados) || 0;
     const pendenteArquivados = parseInt(canvas.dataset.pendentearquivados) || 0;
     const emAndamentoArquivados = parseInt(canvas.dataset.emandamentoarquivados) || 0;
     const feitoArquivados = parseInt(canvas.dataset.feitoarquivados) || 0;
 
-    const dadosAtivos = [atrasadoAtivos, pendenteAtivos, emAndamentoAtivos, feitoAtivos];
-    const dadosArquivados = [atrasadoArquivados, pendenteArquivados, emAndamentoArquivados, feitoArquivados];
+    const dadosAtivos = [pendenteAtivos, emAndamentoAtivos, feitoAtivos];
+    const dadosArquivados = [pendenteArquivados, emAndamentoArquivados, feitoArquivados];
 
-    window.chartGeral = new Chart(ctx, {
+    chartGeral = new Chart(ctx, {
       type: 'bar',
       data: {
         labels: ['Atrasadas', 'Pendentes', ['Em', 'andamento'], 'Concluídas'],
@@ -2577,123 +2520,57 @@
   }
 </script>
 
-  <!-- MODAL PAINEL GERAL CENTRALIZADO -->
+  <!-- MODAL PAINEL GERAL -->
   <div id="modalPainelGeral" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; align-items:center; justify-content:center; padding: 20px; box-sizing: border-box;">
-    <div style="background:var(--bg-panel); width:100%; max-width:1100px; height: 95vh; border-radius:12px; display:flex; flex-direction:column; box-shadow:0 10px 40px rgba(0,0,0,0.6); overflow: hidden;">
+    <div style="background:var(--bg-panel); width:100%; max-width:800px; height: 90vh; border-radius:12px; display:flex; flex-direction:column; box-shadow:0 10px 30px rgba(0,0,0,0.5); overflow: hidden;">
       
-      <!-- Cabeçalho / Inputs -->
-      <div style="padding: 20px 25px; border-bottom: 1px solid var(--border-color); display:flex; flex-direction:column; gap:15px; background:var(--bg-main);">
-        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-          <input type="text" id="pg-atividade" onchange="atualizarAtividadeModal('atividade', this.value)" style="font-size:22px; font-weight:700; color:var(--text-main); border:none; background:transparent; width:100%; outline:none;" placeholder="Título da Atividade">
-          <button onclick="fecharPainelGeral()" style="background:transparent; border:none; color:var(--text-muted); font-size:24px; cursor:pointer; margin-left:15px;">&times;</button>
+      <!-- Cabeçalho -->
+      <div style="padding: 20px 25px; border-bottom: 1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; background:var(--bg-main);">
+        <div style="display:flex; align-items:center; gap: 15px;">
+          <h2 id="pg-titulo" style="margin:0; font-size: 20px; color:var(--text-main);">Carregando...</h2>
+          <div id="pg-status" class="status-badge"></div>
         </div>
-        
-        <div style="display:flex; gap:15px; flex-wrap:wrap; align-items:center;">
-          <div style="display:flex; flex-direction:column; gap:4px; flex:1; min-width:150px;">
-            <label style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase;">Início</label>
-            <input type="date" id="pg-inicio" onchange="atualizarAtividadeModal('data_inicio', this.value)" style="font-size:14px; padding:6px; border:1px solid var(--border-color); border-radius:6px; background:var(--bg-panel); color:var(--text-main);">
-          </div>
-          <div style="display:flex; flex-direction:column; gap:4px; flex:1; min-width:150px;">
-            <label style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase;">Prazo</label>
-            <input type="date" id="pg-prazo" onchange="atualizarAtividadeModal('prazo', this.value)" style="font-size:14px; padding:6px; border:1px solid var(--border-color); border-radius:6px; background:var(--bg-panel); color:var(--text-main);">
-          </div>
-          <div style="display:flex; flex-direction:column; gap:4px; flex:1; min-width:150px;">
-            <label style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase;">Área</label>
-            <select id="pg-area" onchange="atualizarAtividadeModal('area', this.value)" style="font-size:14px; padding:6px; border:1px solid var(--border-color); border-radius:6px; background:var(--bg-panel); color:var(--text-main);">
-              {% for cat in categorias %}
-              <option value="{{ cat['nome'] }}">{{ cat['nome'] }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div style="display:flex; flex-direction:column; gap:4px; flex:1; min-width:150px;">
-            <label style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase;">Responsável</label>
-            <select id="pg-responsavel" onchange="atualizarAtividadeModal('responsavel', this.value)" style="font-size:14px; padding:6px; border:1px solid var(--border-color); border-radius:6px; background:var(--bg-panel); color:var(--text-main);">
-              {% for resp in responsaveis %}
-              <option value="{{ resp['nome'] }}">{{ resp['nome'] }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div style="display:flex; flex-direction:column; gap:4px; flex:1; min-width:150px;">
-            <label style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase;">Prioridade</label>
-            <select id="pg-prioridade" onchange="atualizarAtividadeModal('prioridade', this.value)" style="font-size:14px; padding:6px; border:1px solid var(--border-color); border-radius:6px; background:var(--bg-panel); color:var(--text-main);">
-              <option value="Baixa">Baixa</option>
-              <option value="Média">Média</option>
-              <option value="Alta">Alta</option>
-            </select>
-          </div>
-          <div style="display:flex; flex-direction:column; gap:4px; flex:1; min-width:150px;">
-            <label style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase;">Status</label>
-            <div style="height:31px; display:flex; align-items:center;">
-              <div id="pg-status" class="status-badge"></div>
-            </div>
-          </div>
-        </div>
+        <button onclick="fecharPainelGeral()" style="background:transparent; border:none; color:var(--text-muted); font-size:24px; cursor:pointer;">&times;</button>
       </div>
 
-      <!-- Corpo Principal -->
-      <div style="padding: 25px; flex:1; display:flex; gap:25px; overflow-y:auto; background:var(--bg-panel);">
+      <!-- Corpo -->
+      <div style="padding: 25px; flex:1; display:flex; flex-direction:column; gap:20px; overflow-y:auto;">
         
-        <!-- Coluna Esquerda: Passos & Métricas -->
-        <div style="flex:1; display:flex; flex-direction:column; gap:20px; max-width: 50%;">
-          
-          <div style="display:flex; gap:15px;">
-            <div style="flex:1; background:var(--bg-main); padding:15px; border-radius:8px; border:1px solid var(--border-color);">
-              <div style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; margin-bottom:5px;">Execução</div>
-              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:5px;">
-                <span style="font-size:24px; font-weight:700;" id="pg-perc-txt">0%</span>
-              </div>
-              <div style="width:100%; height:8px; background:var(--border-color); border-radius:4px; overflow:hidden;">
-                <div id="pg-perc-bar" style="height:100%; background:#22c55e; width:0%; transition:width 0.5s ease;"></div>
-              </div>
-            </div>
-            
-            <div style="flex:1; background:var(--bg-main); padding:15px; border-radius:8px; border:1px solid var(--border-color); display:flex; flex-direction:column; justify-content:center; align-items:center;">
-              <div style="font-size:28px; font-weight:700; color:#3b82f6;" id="pg-dias">0</div>
-              <div style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase;">Dias Decorridos</div>
-            </div>
-            
-            <div style="flex:1; background:var(--bg-main); padding:15px; border-radius:8px; border:1px solid var(--border-color); display:flex; flex-direction:column; justify-content:center; align-items:center;">
-              <div style="font-size:28px; font-weight:700; color:#10b981;" id="pg-restantes">0</div>
-              <div style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase;">Dias Restantes</div>
-            </div>
-            
-            <div style="flex:1; background:var(--bg-main); padding:15px; border-radius:8px; border:1px solid var(--border-color); display:flex; flex-direction:column; justify-content:center; align-items:center;">
-              <div style="font-size:28px; font-weight:700; color:#ef4444;" id="pg-atrasados">0</div>
-              <div style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase;">Dias Atrasados</div>
-            </div>
-          </div>
-
-          <!-- Passos -->
-          <div style="flex:1; border:1px solid var(--border-color); border-radius:8px; display:flex; flex-direction:column; background:var(--bg-main); overflow:hidden;">
-            <div style="padding:12px 15px; border-bottom:1px solid var(--border-color); font-weight:600; font-size:14px; background:var(--bg-panel);">
-              ✅ Checklist (Passos)
-            </div>
-            
-            <div id="pg-lista-passos" style="padding:15px; flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px;">
-              <!-- Javascript populates this -->
-            </div>
-            
-            <div style="padding:15px; border-top:1px solid var(--border-color); background:var(--bg-panel);">
-              <div style="display:flex; gap:10px;">
-                <input type="text" id="pg-novoPassoDesc" placeholder="Descrição do passo..." style="flex:2; padding:8px; border:1px solid var(--border-color); border-radius:6px;">
-                <button type="button" onclick="salvarNovoPassoModal()" style="background:#22c55e; color:white; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; font-weight:600;">Adicionar</button>
-              </div>
-            </div>
+        <!-- Métricas -->
+        <div style="display:flex; gap:15px;">
+          <div style="flex:1; background:var(--bg-main); padding:15px; border-radius:8px; border:1px solid var(--border-color);">
+            <div style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; margin-bottom:5px;">Datas</div>
+            <div style="font-size:13px; margin-bottom:3px;"><strong>Início:</strong> <span id="pg-inicio"></span></div>
+            <div style="font-size:13px;"><strong>Prazo:</strong> <span id="pg-prazo"></span></div>
+            <div style="margin-top:8px; font-size:12px; font-weight:600; color:#3b82f6;">⏳ <span id="pg-dias"></span> dias decorridos</div>
           </div>
           
+          <div style="flex:1; background:var(--bg-main); padding:15px; border-radius:8px; border:1px solid var(--border-color);">
+            <div style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; margin-bottom:5px;">Execução</div>
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:5px;">
+              <span style="font-size:24px; font-weight:700;" id="pg-perc-txt">0%</span>
+            </div>
+            <div style="width:100%; height:8px; background:var(--border-color); border-radius:4px; overflow:hidden;">
+              <div id="pg-perc-bar" style="height:100%; background:#22c55e; width:0%; transition:width 0.5s ease;"></div>
+            </div>
+          </div>
         </div>
 
-        <!-- Coluna Direita: Observações -->
-        <div style="flex:1; display:flex; flex-direction:column; border:1px solid var(--border-color); border-radius:8px; overflow:hidden;">
-          <div style="padding:12px 15px; background:var(--bg-panel); border-bottom:1px solid var(--border-color); font-weight:600; font-size:14px; display:flex; justify-content:space-between; align-items:center;">
-            <span>📝 Observações Gerais</span>
-            <button type="button" onclick="salvarObservacoes()" style="background:#3b82f6; color:white; border:none; padding:4px 10px; border-radius:4px; font-size:12px; cursor:pointer;">Salvar</button>
+        <!-- Observações -->
+        <div style="flex:1; display:flex; flex-direction:column; border:1px solid var(--border-color); border-radius:8px; overflow:hidden; min-height: 250px;">
+          <div style="padding:10px 15px; background:var(--bg-main); border-bottom:1px solid var(--border-color); font-weight:600; font-size:13px;">
+            Observações Gerais
           </div>
           <div style="flex:1; display:flex; flex-direction:column; background: #fff; overflow:hidden;">
             <div id="quill-painel-geral" style="flex:1; overflow-y:auto; font-size: 14px; color: #000;"></div>
           </div>
         </div>
 
+      </div>
+
+      <!-- Rodapé -->
+      <div style="padding: 15px 25px; border-top: 1px solid var(--border-color); display:flex; justify-content:flex-end; gap:10px; background:var(--bg-main);">
+        <button type="button" class="btn-primary" onclick="salvarObservacoes()" style="padding:8px 16px;">💾 Salvar Observações</button>
       </div>
 
     </div>
@@ -2707,114 +2584,41 @@
       if (document.getElementById('quill-painel-geral')) {
           quillPainelGeral = new Quill('#quill-painel-geral', {
               theme: 'snow',
-              placeholder: 'Escreva observações, relatórios e evolução da atividade aqui...'
+              placeholder: 'Escreva observações gerais ou atualizações sobre a atividade...'
           });
       }
   });
 
-
-  function recalcularDias() {
-      const d_ini_str = document.getElementById('pg-inicio').value;
-      const d_prazo_str = document.getElementById('pg-prazo').value;
-      
-      const hoje = new Date();
-      hoje.setHours(0,0,0,0);
-
-      // Decorridos
-      if (d_ini_str) {
-          const d_ini = new Date(d_ini_str + 'T00:00:00');
-          d_ini.setHours(0,0,0,0);
-          
-          if (hoje < d_ini) {
-              document.getElementById('pg-dias').innerText = '0';
-          } else {
-              const diffTime = Math.abs(hoje - d_ini);
-              const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-              document.getElementById('pg-dias').innerText = diffDays;
-          }
-      } else {
-          document.getElementById('pg-dias').innerText = '0';
-      }
-
-      // Restantes e Atrasados
-      if (d_prazo_str) {
-          const d_prazo = new Date(d_prazo_str + 'T00:00:00');
-          d_prazo.setHours(0,0,0,0);
-          
-          if (d_prazo < hoje) {
-              const diffTime = hoje - d_prazo;
-              const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-              
-              document.getElementById('pg-restantes').innerText = '0';
-              document.getElementById('pg-restantes').style.color = 'var(--text-muted)';
-              
-              document.getElementById('pg-atrasados').innerText = diffDays;
-              document.getElementById('pg-atrasados').style.color = '#ef4444';
-          } else {
-              const diffTime = d_prazo - hoje;
-              const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-              
-              document.getElementById('pg-restantes').innerText = diffDays;
-              document.getElementById('pg-restantes').style.color = '#10b981'; // Greenish
-              
-              document.getElementById('pg-atrasados').innerText = '0';
-              document.getElementById('pg-atrasados').style.color = 'var(--text-muted)';
-          }
-      } else {
-          document.getElementById('pg-restantes').innerText = '-';
-          document.getElementById('pg-restantes').style.color = 'var(--text-muted)';
-          
-          document.getElementById('pg-atrasados').innerText = '-';
-          document.getElementById('pg-atrasados').style.color = 'var(--text-muted)';
-      }
-  }
-
-  async function atualizarAtividadeModal(campo, valor) {
-      if(!painelGeralAtividadeId) return;
-      const data = new FormData();
-      data.append('campo', campo);
-      data.append('valor', valor);
-      await fetch(`${SCRIPT_ROOT}/api/atividades/${painelGeralAtividadeId}/atualizar`, { method: 'POST', body: data });
-      mostrarToast();
-      
-      if (campo === 'data_inicio' || campo === 'prazo') {
-          recalcularDias();
-      }
-  }
-
-  let linhaAbertaGlobal = null;
   async function abrirPainelGeral(id, event) {
       if (event && event.target) {
           const tag = event.target.tagName.toLowerCase();
           if (['input', 'select', 'button', 'a', 'path', 'svg'].includes(tag)) return;
       }
-      
-      if (event && event.currentTarget && event.currentTarget.classList.contains('linha-dado')) {
-          linhaAbertaGlobal = event.currentTarget;
-      }
 
       painelGeralAtividadeId = id;
       document.getElementById('modalPainelGeral').style.display = 'flex';
       
-      document.getElementById('pg-atividade').value = 'Carregando...';
+      document.getElementById('pg-titulo').innerText = 'Carregando...';
       if(quillPainelGeral) quillPainelGeral.setContents([{ insert: '\n' }]);
-      document.getElementById('pg-lista-passos').innerHTML = 'Carregando...';
       
-      await recarregarDadosModal();
-  }
-  
-  async function recarregarDadosModal() {
-      const resp = await fetch(`${SCRIPT_ROOT}/api/atividades/${painelGeralAtividadeId}/painel_geral`);
+      const resp = await fetch(`${SCRIPT_ROOT}/api/atividades/${id}/painel_geral`);
       const data = await resp.json();
       
-      document.getElementById('pg-atividade').value = data.atividade;
-      document.getElementById('pg-inicio').value = data.data_inicio;
-      document.getElementById('pg-prazo').value = data.prazo;
-      document.getElementById('pg-area').value = data.area;
-      document.getElementById('pg-responsavel').value = data.responsavel;
-      document.getElementById('pg-prioridade').value = data.prioridade;
+      document.getElementById('pg-titulo').innerText = data.atividade;
+      document.getElementById('pg-inicio').innerText = data.data_inicio ? data.data_inicio.split('-').reverse().join('/') : '-';
+      document.getElementById('pg-prazo').innerText = data.prazo ? data.prazo.split('-').reverse().join('/') : '-';
       
-      recalcularDias();
+      if (data.data_inicio) {
+          const hoje = new Date();
+          const d_ini = new Date(data.data_inicio);
+          const diffTime = Math.abs(hoje - d_ini);
+          let diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+          // if future date, handle carefully. For now, abs works for "dias de diferenca".
+          if (hoje < d_ini) diffDays = 0; 
+          document.getElementById('pg-dias').innerText = diffDays;
+      } else {
+          document.getElementById('pg-dias').innerText = '0';
+      }
 
       document.getElementById('pg-perc-txt').innerText = data.perc_execucao + '%';
       document.getElementById('pg-perc-bar').style.width = data.perc_execucao + '%';
@@ -2830,131 +2634,24 @@
       if (data.observacoes && quillPainelGeral) {
           quillPainelGeral.clipboard.dangerouslyPasteHTML(0, data.observacoes);
       }
-      
-      carregarPassosModal();
   }
 
-  async function fecharPainelGeral() {
+  function fecharPainelGeral() {
       document.getElementById('modalPainelGeral').style.display = 'none';
-      
-      if (painelGeralAtividadeId && linhaAbertaGlobal) {
-          try {
-              const resp = await fetch(`${SCRIPT_ROOT}/api/atividades/${painelGeralAtividadeId}/painel_geral`);
-              if (resp.ok) {
-                  const data = await resp.json();
-                  const tds = linhaAbertaGlobal.querySelectorAll('td');
-                  
-                  // Update data attributes
-                  linhaAbertaGlobal.dataset.area = data.area;
-                  linhaAbertaGlobal.dataset.resp = data.responsavel;
-                  linhaAbertaGlobal.dataset.status = data.status_exibicao;
-                  linhaAbertaGlobal.dataset.prio = data.prioridade;
-                  
-                  // Col 0: Prazo
-                  tds[0].innerText = data.prazo ? data.prazo.split('-').reverse().join('/') : '-';
-                  
-                  // Col 1: Area
-                  const spanArea = tds[1].querySelector('.tag-badge');
-                  if (spanArea) spanArea.innerText = data.area;
-                  
-                  // Col 2: Atividade
-                  tds[2].innerText = data.atividade;
-                  
-                  // Col 3: Responsavel
-                  tds[3].innerHTML = `<div style="display:flex; align-items:center; gap:8px; font-size: 13px;"><img src="/static/user_icon.png" style="width:24px; height:24px; border-radius:50%; object-fit:cover;" onerror="this.style.display='none';">${data.responsavel}</div>`;
-                  
-                  // Col 4: Status
-                  let statusHtml = '';
-                  let statusBadgeClass = 'status-' + data.status_exibicao.toLowerCase().replace(' ', '-');
-                  if (data.status_exibicao === 'Atrasado') statusHtml = '🔴 Atrasado';
-                  else if (data.status_exibicao === 'Feito') statusHtml = '✅ Feito';
-                  else if (data.status_exibicao === 'Em andamento') statusHtml = '🏃‍♂️ Em andamento';
-                  else statusHtml = '⏳ Pendente';
-                  tds[4].innerHTML = `<div class="status-badge ${statusBadgeClass}">${statusHtml}</div>`;
-                  
-                  // Col 5: Prioridade
-                  let pIcon = '🟢';
-                  if(data.prioridade === 'Média') pIcon = '🟡';
-                  if(data.prioridade === 'Alta') pIcon = '🔴';
-                  tds[5].innerHTML = `<div class="prio-badge prio-${data.prioridade.toLowerCase()}">${pIcon} ${data.prioridade}</div>`;
-                  
-                  // Trigger filters to recalculate graphs and cards if they changed
-                  if (typeof filtrarTabelaAvancado === 'function') {
-                      filtrarTabelaAvancado();
-                  }
-              }
-          } catch (e) {
-              console.error("Erro ao atualizar linha", e);
-          }
-      }
-      
-      linhaAbertaGlobal = null;
-      painelGeralAtividadeId = null;
   }
 
   async function salvarObservacoes() {
       if (!painelGeralAtividadeId || !quillPainelGeral) return;
+      
       const htmlContent = quillPainelGeral.root.innerHTML;
       const data = new FormData();
       data.append('observacoes', htmlContent);
+      
       await fetch(`${SCRIPT_ROOT}/api/atividades/${painelGeralAtividadeId}/observacoes`, { method: 'POST', body: data });
       mostrarToast(); 
   }
-  
-  // PASSOS DENTRO DO MODAL
-  async function carregarPassosModal() {
-      const resp = await fetch(`${SCRIPT_ROOT}/api/atividades/${painelGeralAtividadeId}/passos`);
-      const passos = await resp.json();
-      const div = document.getElementById('pg-lista-passos');
-      div.innerHTML = '';
-      
-      if(passos.length === 0) {
-          div.innerHTML = '<div style="color:var(--text-muted); font-size:13px; text-align:center; margin-top:20px;">Nenhum passo adicionado.</div>';
-          return;
-      }
-      
-      passos.forEach(p => {
-          const concluidoStyle = p.concluido ? 'text-decoration:line-through; color:var(--text-muted); opacity:0.7;' : '';
-          div.innerHTML += `
-            <div style="display:flex; align-items:center; gap:10px; background:var(--bg-panel); padding:8px 12px; border-radius:6px; border:1px solid var(--border-color);">
-              <input type="checkbox" ${p.concluido ? 'checked' : ''} onchange="togglePassoModal(${p.id}, this.checked)" style="width:16px; height:16px; cursor:pointer;">
-              <input type="text" value="${p.descricao}" onchange="atualizarPassoModal(${p.id}, 'descricao', this.value)" style="flex:2; border:none; background:transparent; font-size:13px; outline:none; ${concluidoStyle}">
-              <button onclick="excluirPassoModal(${p.id})" style="background:transparent; border:none; color:#ef4444; font-weight:bold; cursor:pointer; font-size:14px;" title="Excluir">X</button>
-            </div>
-          `;
-      });
-  }
-
-  async function togglePassoModal(id, checked) {
-      const data = new FormData();
-      data.append('concluido', checked);
-      await fetch(`${SCRIPT_ROOT}/api/passos/${id}/toggle`, { method: 'POST', body: data });
-      recarregarDadosModal();
-  }
-
-  async function atualizarPassoModal(id, campo, valor) {
-      const data = new FormData();
-      data.append('campo', campo);
-      data.append('valor', valor);
-      await fetch(`${SCRIPT_ROOT}/api/passos/${id}/atualizar`, { method: 'POST', body: data });
-      mostrarToast();
-  }
-
-  async function salvarNovoPassoModal() {
-      const desc = document.getElementById('pg-novoPassoDesc').value;
-      if (!desc.trim()) return;
-      const data = new FormData();
-      data.append('atividade_id', painelGeralAtividadeId);
-      data.append('descricao', desc);
-      await fetch(`${SCRIPT_ROOT}/api/passos/adicionar`, { method: 'POST', body: data });
-      document.getElementById('pg-novoPassoDesc').value = '';
-      recarregarDadosModal();
-  }
-
-  async function excluirPassoModal(id) {
-      if (!confirm("Excluir este passo?")) return;
-      await fetch(`${SCRIPT_ROOT}/api/passos/${id}/excluir`, { method: 'POST' });
-      recarregarDadosModal();
-  }
 </script>
+
 </body>
+
+</html>
