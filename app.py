@@ -58,7 +58,11 @@ def init_db():
         )
     ''')
 
-    # Migrações seguras — ignoram erro se coluna já existe
+        # Migrações seguras - ignoram erro se coluna já existe
+    try:
+        conn.execute('ALTER TABLE passos ADD COLUMN responsavel TEXT')
+    except sqlite3.OperationalError:
+        pass
     
 
     conn.execute('''
@@ -533,9 +537,23 @@ def salvar_observacoes(id):
 @app.route('/api/atividades/<int:id>/passos', methods=['GET'])
 def api_get_passos(id):
     conn = get_db_connection()
-    passos = conn.execute('SELECT * FROM passos WHERE atividade_id = ? ORDER BY id ASC', (id,)).fetchall()
+    passos_raw = conn.execute('''
+        SELECT p.*, r.foto as responsavel_foto
+        FROM passos p
+        LEFT JOIN responsaveis r ON p.responsavel = r.nome
+        WHERE p.atividade_id = ? ORDER BY p.id ASC
+    ''', (id,)).fetchall()
     conn.close()
-    return jsonify([dict(p) for p in passos])
+    
+    passos = []
+    for p in passos_raw:
+        pd = dict(p)
+        if 'responsavel' not in pd or not pd['responsavel']:
+            pd['responsavel'] = ''
+        if 'responsavel_foto' not in pd or not pd['responsavel_foto']:
+            pd['responsavel_foto'] = ''
+        passos.append(pd)
+    return jsonify(passos)
 
 @app.route('/api/passos/<int:id>/toggle', methods=['POST'])
 def api_toggle_passo(id):
@@ -578,11 +596,12 @@ def api_adicionar_passo():
     atividade_id = request.form.get('atividade_id')
     descricao = request.form.get('descricao')
     prazo = request.form.get('prazo')
+    responsavel = request.form.get('responsavel', '')
     
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('INSERT INTO passos (atividade_id, descricao, prazo, concluido) VALUES (?, ?, ?, 0)',
-                 (atividade_id, descricao, prazo if prazo else None))
+    cursor.execute('INSERT INTO passos (atividade_id, descricao, prazo, responsavel, concluido) VALUES (?, ?, ?, ?, 0)',
+                 (atividade_id, descricao, prazo if prazo else None, responsavel))
     novo_id = cursor.lastrowid
     
     # Se adicionar um passo novo (incompleto), e a atividade tava "Feito", muda pra "Em andamento"
@@ -611,7 +630,7 @@ def api_excluir_passo(id):
 def api_atualizar_passo(id):
     campo = request.form.get('campo')
     valor = request.form.get('valor')
-    if campo in ['descricao', 'prazo']:
+    if campo in ['descricao', 'prazo', 'responsavel']:
         conn = get_db_connection()
         conn.execute(f'UPDATE passos SET {campo} = ? WHERE id = ?', (valor, id))
         conn.commit()
@@ -645,11 +664,17 @@ def adicionar():
     
     passos_desc = request.form.getlist('passos_desc[]')
     passos_prazo = request.form.getlist('passos_prazo[]')
-    for desc, prazo in zip(passos_desc, passos_prazo):
+    passos_resp = request.form.getlist('passos_resp[]')
+    resp_atividade = request.form.get('responsavel', '')
+    
+    while len(passos_resp) < len(passos_desc):
+        passos_resp.append(resp_atividade)
+
+    for desc, prazo, resp in zip(passos_desc, passos_prazo, passos_resp):
         if desc.strip():
             cursor.execute(
-                'INSERT INTO passos (atividade_id, descricao, prazo, concluido) VALUES (?, ?, ?, 0)',
-                (atividade_id, desc.strip(), prazo.strip() if prazo.strip() else None)
+                'INSERT INTO passos (atividade_id, descricao, prazo, responsavel, concluido) VALUES (?, ?, ?, ?, 0)',
+                (atividade_id, desc.strip(), prazo.strip() if prazo.strip() else None, resp)
             )
     conn.commit()
     conn.close()

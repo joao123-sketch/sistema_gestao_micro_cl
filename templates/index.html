@@ -705,6 +705,69 @@
 
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  function toggleFotoDropdown(containerElem) {
+      // close others
+      document.querySelectorAll('.passo-dropdown').forEach(d => {
+          if(d !== containerElem.querySelector('.passo-dropdown')) d.style.display = 'none';
+      });
+      let dropdown = containerElem.querySelector('.passo-dropdown');
+      if (dropdown.style.display === 'none' || dropdown.style.display === '') {
+          dropdown.style.display = 'flex';
+      } else {
+          dropdown.style.display = 'none';
+      }
+  }
+
+  function selecionarResponsavelPasso(event, imgElem, nomeResponsavel, isAjax, passoId) {
+      event.stopPropagation(); // Prevent toggling the dropdown again
+      let container = imgElem.closest('.passo-responsavel-selector');
+      
+      // Update the main photo
+      let mainFoto = container.querySelector('.passo-foto-atual');
+      mainFoto.src = imgElem.src;
+      mainFoto.title = nomeResponsavel;
+      
+      // Update the hidden input
+      let input = container.querySelector('.passo-resp-input');
+      if (input) {
+          input.value = nomeResponsavel;
+      }
+      
+      // Hide dropdown
+      container.querySelector('.passo-dropdown').style.display = 'none';
+      
+      // If it's an existing step (AJAX), trigger the update API
+      if (isAjax && passoId) {
+          atualizarPassoModal(passoId, 'responsavel', nomeResponsavel);
+      }
+  }
+
+  // Close dropdowns when clicking outside
+  document.addEventListener('click', function(e) {
+      if (!e.target.closest('.passo-responsavel-selector')) {
+          document.querySelectorAll('.passo-dropdown').forEach(d => d.style.display = 'none');
+      }
+  });
+
+  // Helper to generate the dropdown HTML for JS injection
+  function getDropdownFotinhasHTML(currentResp, passoId, isAjax) {
+      let optionsHTML = '';
+      let defaultFoto = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzljYTNhZiI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgM2MxLjY2IDAgMyAxLjM0IDMgM3MtMS4zNCAzLTMgMy0zLTEuMzQtMy0zIDEuMzQtMyAzLTN6bTAgMTQuMmMtMi41IDAtNC43MS0xLjI4LTYtMy4yMi4wMy0xLjk5IDQtMy4wOCA2LTMuMDggMS45OSAwIDUuOTcgMS4wOSA2IDMuMDgtMS4yOSAxLjk0LTMuNSAzLjIyLTYgMy4yMnoiLz48L3N2Zz4=';
+      {% for resp in responsaveis %}
+      {
+          let foto = "{% if resp['foto'] %}{{ url_for('static', filename=resp['foto']) }}{% else %}data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzljYTNhZiI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgM2MxLjY2IDAgMyAxLjM0IDMgM3MtMS4zNCAzLTMgMy0zLTEuMzQtMy0zIDEuMzQtMyAzLTN6bTAgMTQuMmMtMi41IDAtNC43MS0xLjI4LTYtMy4yMi4wMy0xLjk5IDQtMy4wOCA2LTMuMDggMS45OSAwIDUuOTcgMS4wOSA2IDMuMDgtMS4yOSAxLjk0LTMuNSAzLjIyLTYgMy4yMnoiLz48L3N2Zz4={% endif %}";
+          let nome = "{{ resp['nome'] }}";
+          if (nome === currentResp) defaultFoto = foto;
+          optionsHTML += `<img src="${foto}" title="${nome}" style="width:28px; height:28px; border-radius:50%; object-fit:cover; cursor:pointer; border:1px solid transparent;" onclick="selecionarResponsavelPasso(event, this, '${nome}', ${isAjax}, ${passoId || 'null'})" onmouseover="this.style.borderColor='var(--primary-color)'" onmouseout="this.style.borderColor='transparent'">`;
+      }
+      {% endfor %}
+      
+      return { html: optionsHTML, defaultFoto: defaultFoto };
+  }
+
+
+</script>
 
   <!-- Quill.js for Rich Text Editing -->
   <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
@@ -848,7 +911,7 @@
           <td style="font-weight: 500; font-size: 14px;">{{ atv['atividade'] }}</td>
           <td class="w-resp">
             <div style="display:flex; align-items:center; gap:8px; font-size: 13px;">
-              <img src="/static/user_icon.png" style="width:24px; height:24px; border-radius:50%; object-fit:cover;" onerror="this.style.display='none';">
+              <img src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzljYTNhZiI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgM2MxLjY2IDAgMyAxLjM0IDMgM3MtMS4zNCAzLTMgMy0zLTEuMzQtMy0zIDEuMzQtMyAzLTN6bTAgMTQuMmMtMi41IDAtNC43MS0xLjI4LTYtMy4yMi4wMy0xLjk5IDQtMy4wOCA2LTMuMDggMS45OSAwIDUuOTcgMS4wOSA2IDMuMDgtMS4yOSAxLjk0LTMuNSAzLjIyLTYgMy4yMnoiLz48L3N2Zz4=' style="width:24px; height:24px; border-radius:50%; object-fit:cover;" onerror="this.style.display='none';">
               {{ atv['responsavel'] }}
             </div>
           </td>
@@ -959,12 +1022,21 @@
         <div class="form-coluna" id="container-passos-form">
           <label class="label-editor">Passos (Detalhamento)</label>
           <div id="lista-passos-form">
-             <div style="display:flex; gap:5px; margin-bottom:5px;">
-                <input type="text" name="passos_desc[]" placeholder="Descrição do passo..." style="flex:2">
-                <input type="date" name="passos_prazo[]" style="flex:1">
+             <div style="display:flex; gap:5px; margin-bottom:5px; align-items:center;">
+                <div class="passo-responsavel-selector" style="position:relative; cursor:pointer; display:flex; align-items:center;" onclick="toggleFotoDropdown(this)">
+                    <img class="passo-foto-atual" src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzljYTNhZiI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgM2MxLjY2IDAgMyAxLjM0IDMgM3MtMS4zNCAzLTMgMy0zLTEuMzQtMy0zIDEuMzQtMyAzLTN6bTAgMTQuMmMtMi41IDAtNC43MS0xLjI4LTYtMy4yMi4wMy0xLjk5IDQtMy4wOCA2LTMuMDggMS45OSAwIDUuOTcgMS4wOSA2IDMuMDgtMS4yOSAxLjk0LTMuNSAzLjIyLTYgMy4yMnoiLz48L3N2Zz4=' title="Selecionar Responsável" style="width:28px; height:28px; border-radius:50%; object-fit:cover; border:1px solid var(--border-color);">
+                    <div class="passo-dropdown" style="display:none; position:absolute; top:35px; left:0; background:white; border:1px solid #e5e7eb; border-radius:6px; padding:8px; z-index:100; flex-wrap:wrap; width:120px; gap:8px; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                        {% for resp in responsaveis %}
+                        <img src="{% if resp['foto'] %}{{ url_for('static', filename=resp['foto']) }}{% else %}data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzljYTNhZiI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgM2MxLjY2IDAgMyAxLjM0IDMgM3MtMS4zNCAzLTMgMy0zLTEuMzQtMy0zIDEuMzQtMyAzLTN6bTAgMTQuMmMtMi41IDAtNC43MS0xLjI4LTYtMy4yMi4wMy0xLjk5IDQtMy4wOCA2LTMuMDggMS45OSAwIDUuOTcgMS4wOSA2IDMuMDgtMS4yOSAxLjk0LTMuNSAzLjIyLTYgMy4yMnoiLz48L3N2Zz4={% endif %}" title="{{ resp['nome'] }}" style="width:28px; height:28px; border-radius:50%; object-fit:cover; cursor:pointer; border:1px solid transparent;" onclick="selecionarResponsavelPasso(event, this, '{{ resp['nome'] }}', false, null)" onmouseover="this.style.borderColor='var(--primary-color)'" onmouseout="this.style.borderColor='transparent'">
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="passos_resp[]" class="passo-resp-input" value="">
+                </div>
+                <input type="text" name="passos_desc[]" placeholder="Descrição do passo..." style="flex:2; padding:8px; border:1px solid var(--border-color); border-radius:6px;">
+                <input type="date" name="passos_prazo[]" style="flex:1; padding:8px; border:1px solid var(--border-color); border-radius:6px;">
              </div>
           </div>
-          <button type="button" onclick="adicionarCampoPasso()" style="align-self:flex-start; margin-top:5px; background:var(--btn-toolbar); border:1px solid var(--border-color); padding:5px 10px; border-radius:4px; font-size:12px; cursor:pointer;">+ Adicionar Passo</button>
+          <button type="button" onclick="adicionarCampoPasso(this)" style="align-self:flex-start; margin-top:5px; background:var(--btn-toolbar); border:1px solid var(--border-color); padding:5px 10px; border-radius:4px; font-size:12px; cursor:pointer;">+ Adicionar Passo</button>
         </div>
       </div>
       <button type="submit" class="btn-principal">Adicionar à Base Geral</button>
@@ -989,7 +1061,7 @@
           <th class="w-acoes" style="text-align:center;">Ações</th>
         </tr>
               <tr class="col-filters-row">
-          <th></th>
+          <th><input type="month" class="col-filter" data-col="0" onchange="filtrarPorColunas()" style="width:100%; padding:2px; font-size:11px; border-radius:4px; border:1px solid #ccc;" title="Filtrar por mês"></th>
           <th><select class="col-filter" data-col="1" onchange="filtrarPorColunas()" style="width:100%; padding:2px; font-size:11px; border-radius:4px; border:1px solid #ccc;"><option value="">Todas</option>{% for cat in categorias %}<option value="{{ cat['nome'] }}">{{ cat['nome'] }}</option>{% endfor %}</select></th>
           <th><input type="text" class="col-filter" data-col="2" onkeyup="filtrarPorColunas()" placeholder="Buscar..." style="width:100%; padding:2px; font-size:11px; border-radius:4px; border:1px solid #ccc;"></th>
           <th><select class="col-filter" data-col="3" onchange="filtrarPorColunas()" style="width:100%; padding:2px; font-size:11px; border-radius:4px; border:1px solid #ccc;"><option value="">Todos</option>{% for resp in responsaveis %}<option value="{{ resp['nome'] }}">{{ resp['nome'] }}</option>{% endfor %}</select></th>
@@ -1006,7 +1078,7 @@
           <td style="font-weight: 500; font-size: 14px;">{{ atv['atividade'] }}</td>
           <td class="w-resp">
             <div style="display:flex; align-items:center; gap:8px; font-size: 13px;">
-              <img src="/static/user_icon.png" style="width:24px; height:24px; border-radius:50%; object-fit:cover;" onerror="this.style.display='none';">
+              <img src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzljYTNhZiI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgM2MxLjY2IDAgMyAxLjM0IDMgM3MtMS4zNCAzLTMgMy0zLTEuMzQtMy0zIDEuMzQtMyAzLTN6bTAgMTQuMmMtMi41IDAtNC43MS0xLjI4LTYtMy4yMi4wMy0xLjk5IDQtMy4wOCA2LTMuMDggMS45OSAwIDUuOTcgMS4wOSA2IDMuMDgtMS4yOSAxLjk0LTMuNSAzLjIyLTYgMy4yMnoiLz48L3N2Zz4=' style="width:24px; height:24px; border-radius:50%; object-fit:cover;" onerror="this.style.display='none';">
               {{ atv['responsavel'] }}
             </div>
           </td>
@@ -1069,7 +1141,7 @@
           <th class="w-acoes" style="text-align:center;"></th>
         </tr>
               <tr class="col-filters-row">
-          <th></th>
+          <th><input type="month" class="col-filter" data-col="0" onchange="filtrarPorColunas()" style="width:100%; padding:2px; font-size:11px; border-radius:4px; border:1px solid #ccc;" title="Filtrar por mês"></th>
           <th><select class="col-filter" data-col="1" onchange="filtrarPorColunas()" style="width:100%; padding:2px; font-size:11px; border-radius:4px; border:1px solid #ccc;"><option value="">Todas</option>{% for cat in categorias %}<option value="{{ cat['nome'] }}">{{ cat['nome'] }}</option>{% endfor %}</select></th>
           <th><input type="text" class="col-filter" data-col="2" onkeyup="filtrarPorColunas()" placeholder="Buscar..." style="width:100%; padding:2px; font-size:11px; border-radius:4px; border:1px solid #ccc;"></th>
           <th><select class="col-filter" data-col="3" onchange="filtrarPorColunas()" style="width:100%; padding:2px; font-size:11px; border-radius:4px; border:1px solid #ccc;"><option value="">Todos</option>{% for resp in responsaveis %}<option value="{{ resp['nome'] }}">{{ resp['nome'] }}</option>{% endfor %}</select></th>
@@ -1086,7 +1158,7 @@
           <td style="font-weight: 500; font-size: 14px;">{{ atv['atividade'] }}</td>
           <td class="w-resp">
             <div style="display:flex; align-items:center; gap:8px; font-size: 13px;">
-              <img src="/static/user_icon.png" style="width:24px; height:24px; border-radius:50%; object-fit:cover;" onerror="this.style.display='none';">
+              <img src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzljYTNhZiI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgM2MxLjY2IDAgMyAxLjM0IDMgM3MtMS4zNCAzLTMgMy0zLTEuMzQtMy0zIDEuMzQtMyAzLTN6bTAgMTQuMmMtMi41IDAtNC43MS0xLjI4LTYtMy4yMi4wMy0xLjk5IDQtMy4wOCA2LTMuMDggMS45OSAwIDUuOTcgMS4wOSA2IDMuMDgtMS4yOSAxLjk0LTMuNSAzLjIyLTYgMy4yMnoiLz48L3N2Zz4=' style="width:24px; height:24px; border-radius:50%; object-fit:cover;" onerror="this.style.display='none';">
               {{ atv['responsavel'] }}
             </div>
           </td>
@@ -1601,12 +1673,21 @@
         <div class="form-coluna" id="container-passos-form">
           <label class="label-editor">Passos (Detalhamento)</label>
           <div id="lista-passos-form">
-             <div style="display:flex; gap:5px; margin-bottom:5px;">
-                <input type="text" name="passos_desc[]" placeholder="Descrição do passo..." style="flex:2">
-                <input type="date" name="passos_prazo[]" style="flex:1">
+             <div style="display:flex; gap:5px; margin-bottom:5px; align-items:center;">
+                <div class="passo-responsavel-selector" style="position:relative; cursor:pointer; display:flex; align-items:center;" onclick="toggleFotoDropdown(this)">
+                    <img class="passo-foto-atual" src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzljYTNhZiI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgM2MxLjY2IDAgMyAxLjM0IDMgM3MtMS4zNCAzLTMgMy0zLTEuMzQtMy0zIDEuMzQtMyAzLTN6bTAgMTQuMmMtMi41IDAtNC43MS0xLjI4LTYtMy4yMi4wMy0xLjk5IDQtMy4wOCA2LTMuMDggMS45OSAwIDUuOTcgMS4wOSA2IDMuMDgtMS4yOSAxLjk0LTMuNSAzLjIyLTYgMy4yMnoiLz48L3N2Zz4=' title="Selecionar Responsável" style="width:28px; height:28px; border-radius:50%; object-fit:cover; border:1px solid var(--border-color);">
+                    <div class="passo-dropdown" style="display:none; position:absolute; top:35px; left:0; background:white; border:1px solid #e5e7eb; border-radius:6px; padding:8px; z-index:100; flex-wrap:wrap; width:120px; gap:8px; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                        {% for resp in responsaveis %}
+                        <img src="{% if resp['foto'] %}{{ url_for('static', filename=resp['foto']) }}{% else %}data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzljYTNhZiI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgM2MxLjY2IDAgMyAxLjM0IDMgM3MtMS4zNCAzLTMgMy0zLTEuMzQtMy0zIDEuMzQtMyAzLTN6bTAgMTQuMmMtMi41IDAtNC43MS0xLjI4LTYtMy4yMi4wMy0xLjk5IDQtMy4wOCA2LTMuMDggMS45OSAwIDUuOTcgMS4wOSA2IDMuMDgtMS4yOSAxLjk0LTMuNSAzLjIyLTYgMy4yMnoiLz48L3N2Zz4={% endif %}" title="{{ resp['nome'] }}" style="width:28px; height:28px; border-radius:50%; object-fit:cover; cursor:pointer; border:1px solid transparent;" onclick="selecionarResponsavelPasso(event, this, '{{ resp['nome'] }}', false, null)" onmouseover="this.style.borderColor='var(--primary-color)'" onmouseout="this.style.borderColor='transparent'">
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="passos_resp[]" class="passo-resp-input" value="">
+                </div>
+                <input type="text" name="passos_desc[]" placeholder="Descrição do passo..." style="flex:2; padding:8px; border:1px solid var(--border-color); border-radius:6px;">
+                <input type="date" name="passos_prazo[]" style="flex:1; padding:8px; border:1px solid var(--border-color); border-radius:6px;">
              </div>
           </div>
-          <button type="button" onclick="adicionarCampoPasso()" style="align-self:flex-start; margin-top:5px; background:var(--btn-toolbar); border:1px solid var(--border-color); padding:5px 10px; border-radius:4px; font-size:12px; cursor:pointer;">+ Adicionar Passo</button>
+          <button type="button" onclick="adicionarCampoPasso(this)" style="align-self:flex-start; margin-top:5px; background:var(--btn-toolbar); border:1px solid var(--border-color); padding:5px 10px; border-radius:4px; font-size:12px; cursor:pointer;">+ Adicionar Passo</button>
         </div>
       </div>
       <button type="submit" class="btn-principal">Adicionar à Base Geral</button>
@@ -1632,7 +1713,7 @@
           <th class="w-acoes" style="text-align:center;">Ações</th>
         </tr>
               <tr class="col-filters-row">
-          <th></th>
+          <th><input type="month" class="col-filter" data-col="0" onchange="filtrarPorColunas()" style="width:100%; padding:2px; font-size:11px; border-radius:4px; border:1px solid #ccc;" title="Filtrar por mês"></th>
           <th><select class="col-filter" data-col="1" onchange="filtrarPorColunas()" style="width:100%; padding:2px; font-size:11px; border-radius:4px; border:1px solid #ccc;"><option value="">Todas</option>{% for cat in categorias %}<option value="{{ cat['nome'] }}">{{ cat['nome'] }}</option>{% endfor %}</select></th>
           <th><input type="text" class="col-filter" data-col="2" onkeyup="filtrarPorColunas()" placeholder="Buscar..." style="width:100%; padding:2px; font-size:11px; border-radius:4px; border:1px solid #ccc;"></th>
           <th><select class="col-filter" data-col="3" onchange="filtrarPorColunas()" style="width:100%; padding:2px; font-size:11px; border-radius:4px; border:1px solid #ccc;"><option value="">Todos</option>{% for resp in responsaveis %}<option value="{{ resp['nome'] }}">{{ resp['nome'] }}</option>{% endfor %}</select></th>
@@ -1649,7 +1730,7 @@
           <td style="font-weight: 500; font-size: 14px;">{{ atv['atividade'] }}</td>
           <td class="w-resp">
             <div style="display:flex; align-items:center; gap:8px; font-size: 13px;">
-              <img src="/static/user_icon.png" style="width:24px; height:24px; border-radius:50%; object-fit:cover;" onerror="this.style.display='none';">
+              <img src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzljYTNhZiI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgM2MxLjY2IDAgMyAxLjM0IDMgM3MtMS4zNCAzLTMgMy0zLTEuMzQtMy0zIDEuMzQtMyAzLTN6bTAgMTQuMmMtMi41IDAtNC43MS0xLjI4LTYtMy4yMi4wMy0xLjk5IDQtMy4wOCA2LTMuMDggMS45OSAwIDUuOTcgMS4wOSA2IDMuMDgtMS4yOSAxLjk0LTMuNSAzLjIyLTYgMy4yMnoiLz48L3N2Zz4=' style="width:24px; height:24px; border-radius:50%; object-fit:cover;" onerror="this.style.display='none';">
               {{ atv['responsavel'] }}
             </div>
           </td>
@@ -1924,7 +2005,19 @@
                 else if (colIdx === 5) cellVal = (tr.dataset.prio || "").toLowerCase().trim();
                 else cellVal = (tds[colIdx] ? tds[colIdx].innerText.toLowerCase().trim() : "");
                 
-                if (colIdx === 2) {
+                if (colIdx === 0 && filterVal) {
+                    if (cellVal === "-" || cellVal === "") {
+                        show = false;
+                    } else {
+                        const parts = cellVal.split('/');
+                        if (parts.length === 3) {
+                            const cellMonth = parts[2] + '-' + parts[1];
+                            if (cellMonth !== filterVal) show = false;
+                        } else {
+                            show = false;
+                        }
+                    }
+                } else if (colIdx === 2) {
                     if (!cellVal.includes(filterVal)) show = false;
                 } else {
                     if (cellVal !== filterVal) show = false;
@@ -2479,16 +2572,72 @@
 <script>
   let atividadeAtualId = null;
 
-  function adicionarCampoPasso() {
-      const container = document.getElementById('lista-passos-form');
-      const div = document.createElement('div');
-      div.style.cssText = "display:flex; gap:5px; margin-bottom:5px;";
-      div.innerHTML = `
-        <input type="text" name="passos_desc[]" placeholder="Descrição do passo..." style="flex:2">
-        <input type="date" name="passos_prazo[]" style="flex:1">
-        <button type="button" onclick="this.parentElement.remove()" style="background:transparent; border:none; color:#ef4444; font-weight:bold; cursor:pointer;">X</button>
-      `;
-      container.appendChild(div);
+  function adicionarCampoPasso(btnElem) {
+      try {
+          let container = btnElem ? btnElem.previousElementSibling : document.getElementById('lista-passos-form');
+          const div = document.createElement('div');
+          div.style.cssText = "display:flex; gap:5px; margin-bottom:5px; align-items:center;";
+          
+          let fotinhasData = getDropdownFotinhasHTML('', null, false);
+          let selectorHTML = `
+            <div class="passo-responsavel-selector" style="position:relative; cursor:pointer; display:flex; align-items:center;" onclick="toggleFotoDropdown(this)">
+                <img class="passo-foto-atual" src="${fotinhasData.defaultFoto}" title="Selecionar Responsável" style="width:28px; height:28px; border-radius:50%; object-fit:cover; border:1px solid var(--border-color);">
+                <div class="passo-dropdown" style="display:none; position:absolute; top:35px; left:0; background:white; border:1px solid #e5e7eb; border-radius:6px; padding:8px; z-index:100; flex-wrap:wrap; width:120px; gap:8px; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                    ${fotinhasData.html}
+                </div>
+                <input type="hidden" name="passos_resp[]" class="passo-resp-input" value="">
+            </div>
+          `;
+
+          div.innerHTML = `
+            ${selectorHTML}
+            <input type="text" name="passos_desc[]" placeholder="Descrição do passo..." style="flex:2; padding:8px; border:1px solid var(--border-color); border-radius:6px;">
+            <input type="date" name="passos_prazo[]" style="flex:1; padding:8px; border:1px solid var(--border-color); border-radius:6px;">
+            <button type="button" onclick="this.parentElement.remove()" style="background:transparent; border:none; color:#ef4444; font-weight:bold; cursor:pointer;" title="Remover">X</button>
+          `;
+          if (container) {
+              container.appendChild(div);
+          } else {
+              alert("Erro: Container 'lista-passos-form' não encontrado.");
+          }
+          
+          if (btnElem) {
+              let form = btnElem.closest('form');
+              if (form) {
+                  let selectAtiv = form.querySelector('select[name="responsavel"]');
+                  if(selectAtiv && selectAtiv.value) {
+                      let input = div.querySelector('.passo-resp-input');
+                      if(input) {
+                          // Trigger clicking the right image to set it up
+                          let dropImg = div.querySelector(`.passo-dropdown img[title="${selectAtiv.value}"]`);
+                          if(dropImg) {
+                              dropImg.click();
+                          }
+                      }
+                  }
+              }
+          }
+      } catch (err) {
+          alert("Erro no Adicionar Passo: " + err.message + "\n\nStack:\n" + err.stack);
+      }
+  }
+
+  function atualizarFotoPassoNovo(selectElem) {
+      let selectedOption = selectElem.options[selectElem.selectedIndex];
+      let foto = selectedOption.getAttribute('data-foto');
+      let img = selectElem.previousElementSibling;
+      if (img && img.tagName === 'IMG') {
+          img.src = foto;
+      }
+  }
+
+  function atualizarFotoPassoExistente(selectElem) {
+      let selectedOption = selectElem.options[selectElem.selectedIndex];
+      let foto = selectedOption.getAttribute('data-foto');
+      let img = selectElem.previousElementSibling;
+      if (img && img.tagName === 'IMG') {
+          img.src = foto;
+      }
   }
 
   function abrirModalPassos(id) {
@@ -2930,7 +3079,16 @@
             </div>
             
             <div style="padding:15px; border-top:1px solid var(--border-color); background:var(--bg-panel);">
-              <div style="display:flex; gap:10px;">
+              <div style="display:flex; gap:10px; align-items:center;">
+                <div class="passo-responsavel-selector" style="position:relative; cursor:pointer; display:flex; align-items:center;" onclick="toggleFotoDropdown(this)">
+                    <img class="passo-foto-atual" id="pg-novoPassoFoto" src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzljYTNhZiI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgM2MxLjY2IDAgMyAxLjM0IDMgM3MtMS4zNCAzLTMgMy0zLTEuMzQtMy0zIDEuMzQtMyAzLTN6bTAgMTQuMmMtMi41IDAtNC43MS0xLjI4LTYtMy4yMi4wMy0xLjk5IDQtMy4wOCA2LTMuMDggMS45OSAwIDUuOTcgMS4wOSA2IDMuMDgtMS4yOSAxLjk0LTMuNSAzLjIyLTYgMy4yMnoiLz48L3N2Zz4=' title="Selecionar Responsável" style="width:28px; height:28px; border-radius:50%; object-fit:cover; border:1px solid var(--border-color);">
+                    <div class="passo-dropdown" style="display:none; position:absolute; bottom:40px; left:0; background:white; border:1px solid #e5e7eb; border-radius:6px; padding:8px; z-index:100; flex-wrap:wrap; width:120px; gap:8px; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                        {% for resp in responsaveis %}
+                        <img src="{% if resp['foto'] %}{{ url_for('static', filename=resp['foto']) }}{% else %}data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzljYTNhZiI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgM2MxLjY2IDAgMyAxLjM0IDMgM3MtMS4zNCAzLTMgMy0zLTEuMzQtMy0zIDEuMzQtMyAzLTN6bTAgMTQuMmMtMi41IDAtNC43MS0xLjI4LTYtMy4yMi4wMy0xLjk5IDQtMy4wOCA2LTMuMDggMS45OSAwIDUuOTcgMS4wOSA2IDMuMDgtMS4yOSAxLjk0LTMuNSAzLjIyLTYgMy4yMnoiLz48L3N2Zz4={% endif %}" title="{{ resp['nome'] }}" style="width:28px; height:28px; border-radius:50%; object-fit:cover; cursor:pointer; border:1px solid transparent;" onclick="selecionarResponsavelPasso(event, this, '{{ resp['nome'] }}', false, null)" onmouseover="this.style.borderColor='var(--primary-color)'" onmouseout="this.style.borderColor='transparent'">
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" id="pg-novoPassoResp" class="passo-resp-input" value="">
+                </div>
                 <input type="text" id="pg-novoPassoDesc" placeholder="Descrição do passo..." style="flex:2; padding:8px; border:1px solid var(--border-color); border-radius:6px;">
                 <button type="button" onclick="salvarNovoPassoModal()" style="background:#22c55e; color:white; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; font-weight:600;">Adicionar</button>
               </div>
@@ -3200,7 +3358,7 @@
                   tds[2].innerText = data.atividade;
                   
                   // Col 3: Responsavel
-                  tds[3].innerHTML = `<div style="display:flex; align-items:center; gap:8px; font-size: 13px;"><img src="/static/user_icon.png" style="width:24px; height:24px; border-radius:50%; object-fit:cover;" onerror="this.style.display='none';">${data.responsavel}</div>`;
+                  tds[3].innerHTML = `<div style="display:flex; align-items:center; gap:8px; font-size: 13px;"><img src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzljYTNhZiI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgM2MxLjY2IDAgMyAxLjM0IDMgM3MtMS4zNCAzLTMgMy0zLTEuMzQtMy0zIDEuMzQtMyAzLTN6bTAgMTQuMmMtMi41IDAtNC43MS0xLjI4LTYtMy4yMi4wMy0xLjk5IDQtMy4wOCA2LTMuMDggMS45OSAwIDUuOTcgMS4wOSA2IDMuMDgtMS4yOSAxLjk0LTMuNSAzLjIyLTYgMy4yMnoiLz48L3N2Zz4=' style="width:24px; height:24px; border-radius:50%; object-fit:cover;" onerror="this.style.display='none';">${data.responsavel}</div>`;
                   
                   // Col 4: Status
                   let statusHtml = '';
@@ -3254,10 +3412,24 @@
       
       passos.forEach(p => {
           const concluidoStyle = p.concluido ? 'text-decoration:line-through; color:var(--text-muted); opacity:0.7;' : '';
+          
+          let fotinhasData = getDropdownFotinhasHTML(p.responsavel, p.id, true);
+          let selectorHTML = `
+            <div class="passo-responsavel-selector" style="position:relative; cursor:pointer; display:flex; align-items:center;" onclick="toggleFotoDropdown(this)">
+                <img class="passo-foto-atual" src="${fotinhasData.defaultFoto}" title="${p.responsavel || 'Selecionar Responsável'}" style="width:28px; height:28px; border-radius:50%; object-fit:cover; border:1px solid var(--border-color);">
+                <div class="passo-dropdown" style="display:none; position:absolute; top:35px; left:0; background:white; border:1px solid #e5e7eb; border-radius:6px; padding:8px; z-index:100; flex-wrap:wrap; width:120px; gap:8px; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                    ${fotinhasData.html}
+                </div>
+                <input type="hidden" name="passos_resp[]" class="passo-resp-input" value="${p.responsavel || ''}">
+            </div>
+          `;
+
           div.innerHTML += `
             <div style="display:flex; align-items:center; gap:10px; background:var(--bg-panel); padding:8px 12px; border-radius:6px; border:1px solid var(--border-color);">
               <input type="checkbox" ${p.concluido ? 'checked' : ''} onchange="togglePassoModal(${p.id}, this.checked)" style="width:16px; height:16px; cursor:pointer;">
+              ${selectorHTML}
               <input type="text" value="${p.descricao}" onchange="atualizarPassoModal(${p.id}, 'descricao', this.value)" style="flex:2; border:none; background:transparent; font-size:13px; outline:none; ${concluidoStyle}">
+              <input type="date" value="${p.prazo || ''}" onchange="atualizarPassoModal(${p.id}, 'prazo', this.value)" style="width:110px; border:none; background:transparent; font-size:12px; outline:none; color:var(--text-muted); ${concluidoStyle}">
               <button onclick="excluirPassoModal(${p.id})" style="background:transparent; border:none; color:#ef4444; font-weight:bold; cursor:pointer; font-size:14px;" title="Excluir">X</button>
             </div>
           `;
@@ -3281,10 +3453,12 @@
 
   async function salvarNovoPassoModal() {
       const desc = document.getElementById('pg-novoPassoDesc').value;
+      const resp = document.getElementById('pg-novoPassoResp').value;
       if (!desc.trim()) return;
       const data = new FormData();
       data.append('atividade_id', painelGeralAtividadeId);
       data.append('descricao', desc);
+      data.append('responsavel', resp);
       await fetch(`${SCRIPT_ROOT}/api/passos/adicionar`, { method: 'POST', body: data });
       document.getElementById('pg-novoPassoDesc').value = '';
       recarregarDadosModal();
