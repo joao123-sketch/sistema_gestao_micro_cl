@@ -1468,29 +1468,26 @@
             <div style="font-size: 11px; font-weight: 600; margin-top: 3px;">🚨 Atrasadas</div>
           </div>
           <div style="background: rgba(245,158,11,.1); border: 1px solid #f59e0b; padding: 14px; border-radius: 8px; text-align: center; color: #b45309;">
-            <div id="metric-pendente" style="font-size: 18px; font-weight: 700;">{{ metricas.Pendente }}</div>
+            <div id="metric-pendente" style="font-size: 22px; font-weight: 700;">{{ metricas.Pendente }}</div>
             <div style="font-size: 11px; font-weight: 600; margin-top: 3px;">⚠️ Pendentes</div>
           </div>
           <div style="background: rgba(59,130,246,.1); border: 1px solid #3b82f6; padding: 14px; border-radius: 8px; text-align: center; color: #1d4ed8;">
-            <div id="metric-emandamento" style="font-size: 18px; font-weight: 700;">{{ metricas['Em andamento'] }}</div>
+            <div id="metric-emandamento" style="font-size: 22px; font-weight: 700;">{{ metricas['Em andamento'] }}</div>
             <div style="font-size: 11px; font-weight: 600; margin-top: 3px;">🔄 Em andamento</div>
           </div>
           <div style="background: rgba(34,197,94,.1); border: 1px solid #22c55e; padding: 14px; border-radius: 8px; text-align: center; color: #15803d;">
-            <div id="metric-feito" style="font-size: 18px; font-weight: 700;">{{ metricas.Feito }}</div>
+            <div id="metric-feito" style="font-size: 22px; font-weight: 700;">{{ metricas.Feito }}</div>
             <div style="font-size: 11px; font-weight: 600; margin-top: 3px;">✅ Concluídas</div>
           </div>
           <div style="background: var(--btn-toolbar); border: 1px solid var(--border-color); padding: 14px; border-radius: 8px; text-align: center;">
-            <div id="metric-total" style="font-size: 18px; font-weight: 700; color: var(--text-main);">{{ metricas.Total }}</div>
+            <div id="metric-total" style="font-size: 22px; font-weight: 700; color: var(--text-main);">{{ metricas.Total }}</div>
             <div style="font-size: 11px; font-weight: 600; margin-top: 3px; color: var(--text-muted);">Total Ativas</div>
           </div>
         </div>
         <div style="height: 250px; position: relative; width: 100%; margin-top: 16px;">
-        <canvas id="chartAtivos"
-                data-atrasado="{{ metricas['Atrasado'] }}"
-                data-pendente="{{ metricas['Pendente'] }}"
-                data-emandamento="{{ metricas['Em andamento'] }}"
-                data-feito="{{ metricas['Feito'] }}"></canvas>
-      </div>      </div>
+            <canvas id="chartUsrAtivos" data-atrasado="{{ metricas.Atrasado }}" data-pendente="{{ metricas.Pendente }}" data-emandamento="{{ metricas['Em andamento'] }}" data-feito="{{ metricas.Feito }}"></canvas>
+        </div>
+      </div>
 
       <!-- Aba Arquivadas -->
       <div id="dash-arquivados" style="display: none;">
@@ -1500,48 +1497,48 @@
             <div style="font-size: 11px; font-weight: 600; margin-top: 3px;">🚨 Atrasadas</div>
           </div>
           <div style="background: rgba(245,158,11,.1); border: 1px solid #f59e0b; padding: 14px; border-radius: 8px; text-align: center; color: #b45309;">
-            <div style="font-size: 26px; font-weight: 700;">{{ metricas.Pendente_Arq }}</div>
+            <div style="font-size: 22px; font-weight: 700;">{{ metricas.Pendente_Arq }}</div>
             <div style="font-size: 11px; font-weight: 600; margin-top: 3px;">⚠️ Pendentes</div>
           </div>
           <div style="background: rgba(59,130,246,.1); border: 1px solid #3b82f6; padding: 14px; border-radius: 8px; text-align: center; color: #1d4ed8;">
-            <div style="font-size: 26px; font-weight: 700;">{{ metricas['Em andamento_Arq'] }}</div>
+            <div style="font-size: 22px; font-weight: 700;">{{ metricas['Em andamento_Arq'] }}</div>
             <div style="font-size: 11px; font-weight: 600; margin-top: 3px;">🔄 Em andamento</div>
           </div>
           <div style="background: rgba(34,197,94,.1); border: 1px solid #22c55e; padding: 14px; border-radius: 8px; text-align: center; color: #15803d;">
-            <div style="font-size: 26px; font-weight: 700;">{{ metricas.Feito_Arq }}</div>
+            <div style="font-size: 22px; font-weight: 700;">{{ metricas.Feito_Arq }}</div>
             <div style="font-size: 11px; font-weight: 600; margin-top: 3px;">✅ Concluídas</div>
           </div>
           <div style="background: var(--btn-toolbar); border: 1px solid var(--border-color); padding: 14px; border-radius: 8px; text-align: center;">
-            <div style="font-size: 26px; font-weight: 700; color: var(--text-main);">{{ metricas.Total_Arq }}</div>
+            <div style="font-size: 22px; font-weight: 700; color: var(--text-main);">{{ metricas.Total_Arq }}</div>
             <div style="font-size: 11px; font-weight: 600; margin-top: 3px; color: var(--text-muted);">Total Arquivadas</div>
           </div>
         </div>
         <div style="height: 250px; position: relative; width: 100%; margin-top: 16px;">
-        <canvas id="chartArquivados"
-                data-atrasadoarq="{{ metricas['Atrasado_Arq'] }}"
-                data-pendentearq="{{ metricas['Pendente_Arq'] }}"
-                data-emandamentoarq="{{ metricas['Em andamento_Arq'] }}"
-                data-feitoarq="{{ metricas['Feito_Arq'] }}"></canvas>
-      </div>
+            <canvas id="chartUsrArquivados" data-atrasado="{{ metricas.Atrasado_Arq }}" data-pendente="{{ metricas.Pendente_Arq }}" data-emandamento="{{ metricas['Em andamento_Arq'] }}" data-feito="{{ metricas.Feito_Arq }}"></canvas>
+        </div>
       </div>
 
       <!-- Aba Visão Geral -->
       <div id="dash-geral" style="display: none;">
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px;">
-          <div style="background: var(--btn-toolbar); border: 1px solid var(--border-color); padding: 16px; border-radius: 8px; text-align: center;">
-            <div style="font-size: 28px; font-weight: 700; color: var(--text-main);">{{ metricas.Total_Geral }}</div>
+        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 16px;">
+          <div style="background: rgba(239,68,68,.1); border: 1px solid #ef4444; padding: 14px; border-radius: 8px; text-align: center;">
+            <div style="font-size: 22px; font-weight: 700; color: #b91c1c;">{{ metricas.Atrasado + metricas.Atrasado_Arq }}</div>
+            <div style="font-size: 11px; font-weight: 600; margin-top: 3px; color: #b91c1c;">⏰ Atrasadas (Total)</div>
+          </div>
+          <div style="background: var(--btn-toolbar); border: 1px solid var(--border-color); padding: 14px; border-radius: 8px; text-align: center;">
+            <div style="font-size: 22px; font-weight: 700; color: var(--text-main);">{{ metricas.Total_Geral }}</div>
             <div style="font-size: 11px; font-weight: 600; margin-top: 3px; color: var(--text-muted);">🎯 Total Geral</div>
           </div>
-          <div style="background: rgba(34,197,94,.1); border: 1px solid #22c55e; padding: 16px; border-radius: 8px; text-align: center;">
-            <div style="font-size: 28px; font-weight: 700; color: #15803d;">{{ metricas.Feito + metricas.Feito_Arq }}</div>
+          <div style="background: rgba(34,197,94,.1); border: 1px solid #22c55e; padding: 14px; border-radius: 8px; text-align: center;">
+            <div style="font-size: 22px; font-weight: 700; color: #15803d;">{{ metricas.Feito + metricas.Feito_Arq }}</div>
             <div style="font-size: 11px; font-weight: 600; margin-top: 3px; color: #15803d;">✅ Concluídas (Total)</div>
           </div>
-          <div style="background: rgba(59,130,246,.1); border: 1px solid #3b82f6; padding: 16px; border-radius: 8px; text-align: center;">
-            <div style="font-size: 28px; font-weight: 700; color: #1d4ed8;">{{ metricas['Em andamento'] + metricas['Em andamento_Arq'] }}</div>
+          <div style="background: rgba(59,130,246,.1); border: 1px solid #3b82f6; padding: 14px; border-radius: 8px; text-align: center;">
+            <div style="font-size: 22px; font-weight: 700; color: #1d4ed8;">{{ metricas['Em andamento'] + metricas['Em andamento_Arq'] }}</div>
             <div style="font-size: 11px; font-weight: 600; margin-top: 3px; color: #1d4ed8;">🔄 Em andamento (Total)</div>
           </div>
-          <div style="background: rgba(245,158,11,.1); border: 1px solid #f59e0b; padding: 16px; border-radius: 8px; text-align: center;">
-            <div style="font-size: 28px; font-weight: 700; color: #b45309;">{{ metricas.Pendente + metricas.Pendente_Arq }}</div>
+          <div style="background: rgba(245,158,11,.1); border: 1px solid #f59e0b; padding: 14px; border-radius: 8px; text-align: center;">
+            <div style="font-size: 22px; font-weight: 700; color: #b45309;">{{ metricas.Pendente + metricas.Pendente_Arq }}</div>
             <div style="font-size: 11px; font-weight: 600; margin-top: 3px; color: #b45309;">⚠️ Pendentes (Total)</div>
           </div>
         </div>
@@ -1983,6 +1980,10 @@
             window.chartAtivos.data.datasets[0].data = [atrasado, pendente, andamento, feito];
             window.chartAtivos.update();
         }
+        if (window.chartInstance_chartUsrAtivos) {
+            window.chartInstance_chartUsrAtivos.data.datasets[0].data = [atrasado, pendente, andamento, feito];
+            window.chartInstance_chartUsrAtivos.update();
+        }
     } else if (abaAtivaGlobal === 'arquivados') {
         const bAtrasado = document.getElementById("metric-atrasado-arq");
         const bPendente = document.getElementById("metric-pendente-arq");
@@ -2003,12 +2004,107 @@
             window.chartArquivados.data.datasets[0].data = [atrasado, pendente, andamento, feito];
             window.chartArquivados.update();
         }
+        if (window.chartInstance_chartUsrArquivados) {
+            window.chartInstance_chartUsrArquivados.data.datasets[0].data = [atrasado, pendente, andamento, feito];
+            window.chartInstance_chartUsrArquivados.update();
+        }
+        if (window.chartArquivados) {
+            window.chartArquivados.data.datasets[0].data = [atrasado, pendente, andamento, feito];
+            window.chartArquivados.update();
+        }
+        if (window.chartInstance_chartUsrArquivados) {
+            window.chartInstance_chartUsrArquivados.data.datasets[0].data = [atrasado, pendente, andamento, feito];
+            window.chartInstance_chartUsrArquivados.update();
+        }
     }
   }
 
   // Hook original advanced filter to also call this to keep them synced in logic
   // actually just overwrite filtrarTabelaAvancado to just call filtrarPorColunas
 
+
+
+  // BULLETPROOF CHARTS FOR USER PROFILES
+  function criarGraficoGenerico(canvasId, tipoAba) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    
+    // Destroy existing instance explicitly tracking it on the window object
+    const chartKey = 'chartInstance_' + canvasId;
+    if (window[chartKey] instanceof Chart) {
+        window[chartKey].destroy();
+    }
+
+    const ctx = canvas.getContext('2d');
+    
+    let chartConfig = {};
+
+    if (tipoAba === 'geral') {
+        const dataAtivos = [
+          parseInt(canvas.dataset.atrasadoativos) || 0,
+          parseInt(canvas.dataset.pendenteativos) || 0,
+          parseInt(canvas.dataset.emandamentoativos) || 0,
+          parseInt(canvas.dataset.feitoativos) || 0
+        ];
+        const dataArq = [
+          parseInt(canvas.dataset.atrasadoarquivados) || 0,
+          parseInt(canvas.dataset.pendentearquivados) || 0,
+          parseInt(canvas.dataset.emandamentoarquivados) || 0,
+          parseInt(canvas.dataset.feitoarquivados) || 0
+        ];
+        
+        chartConfig = {
+          type: 'bar',
+          data: {
+            labels: ['Atrasadas', 'Pendentes', ['Em', 'andamento'], 'Concluídas'],
+            datasets: [
+              { label: 'Ativas', data: dataAtivos, backgroundColor: 'rgba(59, 130, 246, 0.8)', borderRadius: 6, barPercentage: 0.6, categoryPercentage: 0.8 },
+              { label: 'Arquivadas', data: dataArq, backgroundColor: 'rgba(156, 163, 175, 0.8)', borderRadius: 6, barPercentage: 0.6, categoryPercentage: 0.8 }
+            ]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: true, position: 'bottom', labels: { font: { family: 'Poppins', size: 12 } } } },
+            scales: {
+                x: { ticks: { maxRotation: 0, minRotation: 0, font: { family: 'Poppins', size: 12, weight: 'bold' } }, grid: { display: true, color: 'rgba(150, 150, 150, 0.15)', drawBorder: false } },
+                y: { beginAtZero: true, ticks: { display: true, precision: 0, font: { family: 'Poppins', size: 11 } }, grid: { display: true, color: 'rgba(150, 150, 150, 0.15)', drawBorder: false } }
+            },
+            layout: { padding: { top: 25, bottom: 10 } }
+          },
+          plugins: [barValuePluginGlobal]
+        };
+    } else {
+        const atrasado = parseInt(canvas.dataset.atrasado) || 0;
+        const pendente = parseInt(canvas.dataset.pendente) || 0;
+        const emAndamento = parseInt(canvas.dataset.emandamento) || 0;
+        const feito = parseInt(canvas.dataset.feito) || 0;
+
+        chartConfig = {
+          type: 'bar',
+          data: {
+            labels: ['Atrasadas', 'Pendentes', ['Em', 'andamento'], 'Concluídas'],
+            datasets: [{
+              data: [atrasado, pendente, emAndamento, feito],
+              backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6', '#22c55e'],
+              borderRadius: 8, barPercentage: 0.6, categoryPercentage: 0.7
+            }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { ticks: { maxRotation: 0, minRotation: 0, font: { family: 'Poppins', size: 12, weight: 'bold' } }, grid: { display: true, color: 'rgba(150, 150, 150, 0.15)', drawBorder: false } },
+                y: { beginAtZero: true, ticks: { display: true, precision: 0, font: { family: 'Poppins', size: 11 } }, grid: { display: true, color: 'rgba(150, 150, 150, 0.15)', drawBorder: false } }
+            },
+            layout: { padding: { top: 25, bottom: 10 } }
+          },
+          plugins: [barValuePluginGlobal]
+        };
+    }
+    
+    // Create new chart instance
+    window[chartKey] = new Chart(ctx, chartConfig);
+  }
 
   window.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('select.tag-select').forEach(ajustarCorSelect);
@@ -2027,13 +2123,7 @@
       criarGraficoAtivos();
     }
     
-    // In User Profile, Arquivadas and Geral might be hidden initially, but we can initialize them anyway.
-    if (document.getElementById('chartArquivados')) {
-      criarGraficoArquivados();
-    }
-    if (document.getElementById('chartGeral')) {
-      criarGraficoGeral();
-    }
+
   });
 
         const barValuePluginGlobal = {
@@ -2487,6 +2577,89 @@
   }
 
   // AUTO-SAVE nas tabelas
+
+  // BULLETPROOF CHARTS FOR USER PROFILES
+  function criarGraficoGenerico(canvasId, tipoAba) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    
+    // Destroy existing instance explicitly tracking it on the window object
+    const chartKey = 'chartInstance_' + canvasId;
+    if (window[chartKey] instanceof Chart) {
+        window[chartKey].destroy();
+    }
+
+    const ctx = canvas.getContext('2d');
+    
+    let chartConfig = {};
+
+    if (tipoAba === 'geral') {
+        const dataAtivos = [
+          parseInt(canvas.dataset.atrasadoativos) || 0,
+          parseInt(canvas.dataset.pendenteativos) || 0,
+          parseInt(canvas.dataset.emandamentoativos) || 0,
+          parseInt(canvas.dataset.feitoativos) || 0
+        ];
+        const dataArq = [
+          parseInt(canvas.dataset.atrasadoarquivados) || 0,
+          parseInt(canvas.dataset.pendentearquivados) || 0,
+          parseInt(canvas.dataset.emandamentoarquivados) || 0,
+          parseInt(canvas.dataset.feitoarquivados) || 0
+        ];
+        
+        chartConfig = {
+          type: 'bar',
+          data: {
+            labels: ['Atrasadas', 'Pendentes', ['Em', 'andamento'], 'Concluídas'],
+            datasets: [
+              { label: 'Ativas', data: dataAtivos, backgroundColor: 'rgba(59, 130, 246, 0.8)', borderRadius: 6, barPercentage: 0.6, categoryPercentage: 0.8 },
+              { label: 'Arquivadas', data: dataArq, backgroundColor: 'rgba(156, 163, 175, 0.8)', borderRadius: 6, barPercentage: 0.6, categoryPercentage: 0.8 }
+            ]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: true, position: 'bottom', labels: { font: { family: 'Poppins', size: 12 } } } },
+            scales: {
+                x: { ticks: { maxRotation: 0, minRotation: 0, font: { family: 'Poppins', size: 12, weight: 'bold' } }, grid: { display: true, color: 'rgba(150, 150, 150, 0.15)', drawBorder: false } },
+                y: { beginAtZero: true, ticks: { display: true, precision: 0, font: { family: 'Poppins', size: 11 } }, grid: { display: true, color: 'rgba(150, 150, 150, 0.15)', drawBorder: false } }
+            },
+            layout: { padding: { top: 25, bottom: 10 } }
+          },
+          plugins: [barValuePluginGlobal]
+        };
+    } else {
+        const atrasado = parseInt(canvas.dataset.atrasado) || 0;
+        const pendente = parseInt(canvas.dataset.pendente) || 0;
+        const emAndamento = parseInt(canvas.dataset.emandamento) || 0;
+        const feito = parseInt(canvas.dataset.feito) || 0;
+
+        chartConfig = {
+          type: 'bar',
+          data: {
+            labels: ['Atrasadas', 'Pendentes', ['Em', 'andamento'], 'Concluídas'],
+            datasets: [{
+              data: [atrasado, pendente, emAndamento, feito],
+              backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6', '#22c55e'],
+              borderRadius: 8, barPercentage: 0.6, categoryPercentage: 0.7
+            }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { ticks: { maxRotation: 0, minRotation: 0, font: { family: 'Poppins', size: 12, weight: 'bold' } }, grid: { display: true, color: 'rgba(150, 150, 150, 0.15)', drawBorder: false } },
+                y: { beginAtZero: true, ticks: { display: true, precision: 0, font: { family: 'Poppins', size: 11 } }, grid: { display: true, color: 'rgba(150, 150, 150, 0.15)', drawBorder: false } }
+            },
+            layout: { padding: { top: 25, bottom: 10 } }
+          },
+          plugins: [barValuePluginGlobal]
+        };
+    }
+    
+    // Create new chart instance
+    window[chartKey] = new Chart(ctx, chartConfig);
+  }
+
   window.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('.auto-save').forEach(el => {
           el.addEventListener('change', async function() {
@@ -2512,6 +2685,89 @@
   // --- PROCEDIMENTOS QUILL EDITOR ---
   let quill;
   
+
+  // BULLETPROOF CHARTS FOR USER PROFILES
+  function criarGraficoGenerico(canvasId, tipoAba) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    
+    // Destroy existing instance explicitly tracking it on the window object
+    const chartKey = 'chartInstance_' + canvasId;
+    if (window[chartKey] instanceof Chart) {
+        window[chartKey].destroy();
+    }
+
+    const ctx = canvas.getContext('2d');
+    
+    let chartConfig = {};
+
+    if (tipoAba === 'geral') {
+        const dataAtivos = [
+          parseInt(canvas.dataset.atrasadoativos) || 0,
+          parseInt(canvas.dataset.pendenteativos) || 0,
+          parseInt(canvas.dataset.emandamentoativos) || 0,
+          parseInt(canvas.dataset.feitoativos) || 0
+        ];
+        const dataArq = [
+          parseInt(canvas.dataset.atrasadoarquivados) || 0,
+          parseInt(canvas.dataset.pendentearquivados) || 0,
+          parseInt(canvas.dataset.emandamentoarquivados) || 0,
+          parseInt(canvas.dataset.feitoarquivados) || 0
+        ];
+        
+        chartConfig = {
+          type: 'bar',
+          data: {
+            labels: ['Atrasadas', 'Pendentes', ['Em', 'andamento'], 'Concluídas'],
+            datasets: [
+              { label: 'Ativas', data: dataAtivos, backgroundColor: 'rgba(59, 130, 246, 0.8)', borderRadius: 6, barPercentage: 0.6, categoryPercentage: 0.8 },
+              { label: 'Arquivadas', data: dataArq, backgroundColor: 'rgba(156, 163, 175, 0.8)', borderRadius: 6, barPercentage: 0.6, categoryPercentage: 0.8 }
+            ]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: true, position: 'bottom', labels: { font: { family: 'Poppins', size: 12 } } } },
+            scales: {
+                x: { ticks: { maxRotation: 0, minRotation: 0, font: { family: 'Poppins', size: 12, weight: 'bold' } }, grid: { display: true, color: 'rgba(150, 150, 150, 0.15)', drawBorder: false } },
+                y: { beginAtZero: true, ticks: { display: true, precision: 0, font: { family: 'Poppins', size: 11 } }, grid: { display: true, color: 'rgba(150, 150, 150, 0.15)', drawBorder: false } }
+            },
+            layout: { padding: { top: 25, bottom: 10 } }
+          },
+          plugins: [barValuePluginGlobal]
+        };
+    } else {
+        const atrasado = parseInt(canvas.dataset.atrasado) || 0;
+        const pendente = parseInt(canvas.dataset.pendente) || 0;
+        const emAndamento = parseInt(canvas.dataset.emandamento) || 0;
+        const feito = parseInt(canvas.dataset.feito) || 0;
+
+        chartConfig = {
+          type: 'bar',
+          data: {
+            labels: ['Atrasadas', 'Pendentes', ['Em', 'andamento'], 'Concluídas'],
+            datasets: [{
+              data: [atrasado, pendente, emAndamento, feito],
+              backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6', '#22c55e'],
+              borderRadius: 8, barPercentage: 0.6, categoryPercentage: 0.7
+            }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { ticks: { maxRotation: 0, minRotation: 0, font: { family: 'Poppins', size: 12, weight: 'bold' } }, grid: { display: true, color: 'rgba(150, 150, 150, 0.15)', drawBorder: false } },
+                y: { beginAtZero: true, ticks: { display: true, precision: 0, font: { family: 'Poppins', size: 11 } }, grid: { display: true, color: 'rgba(150, 150, 150, 0.15)', drawBorder: false } }
+            },
+            layout: { padding: { top: 25, bottom: 10 } }
+          },
+          plugins: [barValuePluginGlobal]
+        };
+    }
+    
+    // Create new chart instance
+    window[chartKey] = new Chart(ctx, chartConfig);
+  }
+
   window.addEventListener('DOMContentLoaded', () => {
     // Inicializa o Quill apenas se estiver na aba de procedimentos
     if (document.getElementById('quill-editor')) {
@@ -2584,7 +2840,7 @@
       <!-- Cabeçalho / Inputs -->
       <div style="padding: 20px 25px; border-bottom: 1px solid var(--border-color); display:flex; flex-direction:column; gap:15px; background:var(--bg-main);">
         <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-          <input type="text" id="pg-atividade" onchange="atualizarAtividadeModal('atividade', this.value)" style="font-size:22px; font-weight:700; color:var(--text-main); border:none; background:transparent; width:100%; outline:none;" placeholder="Título da Atividade">
+          <input type="text" id="pg-atividade" onchange="atualizarAtividadeModal('atividade', this.value)" style="font-size: 22px; font-weight: 700; color:var(--text-main); border:none; background:transparent; width:100%; outline:none;" placeholder="Título da Atividade">
           <button onclick="fecharPainelGeral()" style="background:transparent; border:none; color:var(--text-muted); font-size:24px; cursor:pointer; margin-left:15px;">&times;</button>
         </div>
         
@@ -2640,7 +2896,7 @@
             <div style="flex:1; background:var(--bg-main); padding:15px; border-radius:8px; border:1px solid var(--border-color);">
               <div style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; margin-bottom:5px;">Execução</div>
               <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:5px;">
-                <span style="font-size:24px; font-weight:700;" id="pg-perc-txt">0%</span>
+                <span style="font-size: 22px; font-weight: 700;" id="pg-perc-txt">0%</span>
               </div>
               <div style="width:100%; height:8px; background:var(--border-color); border-radius:4px; overflow:hidden;">
                 <div id="pg-perc-bar" style="height:100%; background:#22c55e; width:0%; transition:width 0.5s ease;"></div>
@@ -2648,17 +2904,17 @@
             </div>
             
             <div style="flex:1; background:var(--bg-main); padding:15px; border-radius:8px; border:1px solid var(--border-color); display:flex; flex-direction:column; justify-content:center; align-items:center;">
-              <div style="font-size:28px; font-weight:700; color:#3b82f6;" id="pg-dias">0</div>
+              <div style="font-size: 22px; font-weight: 700; color:#3b82f6;" id="pg-dias">0</div>
               <div style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase;">Dias Decorridos</div>
             </div>
             
             <div style="flex:1; background:var(--bg-main); padding:15px; border-radius:8px; border:1px solid var(--border-color); display:flex; flex-direction:column; justify-content:center; align-items:center;">
-              <div style="font-size:28px; font-weight:700; color:#10b981;" id="pg-restantes">0</div>
+              <div style="font-size: 22px; font-weight: 700; color:#10b981;" id="pg-restantes">0</div>
               <div style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase;">Dias Restantes</div>
             </div>
             
             <div style="flex:1; background:var(--bg-main); padding:15px; border-radius:8px; border:1px solid var(--border-color); display:flex; flex-direction:column; justify-content:center; align-items:center;">
-              <div style="font-size:28px; font-weight:700; color:#ef4444;" id="pg-atrasados">0</div>
+              <div style="font-size: 22px; font-weight: 700; color:#ef4444;" id="pg-atrasados">0</div>
               <div style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase;">Dias Atrasados</div>
             </div>
           </div>
@@ -2702,6 +2958,89 @@
 <script>
   let quillPainelGeral;
   let painelGeralAtividadeId = null;
+
+
+  // BULLETPROOF CHARTS FOR USER PROFILES
+  function criarGraficoGenerico(canvasId, tipoAba) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    
+    // Destroy existing instance explicitly tracking it on the window object
+    const chartKey = 'chartInstance_' + canvasId;
+    if (window[chartKey] instanceof Chart) {
+        window[chartKey].destroy();
+    }
+
+    const ctx = canvas.getContext('2d');
+    
+    let chartConfig = {};
+
+    if (tipoAba === 'geral') {
+        const dataAtivos = [
+          parseInt(canvas.dataset.atrasadoativos) || 0,
+          parseInt(canvas.dataset.pendenteativos) || 0,
+          parseInt(canvas.dataset.emandamentoativos) || 0,
+          parseInt(canvas.dataset.feitoativos) || 0
+        ];
+        const dataArq = [
+          parseInt(canvas.dataset.atrasadoarquivados) || 0,
+          parseInt(canvas.dataset.pendentearquivados) || 0,
+          parseInt(canvas.dataset.emandamentoarquivados) || 0,
+          parseInt(canvas.dataset.feitoarquivados) || 0
+        ];
+        
+        chartConfig = {
+          type: 'bar',
+          data: {
+            labels: ['Atrasadas', 'Pendentes', ['Em', 'andamento'], 'Concluídas'],
+            datasets: [
+              { label: 'Ativas', data: dataAtivos, backgroundColor: 'rgba(59, 130, 246, 0.8)', borderRadius: 6, barPercentage: 0.6, categoryPercentage: 0.8 },
+              { label: 'Arquivadas', data: dataArq, backgroundColor: 'rgba(156, 163, 175, 0.8)', borderRadius: 6, barPercentage: 0.6, categoryPercentage: 0.8 }
+            ]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: true, position: 'bottom', labels: { font: { family: 'Poppins', size: 12 } } } },
+            scales: {
+                x: { ticks: { maxRotation: 0, minRotation: 0, font: { family: 'Poppins', size: 12, weight: 'bold' } }, grid: { display: true, color: 'rgba(150, 150, 150, 0.15)', drawBorder: false } },
+                y: { beginAtZero: true, ticks: { display: true, precision: 0, font: { family: 'Poppins', size: 11 } }, grid: { display: true, color: 'rgba(150, 150, 150, 0.15)', drawBorder: false } }
+            },
+            layout: { padding: { top: 25, bottom: 10 } }
+          },
+          plugins: [barValuePluginGlobal]
+        };
+    } else {
+        const atrasado = parseInt(canvas.dataset.atrasado) || 0;
+        const pendente = parseInt(canvas.dataset.pendente) || 0;
+        const emAndamento = parseInt(canvas.dataset.emandamento) || 0;
+        const feito = parseInt(canvas.dataset.feito) || 0;
+
+        chartConfig = {
+          type: 'bar',
+          data: {
+            labels: ['Atrasadas', 'Pendentes', ['Em', 'andamento'], 'Concluídas'],
+            datasets: [{
+              data: [atrasado, pendente, emAndamento, feito],
+              backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6', '#22c55e'],
+              borderRadius: 8, barPercentage: 0.6, categoryPercentage: 0.7
+            }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { ticks: { maxRotation: 0, minRotation: 0, font: { family: 'Poppins', size: 12, weight: 'bold' } }, grid: { display: true, color: 'rgba(150, 150, 150, 0.15)', drawBorder: false } },
+                y: { beginAtZero: true, ticks: { display: true, precision: 0, font: { family: 'Poppins', size: 11 } }, grid: { display: true, color: 'rgba(150, 150, 150, 0.15)', drawBorder: false } }
+            },
+            layout: { padding: { top: 25, bottom: 10 } }
+          },
+          plugins: [barValuePluginGlobal]
+        };
+    }
+    
+    // Create new chart instance
+    window[chartKey] = new Chart(ctx, chartConfig);
+  }
 
   window.addEventListener('DOMContentLoaded', () => {
       if (document.getElementById('quill-painel-geral')) {
