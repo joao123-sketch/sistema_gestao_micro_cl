@@ -264,6 +264,46 @@
       align-items: center;
       justify-content: space-between;
     }
+    .user-chip {
+      margin: -3px 15px 15px;
+      padding: 8px 10px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.12);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .user-chip-info { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .user-chip-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #FFC844;
+      flex-shrink: 0;
+    }
+    .user-chip-nome {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #fff;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .user-chip-sair {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      color: rgba(255,255,255,.75);
+      text-decoration: none;
+      flex-shrink: 0;
+      padding: 4px 8px;
+      border-radius: 8px;
+      transition: background .2s, color .2s;
+    }
+    .user-chip-sair:hover { background: rgba(255,255,255,.18); color: #fff; }
     .main-content {
       flex: 1;
       display: flex;
@@ -794,9 +834,13 @@
     </div>
 
     {% if usuario_logado_nome %}
-    <div style="padding: 0 20px 15px; display:flex; align-items:center; justify-content:space-between; gap:8px;">
-      <span style="font-size:11px; color:rgba(255,255,255,.8);">👋 {{ usuario_logado_nome }}</span>
-      <a href="{{ url_for('logout') }}" style="font-size:11px; color:#fff; text-decoration:underline;">Sair</a>
+    {% set f_logado = map_fotos.get(usuario_logado_nome) %}
+    <div class="user-chip">
+      <div class="user-chip-info">
+        <img class="user-chip-avatar" src="{% if f_logado %}{{ url_for('static', filename=f_logado) }}{% else %}data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzljYTNhZiI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgM2MxLjY2IDAgMyAxLjM0IDMgM3MtMS4zNCAzLTMgMy0zLTEuMzQtMy0zIDEuMzQtMyAzLTN6bTAgMTQuMmMtMi41IDAtNC43MS0xLjI4LTYtMy4yMi4wMy0xLjk5IDQtMy4wOCA2LTMuMDggMS45OSAwIDUuOTcgMS4wOSA2IDMuMDgtMS4yOSAxLjk0LTMuNSAzLjIyLTYgMy4yMnoiLz48L3N2Zz4={% endif %}" alt="{{ usuario_logado_nome }}" onerror="this.style.display='none';">
+        <span class="user-chip-nome">{{ usuario_logado_nome }}</span>
+      </div>
+      <a href="{{ url_for('logout') }}" class="user-chip-sair">Sair</a>
     </div>
     {% endif %}
 

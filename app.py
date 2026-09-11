@@ -207,7 +207,7 @@ def _safe_alter(conn, sql):
         pass
 
 
-SENHA_PADRAO_INICIAL = 'Trocar123!'
+SENHA_PADRAO_INICIAL = '1234'
 
 
 def _gerar_login(nome):
