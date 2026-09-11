@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — Gestão de Atividades</title>
+  <style>
+    @font-face {
+      font-family: 'Poppins';
+      src: url('/static/poppins/Poppins-Regular.ttf') format('truetype');
+      font-weight: 400;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'Poppins';
+      src: url('/static/poppins/Poppins-SemiBold.ttf') format('truetype');
+      font-weight: 600;
+      font-style: normal;
+    }
+
+    :root {
+      --bg-body: #F8FAFC;
+      --bg-panel: #FFFFFF;
+      --text-main: #1E293B;
+      --text-muted: #64748B;
+      --border-color: #E2E8F0;
+      --input-bg: #F1F5F9;
+      --input-border: #CBD5E1;
+      --accent: #4C6870;
+      --btn-primary: var(--accent);
+      --btn-primary-hover: #405961;
+      --btn-success: #DC5F31;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow-sm: 0 4px 6px -1px rgba(15, 23, 42, 0.06), 0 2px 4px -1px rgba(15, 23, 42, 0.04);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+      background: var(--bg-body);
+      color: var(--text-main);
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 360px;
+      margin: 20px;
+      background: var(--bg-panel);
+      padding: 32px 28px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      border: 2px solid transparent;
+      background-image: linear-gradient(var(--bg-panel), var(--bg-panel)), linear-gradient(135deg, var(--accent), var(--btn-success));
+      background-origin: border-box;
+      background-clip: padding-box, border-box;
+      text-align: center;
+    }
+
+    .login-card img {
+      height: 64px;
+      margin-bottom: 12px;
+    }
+
+    .login-card h1 {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0 0 4px;
+    }
+
+    .login-card p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin: 0 0 22px;
+    }
+
+    .campo {
+      text-align: left;
+      margin-bottom: 14px;
+    }
+
+    .campo label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 5px;
+    }
+
+    .campo input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--input-border);
+      background: var(--input-bg);
+      font-family: inherit;
+      font-size: 14px;
+      color: var(--text-main);
+    }
+
+    .campo input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    button.btn-entrar {
+      width: 100%;
+      background: var(--btn-primary);
+      color: #fff;
+      border: none;
+      padding: 12px 24px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-weight: 600;
+      font-family: inherit;
+      font-size: 15px;
+      margin-top: 6px;
+      transition: all .2s;
+    }
+
+    button.btn-entrar:hover {
+      background: var(--btn-primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .erro {
+      background: #fee2e2;
+      color: #ef4444;
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" onerror="this.style.display='none'">
+    <h1>Gestão de Atividades</h1>
+    <p>Entre com o seu login para continuar.</p>
+
+    {% if erro %}
+    <div class="erro">{{ erro }}</div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('login') }}">
+      <input type="hidden" name="next" value="{{ next }}">
+      <div class="campo">
+        <label for="login">Login</label>
+        <input type="text" id="login" name="login" autocomplete="username" required autofocus>
+      </div>
+      <div class="campo">
+        <label for="senha">Senha</label>
+        <input type="password" id="senha" name="senha" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="btn-entrar">Entrar</button>
+    </form>
+  </div>
+</body>
+</html>

@@ -11,6 +11,8 @@ import sqlite3
 import os
 import datetime
 import io
+import re
+import unicodedata
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'chave-secreta-padrao-troque-em-producao')
@@ -161,6 +163,29 @@ def init_db():
         conn.executemany('INSERT INTO responsaveis (nome) VALUES (?)',
                          [("João",), ("Edu",), ("Elvis",), ("Felipe",)])
 
+    # ── Login individual (apenas identificação — não restringe acesso) ──
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS usuarios (
+            id             INTEGER PRIMARY KEY AUTOINCREMENT,
+            responsavel_id INTEGER UNIQUE,
+            login          TEXT    NOT NULL UNIQUE,
+            senha_hash     TEXT    NOT NULL,
+            FOREIGN KEY(responsavel_id) REFERENCES responsaveis(id)
+        )
+    ''')
+
+    responsaveis_sem_login = conn.execute('''
+        SELECT r.id, r.nome FROM responsaveis r
+        LEFT JOIN usuarios u ON u.responsavel_id = r.id
+        WHERE u.id IS NULL
+    ''').fetchall()
+    for r in responsaveis_sem_login:
+        login_gerado = _login_unico(conn, _gerar_login(r['nome']))
+        conn.execute(
+            'INSERT INTO usuarios (responsavel_id, login, senha_hash) VALUES (?, ?, ?)',
+            (r['id'], login_gerado, generate_password_hash(SENHA_PADRAO_INICIAL))
+        )
+
     # Dados padrão do João
     conn.execute('''
         UPDATE responsaveis
@@ -182,6 +207,26 @@ def _safe_alter(conn, sql):
         pass
 
 
+SENHA_PADRAO_INICIAL = 'Trocar123!'
+
+
+def _gerar_login(nome):
+    """Deriva um login simples (primeiro nome, sem acento/espaço) a partir do nome."""
+    primeiro_nome = nome.strip().split(' ')[0]
+    sem_acento = unicodedata.normalize('NFKD', primeiro_nome).encode('ascii', 'ignore').decode('ascii')
+    return re.sub(r'[^a-z0-9]', '', sem_acento.lower()) or 'usuario'
+
+
+def _login_unico(conn, base):
+    """Garante que o login gerado não colida com um já existente."""
+    login = base
+    sufixo = 2
+    while conn.execute('SELECT 1 FROM usuarios WHERE login = ?', (login,)).fetchone():
+        login = f"{base}{sufixo}"
+        sufixo += 1
+    return login
+
+
 def _redirect_back(default_endpoint='index'):
     destino = request.form.get('next') or request.referrer
     if destino and destino.startswith('/'):
@@ -195,7 +240,63 @@ def _redirect_back(default_endpoint='index'):
 
 @app.context_processor
 def inject_globals():
-    return dict(font_size=session.get('font_size', 14))
+    return dict(
+        font_size=session.get('font_size', 14),
+        usuario_logado_nome=session.get('usuario_nome'),
+        usuario_logado_login=session.get('usuario_login'),
+    )
+
+
+# ─────────────────────────────────────────────
+#  AUTENTICAÇÃO (identificação — não restringe acesso)
+# ─────────────────────────────────────────────
+
+ROTAS_PUBLICAS = {'login', 'static'}
+
+
+@app.before_request
+def exigir_login():
+    if request.endpoint in ROTAS_PUBLICAS or request.endpoint is None:
+        return
+    if not session.get('usuario_id'):
+        return redirect(url_for('login', next=request.path))
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    erro = None
+    if request.method == 'POST':
+        login_digitado = request.form.get('login', '').strip().lower()
+        senha_digitada = request.form.get('senha', '')
+
+        conn = get_db_connection()
+        usuario = conn.execute('''
+            SELECT u.*, r.nome AS nome_responsavel
+            FROM usuarios u
+            LEFT JOIN responsaveis r ON r.id = u.responsavel_id
+            WHERE u.login = ?
+        ''', (login_digitado,)).fetchone()
+        conn.close()
+
+        if usuario and check_password_hash(usuario['senha_hash'], senha_digitada):
+            session['usuario_id'] = usuario['id']
+            session['usuario_login'] = usuario['login']
+            session['usuario_nome'] = usuario['nome_responsavel'] or usuario['login']
+
+            destino = request.form.get('next') or url_for('index')
+            if not destino.startswith('/'):
+                destino = url_for('index')
+            return redirect(destino)
+
+        erro = 'Login ou senha incorretos.'
+
+    return render_template('login.html', erro=erro, next=request.args.get('next', ''))
+
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
 
 
 # ─────────────────────────────────────────────
@@ -345,6 +446,23 @@ def editar_cadastro(id):
     conn.execute('UPDATE responsaveis SET cargo = ?, email = ? WHERE id = ?', (cargo, email, id))
     conn.commit()
     conn.close()
+    return redirect(url_for('usuario_detalhe', id=id))
+
+
+@app.route('/usuarios/<int:id>/senha', methods=['POST'])
+def alterar_senha(id):
+    nova_senha = request.form.get('nova_senha', '')
+    confirmar_senha = request.form.get('confirmar_senha', '')
+
+    if nova_senha and len(nova_senha) >= 6 and nova_senha == confirmar_senha:
+        conn = get_db_connection()
+        conn.execute(
+            'UPDATE usuarios SET senha_hash = ? WHERE responsavel_id = ?',
+            (generate_password_hash(nova_senha), id)
+        )
+        conn.commit()
+        conn.close()
+
     return redirect(url_for('usuario_detalhe', id=id))
 
 
