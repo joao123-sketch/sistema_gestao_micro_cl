@@ -7,9 +7,13 @@ senha fixos, informados por variável de ambiente, e mantém a sessão
 autenticada durante toda a execução.
 
 Variáveis de ambiente:
-    GESTAO_ATIVIDADES_URL    Base do sistema Flask (padrão: http://127.0.0.1:5000)
-    GESTAO_ATIVIDADES_LOGIN  Login de um usuário já cadastrado (ex.: "edu")
-    GESTAO_ATIVIDADES_SENHA  Senha desse usuário
+    GESTAO_ATIVIDADES_URL    Base do sistema Flask (padrão: instância compartilhada no PythonAnywhere)
+    GESTAO_ATIVIDADES_LOGIN  Seu login de usuário já cadastrado (ex.: "edu")
+    GESTAO_ATIVIDADES_SENHA  Sua senha desse usuário
+
+Cada pessoa do time roda esse servidor localmente (via .mcp.json), com
+seu próprio login/senha, apontando para a mesma instância hospedada —
+por isso todo mundo mexe nos mesmos dados.
 """
 
 import os
@@ -17,7 +21,7 @@ import os
 import requests
 from mcp.server.mcpserver import MCPServer
 
-BASE_URL = os.environ.get('GESTAO_ATIVIDADES_URL', 'http://127.0.0.1:5000').rstrip('/')
+BASE_URL = os.environ.get('GESTAO_ATIVIDADES_URL', 'https://victorjoao271828.pythonanywhere.com').rstrip('/')
 LOGIN = os.environ.get('GESTAO_ATIVIDADES_LOGIN')
 SENHA = os.environ.get('GESTAO_ATIVIDADES_SENHA')
 
