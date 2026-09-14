@@ -755,6 +755,118 @@ def api_atualizar_passo(id):
         conn.close()
     return jsonify({"status": "success"})
 
+
+# ─────────────────────────────────────────────
+#  API JSON — INTEGRAÇÃO EXTERNA (MCP)
+#  Endpoints em JSON para o servidor MCP (e outros
+#  clientes externos) fazerem CRUD de atividades.
+# ─────────────────────────────────────────────
+
+CAMPOS_ATIVIDADE_EDITAVEIS = ['area', 'atividade', 'responsavel', 'status', 'prazo', 'prioridade', 'data_inicio', 'observacoes']
+
+
+@app.route('/api/atividades', methods=['GET'])
+def api_listar_atividades():
+    arquivado = 1 if request.args.get('arquivado', '0') in ('1', 'true', 'True') else 0
+    responsavel = request.args.get('responsavel')
+    busca = request.args.get('q')
+    status_filtro = request.args.get('status')
+
+    query = 'SELECT * FROM atividades WHERE arquivado = ?'
+    params = [arquivado]
+    if responsavel:
+        query += ' AND responsavel = ?'
+        params.append(responsavel)
+    if busca:
+        query += ' AND atividade LIKE ?'
+        params.append(f'%{busca}%')
+    query += ' ORDER BY id DESC'
+
+    conn = get_db_connection()
+    atividades = processar_atividades(conn.execute(query, params).fetchall())
+    conn.close()
+
+    if status_filtro:
+        atividades = [a for a in atividades if a['status_exibicao'] == status_filtro]
+
+    return jsonify(atividades)
+
+
+@app.route('/api/atividades', methods=['POST'])
+def api_criar_atividade():
+    dados = request.get_json(silent=True) or request.form
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO atividades (area, atividade, responsavel, status, data_inicio, prazo, prioridade, arquivado)
+        VALUES (?, ?, ?, ?, ?, ?, ?, 0)
+    ''', (
+        dados.get('area', ''),
+        dados.get('atividade', ''),
+        dados.get('responsavel', ''),
+        dados.get('status', 'Pendente'),
+        dados.get('data_inicio') or datetime.date.today().strftime('%Y-%m-%d'),
+        dados.get('prazo') or datetime.date.today().strftime('%Y-%m-%d'),
+        dados.get('prioridade', 'Baixa'),
+    ))
+    atividade_id = cursor.lastrowid
+
+    for passo in dados.get('passos', []) or []:
+        descricao = (passo.get('descricao') or '').strip()
+        if descricao:
+            cursor.execute(
+                'INSERT INTO passos (atividade_id, descricao, prazo, responsavel, concluido) VALUES (?, ?, ?, ?, 0)',
+                (atividade_id, descricao, passo.get('prazo') or None, passo.get('responsavel') or dados.get('responsavel', ''))
+            )
+
+    conn.commit()
+    conn.close()
+    return jsonify({'status': 'success', 'id': atividade_id}), 201
+
+
+@app.route('/api/atividades/<int:id>/editar', methods=['POST'])
+def api_editar_atividade(id):
+    dados = request.get_json(silent=True) or request.form
+    campos = {k: v for k, v in dados.items() if k in CAMPOS_ATIVIDADE_EDITAVEIS and v not in (None, '')}
+    if not campos:
+        return jsonify({'status': 'error', 'mensagem': 'Nenhum campo válido informado.'}), 400
+
+    conn = get_db_connection()
+    set_clause = ', '.join(f'{campo} = ?' for campo in campos)
+    conn.execute(f'UPDATE atividades SET {set_clause} WHERE id = ?', (*campos.values(), id))
+    conn.commit()
+    conn.close()
+    return jsonify({'status': 'success'})
+
+
+@app.route('/api/atividades/<int:id>/arquivar', methods=['POST'])
+def api_arquivar_atividade(id):
+    conn = get_db_connection()
+    conn.execute('UPDATE atividades SET arquivado = 1 WHERE id = ?', (id,))
+    conn.commit()
+    conn.close()
+    return jsonify({'status': 'success'})
+
+
+@app.route('/api/atividades/<int:id>/restaurar', methods=['POST'])
+def api_restaurar_atividade(id):
+    conn = get_db_connection()
+    conn.execute('UPDATE atividades SET arquivado = 0 WHERE id = ?', (id,))
+    conn.commit()
+    conn.close()
+    return jsonify({'status': 'success'})
+
+
+@app.route('/api/atividades/<int:id>', methods=['DELETE'])
+def api_deletar_atividade(id):
+    conn = get_db_connection()
+    conn.execute('DELETE FROM atividades WHERE id = ?', (id,))
+    conn.commit()
+    conn.close()
+    return jsonify({'status': 'success'})
+
+
 # ─────────────────────────────────────────────
 #  ATIVIDADES — CRUD
 # ─────────────────────────────────────────────

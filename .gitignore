@@ -4,4 +4,6 @@ __pycache__/
 *.pyc
 venv/
 env/
+mcp_server_venv/
 .env
+.mcp.json
