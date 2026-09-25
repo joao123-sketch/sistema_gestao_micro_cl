@@ -1575,6 +1575,17 @@
         <input type="password" id="confirmar-senha-{{ usuario['id'] }}" name="confirmar_senha" placeholder="Confirmar nova senha" minlength="6" required style="margin-bottom:9px;">
         <button type="submit" class="btn-principal" style="width: 100%; padding: 8px;">🔒 Salvar Senha</button>
       </form>
+
+      {% if usuario['nome'] != usuario_logado_nome %}
+      <hr style="border:none; border-top:1px solid var(--border-color); margin:18px 0;">
+
+      <form action="{{ url_for('excluir_usuario', id=usuario['id']) }}" method="POST"
+            data-nome="{{ usuario['nome'] }}"
+            onsubmit="return confirm('Excluir ' + this.dataset.nome + ' do sistema?\n\nO login e o perfil serão removidos. As atividades continuam no histórico.')">
+        <label class="label-editor">Desligamento do Colaborador</label>
+        <button type="submit" class="btn-deletar" style="width: 100%; padding: 8px;">🗑️ Excluir Usuário</button>
+      </form>
+      {% endif %}
     </div>
 
     <!-- Dashboard -->

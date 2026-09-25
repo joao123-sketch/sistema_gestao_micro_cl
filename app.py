@@ -258,8 +258,17 @@ ROTAS_PUBLICAS = {'login', 'static'}
 def exigir_login():
     if request.endpoint in ROTAS_PUBLICAS or request.endpoint is None:
         return
-    if not session.get('usuario_id'):
+    usuario_id = session.get('usuario_id')
+    if not usuario_id:
         return redirect(url_for('login', next=request.path))
+
+    # Colaborador excluído perde o acesso na hora, mesmo com sessão aberta
+    conn = get_db_connection()
+    ainda_existe = conn.execute('SELECT 1 FROM usuarios WHERE id = ?', (usuario_id,)).fetchone()
+    conn.close()
+    if not ainda_existe:
+        session.clear()
+        return redirect(url_for('login'))
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -464,6 +473,34 @@ def alterar_senha(id):
         conn.close()
 
     return redirect(url_for('usuario_detalhe', id=id))
+
+
+def _excluir_colaborador(conn, responsavel_id):
+    """Remove o colaborador, seu login e sua foto. As atividades dele são mantidas como histórico."""
+    resp = conn.execute('SELECT foto FROM responsaveis WHERE id = ?', (responsavel_id,)).fetchone()
+    if resp and resp['foto']:
+        caminho_foto = os.path.join(STATIC_DIR, resp['foto'])
+        if os.path.exists(caminho_foto):
+            os.remove(caminho_foto)
+    conn.execute('DELETE FROM usuarios WHERE responsavel_id = ?', (responsavel_id,))
+    conn.execute('DELETE FROM responsaveis WHERE id = ?', (responsavel_id,))
+    conn.commit()
+
+
+def _eh_usuario_logado(conn, responsavel_id):
+    row = conn.execute('SELECT id FROM usuarios WHERE responsavel_id = ?', (responsavel_id,)).fetchone()
+    return bool(row) and row['id'] == session.get('usuario_id')
+
+
+@app.route('/usuarios/<int:id>/excluir', methods=['POST'])
+def excluir_usuario(id):
+    conn = get_db_connection()
+    if _eh_usuario_logado(conn, id):
+        conn.close()
+        return redirect(url_for('usuario_detalhe', id=id))
+    _excluir_colaborador(conn, id)
+    conn.close()
+    return redirect(url_for('usuarios'))
 
 
 # ─────────────────────────────────────────────
@@ -1037,8 +1074,8 @@ def editar_responsavel(id):
 @app.route('/deletar_responsavel/<int:id>', methods=['POST'])
 def deletar_responsavel(id):
     conn = get_db_connection()
-    conn.execute('DELETE FROM responsaveis WHERE id = ?', (id,))
-    conn.commit()
+    if not _eh_usuario_logado(conn, id):
+        _excluir_colaborador(conn, id)
     conn.close()
     return redirect(url_for('configuracoes'))
 
