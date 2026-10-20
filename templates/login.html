@@ -143,7 +143,7 @@
   <div class="login-card">
     <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" onerror="this.style.display='none'">
     <h1>Gestão de Atividades</h1>
-    <p>Entre com o seu login para continuar.</p>
+    <p>Entre com o seu usuário (o seu e-mail até o @) para continuar.</p>
 
     {% if erro %}
     <div class="erro">{{ erro }}</div>
@@ -152,8 +152,8 @@
     <form method="POST" action="{{ url_for('login') }}">
       <input type="hidden" name="next" value="{{ next }}">
       <div class="campo">
-        <label for="login">Login</label>
-        <input type="text" id="login" name="login" autocomplete="username" required autofocus>
+        <label for="login">Usuário</label>
+        <input type="text" id="login" name="login" placeholder="ex.: fulano.silva" autocomplete="username" required autofocus>
       </div>
       <div class="campo">
         <label for="senha">Senha</label>

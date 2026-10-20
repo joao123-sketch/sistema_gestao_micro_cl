@@ -174,17 +174,24 @@ def init_db():
         )
     ''')
 
+    # Marca quem ainda está com a senha padrão e deve ver a tela de primeiro acesso
+    _safe_alter(conn, 'ALTER TABLE usuarios ADD COLUMN trocar_senha INTEGER DEFAULT 0')
+
     responsaveis_sem_login = conn.execute('''
-        SELECT r.id, r.nome FROM responsaveis r
+        SELECT r.id, r.nome, r.email FROM responsaveis r
         LEFT JOIN usuarios u ON u.responsavel_id = r.id
         WHERE u.id IS NULL
     ''').fetchall()
     for r in responsaveis_sem_login:
-        login_gerado = _login_unico(conn, _gerar_login(r['nome']))
-        conn.execute(
-            'INSERT INTO usuarios (responsavel_id, login, senha_hash) VALUES (?, ?, ?)',
-            (r['id'], login_gerado, generate_password_hash(SENHA_PADRAO_INICIAL))
-        )
+        _criar_usuario(conn, r['id'], r['nome'], r['email'])
+
+    # Login padrão = parte do e-mail antes do @ (ajusta logins antigos baseados no nome)
+    for u in conn.execute('''
+        SELECT u.id, u.login, r.email FROM usuarios u
+        JOIN responsaveis r ON r.id = u.responsavel_id
+        WHERE r.email IS NOT NULL AND r.email LIKE '%@%'
+    ''').fetchall():
+        _sincronizar_login_email(conn, u['id'], u['email'])
 
     # Dados padrão do João
     conn.execute('''
@@ -207,7 +214,31 @@ def _safe_alter(conn, sql):
         pass
 
 
-SENHA_PADRAO_INICIAL = '1234'
+SENHA_PADRAO_INICIAL = '123456'
+
+
+def _login_de_email(email):
+    """joaovictor.souza@centrolemann.org.br → joaovictor.souza"""
+    return (email or '').strip().split('@')[0].strip().lower()
+
+
+def _criar_usuario(conn, responsavel_id, nome, email):
+    """Cria o login do colaborador (prefixo do e-mail ou, sem e-mail, o primeiro nome) com a senha padrão."""
+    base = _login_de_email(email) or _gerar_login(nome)
+    conn.execute(
+        'INSERT INTO usuarios (responsavel_id, login, senha_hash, trocar_senha) VALUES (?, ?, ?, 1)',
+        (responsavel_id, _login_unico(conn, base), generate_password_hash(SENHA_PADRAO_INICIAL))
+    )
+
+
+def _sincronizar_login_email(conn, usuario_id, email):
+    """Faz o login acompanhar o e-mail, desde que o novo login não pertença a outra pessoa."""
+    desejado = _login_de_email(email)
+    if not desejado:
+        return
+    dono = conn.execute('SELECT id FROM usuarios WHERE login = ?', (desejado,)).fetchone()
+    if not dono:
+        conn.execute('UPDATE usuarios SET login = ? WHERE id = ?', (desejado, usuario_id))
 
 
 def _gerar_login(nome):
@@ -275,7 +306,8 @@ def exigir_login():
 def login():
     erro = None
     if request.method == 'POST':
-        login_digitado = request.form.get('login', '').strip().lower()
+        # Aceita tanto "fulano.silva" quanto o e-mail completo
+        login_digitado = _login_de_email(request.form.get('login', ''))
         senha_digitada = request.form.get('senha', '')
 
         conn = get_db_connection()
@@ -295,11 +327,44 @@ def login():
             destino = request.form.get('next') or url_for('index')
             if not destino.startswith('/'):
                 destino = url_for('index')
+            if usuario['trocar_senha']:
+                return redirect(url_for('primeiro_acesso', next=destino))
             return redirect(destino)
 
         erro = 'Login ou senha incorretos.'
 
     return render_template('login.html', erro=erro, next=request.args.get('next', ''))
+
+
+@app.route('/primeiro-acesso', methods=['GET', 'POST'])
+def primeiro_acesso():
+    erro = None
+    destino = request.values.get('next') or url_for('index')
+    if not destino.startswith('/'):
+        destino = url_for('index')
+
+    if request.method == 'POST':
+        conn = get_db_connection()
+        if request.form.get('acao') == 'manter':
+            conn.execute('UPDATE usuarios SET trocar_senha = 0 WHERE id = ?', (session['usuario_id'],))
+        else:
+            nova_senha = request.form.get('nova_senha', '')
+            if len(nova_senha) < 6:
+                erro = 'A senha precisa ter pelo menos 6 caracteres.'
+            elif nova_senha != request.form.get('confirmar_senha', ''):
+                erro = 'As senhas não conferem.'
+            else:
+                conn.execute(
+                    'UPDATE usuarios SET senha_hash = ?, trocar_senha = 0 WHERE id = ?',
+                    (generate_password_hash(nova_senha), session['usuario_id'])
+                )
+        conn.commit()
+        conn.close()
+        if not erro:
+            return redirect(destino)
+
+    return render_template('primeiro_acesso.html', erro=erro, next=destino,
+                           login=session.get('usuario_login'))
 
 
 @app.route('/logout')
@@ -453,6 +518,12 @@ def editar_cadastro(id):
             conn.execute('UPDATE responsaveis SET foto = ? WHERE id = ?', (nome_arquivo, id))
 
     conn.execute('UPDATE responsaveis SET cargo = ?, email = ? WHERE id = ?', (cargo, email, id))
+    usuario = conn.execute('SELECT id FROM usuarios WHERE responsavel_id = ?', (id,)).fetchone()
+    if usuario:
+        _sincronizar_login_email(conn, usuario['id'], email)
+        if usuario['id'] == session.get('usuario_id'):
+            session['usuario_login'] = conn.execute(
+                'SELECT login FROM usuarios WHERE id = ?', (usuario['id'],)).fetchone()['login']
     conn.commit()
     conn.close()
     return redirect(url_for('usuario_detalhe', id=id))
@@ -466,7 +537,7 @@ def alterar_senha(id):
     if nova_senha and len(nova_senha) >= 6 and nova_senha == confirmar_senha:
         conn = get_db_connection()
         conn.execute(
-            'UPDATE usuarios SET senha_hash = ? WHERE responsavel_id = ?',
+            'UPDATE usuarios SET senha_hash = ?, trocar_senha = 0 WHERE responsavel_id = ?',
             (generate_password_hash(nova_senha), id)
         )
         conn.commit()
@@ -1052,12 +1123,15 @@ def deletar_categoria(id):
 
 @app.route('/adicionar_responsavel', methods=['POST'])
 def adicionar_responsavel():
+    nome = request.form['nome'].strip()
+    email = request.form.get('email', '').strip()
     conn = get_db_connection()
     try:
-        conn.execute('INSERT INTO responsaveis (nome) VALUES (?)', (request.form['nome'],))
+        cursor = conn.execute('INSERT INTO responsaveis (nome, email) VALUES (?, ?)', (nome, email or None))
+        _criar_usuario(conn, cursor.lastrowid, nome, email)
         conn.commit()
     except sqlite3.IntegrityError:
-        pass
+        conn.rollback()
     conn.close()
     return redirect(url_for('configuracoes'))
 

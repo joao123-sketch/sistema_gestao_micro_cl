@@ -1298,6 +1298,8 @@
       <h3>👥 Responsáveis</h3>
       <form action="{{ url_for('adicionar_responsavel') }}" method="POST" style="margin-bottom:20px; display:flex; flex-direction:column; gap:10px;">
         <input type="text" name="nome" placeholder="Novo Responsável..." required style="width:100%; padding: 12px; font-size: 15px;">
+        <input type="email" name="email" placeholder="E-mail (o usuário de acesso será o que vem antes do @)" required style="width:100%; padding: 12px; font-size: 15px;">
+        <small style="color:var(--text-muted);">Senha inicial: 123456 — a pessoa pode trocá-la no primeiro acesso.</small>
         <div style="display:flex; justify-content:flex-end; height: 36px;">
           <button type="submit" class="btn-principal" style="height:100%; padding: 0 15px; font-size:12px; font-weight:bold;">Adicionar Responsável</button>
         </div>
@@ -1858,13 +1860,41 @@
 
 <script>
     const SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-  /* ── Restaurar posição de scroll ── */
-  window.addEventListener("beforeunload", () =>
-    sessionStorage.setItem("scrollY", window.scrollY));
-  window.addEventListener("DOMContentLoaded", () => {
-    const y = sessionStorage.getItem("scrollY");
-    if (y) { window.scrollTo(0, +y); sessionStorage.removeItem("scrollY"); }
+    const FOTO_PADRAO = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzljYTNhZiI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgM2MxLjY2IDAgMyAxLjM0IDMgM3MtMS4zNCAzLTMgMy0zLTEuMzQtMy0zIDEuMzQtMyAzLTN6bTAgMTQuMmMtMi41IDAtNC43MS0xLjI4LTYtMy4yMi4wMy0xLjk5IDQtMy4wOCA2LTMuMDggMS45OSAwIDUuOTcgMS4wOSA2IDMuMDgtMS4yOSAxLjk0LTMuNSAzLjIyLTYgMy4yMnoiLz48L3N2Zz4=';
+    const FOTOS_RESP = {
+      {% for r in responsaveis %}{% if r['foto'] %}{{ r['nome']|tojson }}: {{ url_for('static', filename=r['foto'])|tojson }},{% endif %}
+      {% endfor %}
+    };
+    function fotoDoResponsavel(nome) { return FOTOS_RESP[nome] || FOTO_PADRAO; }
+
+  /* ── Sidebar: mantém aberta/fechada entre recarregamentos ── */
+  (function () {
+    let fechada = false;
+    try { fechada = localStorage.getItem('sidebarFechada') === '1'; } catch (e) {}
+    if (!fechada) return;
+    const sb = document.getElementById('sidebar');
+    const mc = document.getElementById('main-content');
+    // Sem animação na restauração, para não "piscar" abrindo e fechando
+    sb.style.transition = mc.style.transition = 'none';
+    sb.classList.add('fechada');
+    mc.classList.add('expandido');
+    requestAnimationFrame(() => requestAnimationFrame(() => { sb.style.transition = mc.style.transition = ''; }));
+  })();
+  /* ── Restaurar posição de scroll (por página) ── */
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  const CHAVE_SCROLL = 'scrollY:' + location.pathname;
+  window.addEventListener("beforeunload", () => {
+    try { sessionStorage.setItem(CHAVE_SCROLL, window.scrollY); } catch (e) {}
   });
+  (function () {
+    let y = null;
+    try { y = sessionStorage.getItem(CHAVE_SCROLL); } catch (e) {}
+    if (!y) return;
+    const restaurar = () => window.scrollTo(0, +y);
+    window.addEventListener("DOMContentLoaded", restaurar);
+    // Gráficos e imagens mudam a altura da página depois do DOMContentLoaded
+    window.addEventListener("load", () => { restaurar(); setTimeout(restaurar, 150); });
+  })();
 
   /* ── Tema claro/escuro ── */
   function aplicarTema() {
@@ -2620,8 +2650,9 @@
 
   /* ── Sidebar Toggle ── */
   function toggleSidebar() {
-    document.getElementById("sidebar").classList.toggle("fechada");
-    document.getElementById("main-content").classList.toggle("expandido");
+    const fechada = document.getElementById("sidebar").classList.toggle("fechada");
+    document.getElementById("main-content").classList.toggle("expandido", fechada);
+    try { localStorage.setItem('sidebarFechada', fechada ? '1' : '0'); } catch (e) {}
   }
 
 </script>
@@ -3169,7 +3200,7 @@
                     </div>
                     <input type="hidden" id="pg-novoPassoResp" class="passo-resp-input" value="">
                 </div>
-                <input type="text" id="pg-novoPassoDesc" placeholder="Descrição do passo..." style="flex:2; padding:8px; border:1px solid var(--border-color); border-radius:6px;">
+                <input type="text" id="pg-novoPassoDesc" placeholder="Descrição do passo..." onkeydown="if (event.key === 'Enter') { event.preventDefault(); salvarNovoPassoModal(); }" style="flex:2; padding:8px; border:1px solid var(--border-color); border-radius:6px;">
                 <button type="button" onclick="salvarNovoPassoModal()" style="background:#22c55e; color:white; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; font-weight:600;">Adicionar</button>
               </div>
             </div>
@@ -3377,10 +3408,10 @@
       if(quillPainelGeral) quillPainelGeral.setContents([{ insert: '\n' }]);
       document.getElementById('pg-lista-passos').innerHTML = 'Carregando...';
       
-      await recarregarDadosModal();
+      await recarregarDadosModal(true);
   }
   
-  async function recarregarDadosModal() {
+  async function recarregarDadosModal(carregarObservacoes = false) {
       const resp = await fetch(`${SCRIPT_ROOT}/api/atividades/${painelGeralAtividadeId}/painel_geral`);
       const data = await resp.json();
       
@@ -3404,8 +3435,16 @@
       else if (s === 'Em andamento') b.innerHTML = '🔄 Em andamento';
       else b.innerHTML = '⚠️ Pendente';
       
-      if (data.observacoes && quillPainelGeral) {
-          quillPainelGeral.clipboard.dangerouslyPasteHTML(0, data.observacoes);
+      // Só quando o modal abre: recarregar depois (ex.: ao adicionar passo)
+      // colava o texto de novo por cima e apagaria o que ainda não foi salvo.
+      if (carregarObservacoes && quillPainelGeral) {
+          quillPainelGeral.setContents([{ insert: '\n' }]);
+          if (data.observacoes) quillPainelGeral.clipboard.dangerouslyPasteHTML(0, data.observacoes);
+      }
+
+      // Novo passo: responsável padrão = responsável geral da demanda (troca pela fotinha)
+      if (!document.getElementById('pg-novoPassoDesc').value) {
+          definirResponsavelNovoPasso(data.responsavel);
       }
       
       carregarPassosModal();
@@ -3439,7 +3478,7 @@
                   
                   // Col 3: Responsavel
                   tds[3].innerHTML = `<div style="display:flex; align-items:center; gap:8px; font-size: 13px;">
-              <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzljYTNhZiI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgM2MxLjY2IDAgMyAxLjM0IDMgM3MtMS4zNCAzLTMgMy0zLTEuMzQtMy0zIDEuMzQtMyAzLTN6bTAgMTQuMmMtMi41IDAtNC43MS0xLjI4LTYtMy4yMi4wMy0xLjk5IDQtMy4wOCA2LTMuMDggMS45OSAwIDUuOTcgMS4wOSA2IDMuMDgtMS4yOSAxLjk0LTMuNSAzLjIyLTYgMy4yMnoiLz48L3N2Zz4=" style="width:24px; height:24px; border-radius:50%; object-fit:cover;" onerror="this.style.display='none';">${data.responsavel}</div>`;
+              <img src="${fotoDoResponsavel(data.responsavel)}" style="width:24px; height:24px; border-radius:50%; object-fit:cover;" onerror="this.style.display='none';">${data.responsavel}</div>`;
                   
                   // Col 4: Status
                   let statusHtml = '';
@@ -3532,7 +3571,16 @@
       mostrarToast();
   }
 
+  function definirResponsavelNovoPasso(nome) {
+      document.getElementById('pg-novoPassoResp').value = nome || '';
+      const foto = document.getElementById('pg-novoPassoFoto');
+      foto.src = fotoDoResponsavel(nome);
+      foto.title = nome || 'Selecionar Responsável';
+  }
+
+  let salvandoNovoPasso = false;
   async function salvarNovoPassoModal() {
+      if (salvandoNovoPasso) return;
       const desc = document.getElementById('pg-novoPassoDesc').value;
       const resp = document.getElementById('pg-novoPassoResp').value;
       if (!desc.trim()) return;
@@ -3540,7 +3588,12 @@
       data.append('atividade_id', painelGeralAtividadeId);
       data.append('descricao', desc);
       data.append('responsavel', resp);
-      await fetch(`${SCRIPT_ROOT}/api/passos/adicionar`, { method: 'POST', body: data });
+      salvandoNovoPasso = true;
+      try {
+          await fetch(`${SCRIPT_ROOT}/api/passos/adicionar`, { method: 'POST', body: data });
+      } finally {
+          salvandoNovoPasso = false;
+      }
       document.getElementById('pg-novoPassoDesc').value = '';
       recarregarDadosModal();
   }
