@@ -4,6 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gestão de Atividades & Contas</title>
+  <script>
+    // Decide o estado da sidebar antes da primeira pintura, para não "piscar" aberta
+    try { if (localStorage.getItem('sidebarFechada') === '1') document.documentElement.classList.add('sidebar-inicio-fechada'); } catch (e) {}
+  </script>
+  <!-- Pesos mais usados da Poppins: baixar logo, para o texto não aparecer depois do layout -->
+  <link rel="preload" href="/static/poppins/Poppins-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="/static/poppins/Poppins-SemiBold.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="/static/poppins/Poppins-Bold.ttf" as="font" type="font/ttf" crossorigin>
   <style>
     /* ── Importação Local da Fonte Poppins ── */
     @font-face {
@@ -315,9 +323,8 @@
     .main-content.expandido {
       margin-left: 0;
     }
-    .main-content.expandido {
-      margin-left: 0;
-    }
+    html.sidebar-inicio-fechada .sidebar { transform: translateX(-100%); transition: none; }
+    html.sidebar-inicio-fechada .main-content { margin-left: 0; transition: none; }
 
     /* ── Toolbar de botões ── */
     .botoes-topo {
@@ -745,6 +752,15 @@
 
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    // Gráficos já aparecem prontos ao carregar a página (sem as barras "crescerem" a cada
+    // recarregamento); depois do load a animação volta para trocas de aba e atualizações
+    (function () {
+      const animacao = Chart.defaults.animation;
+      Chart.defaults.animation = false;
+      window.addEventListener('load', () => { Chart.defaults.animation = animacao; });
+    })();
+  </script>
 <script>
   function toggleFotoDropdown(containerElem) {
       // close others
@@ -1872,13 +1888,12 @@
     let fechada = false;
     try { fechada = localStorage.getItem('sidebarFechada') === '1'; } catch (e) {}
     if (!fechada) return;
-    const sb = document.getElementById('sidebar');
-    const mc = document.getElementById('main-content');
-    // Sem animação na restauração, para não "piscar" abrindo e fechando
-    sb.style.transition = mc.style.transition = 'none';
-    sb.classList.add('fechada');
-    mc.classList.add('expandido');
-    requestAnimationFrame(() => requestAnimationFrame(() => { sb.style.transition = mc.style.transition = ''; }));
+    // O <head> já escondeu a sidebar via html.sidebar-inicio-fechada; aqui passamos
+    // para as classes normais e, depois de pintado, liberamos a animação do toggle
+    document.getElementById('sidebar').classList.add('fechada');
+    document.getElementById('main-content').classList.add('expandido');
+    const html = document.documentElement;
+    requestAnimationFrame(() => requestAnimationFrame(() => html.classList.remove('sidebar-inicio-fechada')));
   })();
   /* ── Restaurar posição de scroll (por página) ── */
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';

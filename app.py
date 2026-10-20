@@ -23,6 +23,17 @@ STATIC_DIR = os.path.join(PASTA_ATUAL, 'static')
 EXTENSOES_IMAGEM = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 
 
+@app.after_request
+def cache_fontes(resp):
+    # As fontes nunca mudam: sem cache, cada recarregamento revalida todas e o texto
+    # fica invisível até elas chegarem, o que faz a página "piscar"
+    if request.path.startswith('/static/poppins/'):
+        resp.cache_control.no_cache = None
+        resp.cache_control.public = True
+        resp.cache_control.max_age = 31536000
+    return resp
+
+
 # ─────────────────────────────────────────────
 #  BANCO DE DADOS
 # ─────────────────────────────────────────────
