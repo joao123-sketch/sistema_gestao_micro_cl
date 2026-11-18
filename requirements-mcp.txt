@@ -1,2 +1,6 @@
 mcp[cli]>=2.0
 requests
+
+# Só necessário no PythonAnywhere, para rodar mcp_http_server.py via
+# wsgi_combined.py (o servidor local via .mcp.json/stdio não usa isso).
+a2wsgi

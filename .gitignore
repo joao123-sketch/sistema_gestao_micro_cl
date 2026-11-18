@@ -1,5 +1,6 @@
 database.db
 atividades.db
+mcp_oauth.db
 __pycache__/
 *.pyc
 venv/
