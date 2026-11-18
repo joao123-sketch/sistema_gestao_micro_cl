@@ -24,12 +24,22 @@ configuration file), troque o conteúdo por algo como:
 Depois é só dar Reload no site.
 """
 
-from a2wsgi import ASGIMiddleware
-
 from app import app as _flask_app
-from mcp_http_server import app as _mcp_asgi_app
 
-_mcp_wsgi_app = ASGIMiddleware(_mcp_asgi_app)
+# O servidor MCP só é carregado na primeira chamada a uma rota MCP. Assim o
+# Flask nunca depende dele: se o MCP travar ou falhar ao importar, só as
+# rotas MCP são afetadas e o sistema continua no ar.
+_mcp_wsgi_app = None
+
+
+def _obter_mcp_wsgi():
+    global _mcp_wsgi_app
+    if _mcp_wsgi_app is None:
+        from a2wsgi import ASGIMiddleware
+        from mcp_http_server import app as _mcp_asgi_app
+        _mcp_wsgi_app = ASGIMiddleware(_mcp_asgi_app)
+    return _mcp_wsgi_app
+
 
 # Rotas que pertencem ao servidor MCP/OAuth; qualquer outra vai pro Flask.
 _ROTAS_MCP_EXATAS = {'/mcp', '/authorize', '/token', '/register', '/revoke', '/oauth/login'}
@@ -39,5 +49,5 @@ _PREFIXOS_MCP = ('/.well-known/',)
 def application(environ, start_response):
     caminho = environ.get('PATH_INFO', '')
     if caminho in _ROTAS_MCP_EXATAS or caminho.startswith(_PREFIXOS_MCP):
-        return _mcp_wsgi_app(environ, start_response)
+        return _obter_mcp_wsgi()(environ, start_response)
     return _flask_app(environ, start_response)
